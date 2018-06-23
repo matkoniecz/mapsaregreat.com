@@ -6,6 +6,62 @@
     <style></style>
   </head>
   <body>
-    TODO: add anything here
+
+<h2>Status</h2>
+<p>Status: unfinished draft that is actively updated (as of June 2018).</p>
+
+<p>Published part is unfinished and ends abruptly and has some TODOs scattered around. But it is supposed to be free from mistakes, typos, unclear text, missing explanations, grammar problems etc. Please sent mail to matkoniecz@gmail.com if you spot anything wrong!<p/>
+
+<p>Feel free to send mail also if this page was useful for you :)</p>
+
+<h2>Geographic data mining and visualisation for beginners - Overpass turbo tutorial</h2>
+
+<p>Go to <a target="_blank" href="https://www.openstreetmap.org/"">openstreetmap.org</a> and look around.</p>
+
+<p>Default map at that page displays small part of data collected by the OpenStreetMap contributors. Depending on region various features should be visible - roads, rivers, railways, forests, buildings, shops, peaks, lakes, cemeteries, caves, hospitals, paths, springs and many more.</p>
+
+<p>It is possible to download and use this data, on this page I will present my favourite method - tool called Overpass turbo.</p>
+
+<p>Let's open <a target="_blank" href="http://overpass-turbo.eu/s/zMg">the first query</a>. It should show page with map on the right and panel with mysterious text on the left. Ignore gibberish on the left and wait (seconds should be enough) for the query to complete. We should see museums in Kraków marked on the map.</p>
+
+<img scr="" />
+TODO: add an animated image
+
+<p>Now lets try something else - public playgrounds in Hamm -  <a target="_blank" href="http://overpass-turbo.eu/s/zMi">follow this link</a> to try this query.</p>
+
+<img scr="" />
+<p>TODO: add an image</p>
+
+
+<p>Maybe you just want to grab all data from given area and download it? And do entire processing and filtering in other tool like QGIS?  Or just look at all what is mapped? Next query will show all data within specified area. Note that this data is a direct copy of OpenStreetMap database so you will need some help in interpreting the data. Next sections should help with that.</p>
+
+<p>So now <a target="_blank" href="http://overpass-turbo.eu/s/zMQ">a query to get everything</a>.</p>
+
+<p>You can click on specific object, it cause a box with some info about object to appear. Typical object will have some tags defining its meaning.</p>
+
+<p>I just mentioned that this query will get everything. Fortunately, it is not true. It will get everything within area visible in your map view. You can pan around to see that objects not inside this area are not downloaded. After moving map to a different location and select "run" button on top-left to see results of query in a different location.</p>
+
+<p>So far all presented querries take into account part of the map visible on the screen. But avoid zooming out to much - large areas like entire cities have to much data to display at once.</p>
+
+<p>Filtering is necessary to display data for larger area - attempt to download all data at once would not succeded. Currently OSM database has size of {TODO: MAKE IT AUTOUPDATABLE}, displaying all of it is a complicated task that requires more specialized tools than a web browser.</p>
+
+<p>Querries that filter data (like ones presented before "get everything" query) will work for much bigger areas, some may even allow to scan entire world and display all objects matching filter!</p>
+
+<p>But before trying our luck with worldwide querries (it requires using left panel, so lets ignore it for now) lets try a different adventure.</p>
+
+<p>Now you will make a new query.</p>
+
+<p>Lets say that we want to query for glaciers.
+<ol>
+<li> Go to <a target="_blank" href="http://overpass-turbo.eu/s/zMN">http://overpass-turbo.eu/s/zMN/</a> (this link places you at a specific area). </li>
+<li>Press "Wizard" button on the top menu. A window should appear </li>
+<li>Into box type: natural=glacier</li>
+<li>Press 'build and run query'</li>
+<li>you should see marked areas representing glaciers!</lo>
+<li>Congratulations!</li>
+</ol>
+TODO: add an animated image
+</p>
+
   </body>
 </html>
