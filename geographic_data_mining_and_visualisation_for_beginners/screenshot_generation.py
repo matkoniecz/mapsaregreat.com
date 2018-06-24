@@ -11,7 +11,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
 # as recommended on http://selenium-python.readthedocs.io/waits.html#explicit-waits
-def smart_overpass_capture(url, image_file):
+def smart_overpass_capture(url, image_file, driver):
     driver.get(url)
     element = WebDriverWait(driver, 10).until_not(
         EC.presence_of_element_located((By.CLASS_NAME, "loading"))
@@ -37,8 +37,8 @@ driver.save_screenshot("hamm_playgrounds.png")
 """
 
 try:
-    smart_overpass_capture('http://overpass-turbo.eu/s/zMi', "Hamm_-_playgrounds.png")
-    smart_overpass_capture('http://overpass-turbo.eu/s/zMQ', "Kampong_Ayer_-_everything.png")
-    smart_overpass_capture('http://overpass-turbo.eu/s/zNL', "Nepal_-_glacier.png")
+    smart_overpass_capture('http://overpass-turbo.eu/s/zMi', "Hamm_-_playgrounds.png", driver)
+    smart_overpass_capture('http://overpass-turbo.eu/s/zMQ', "Kampong_Ayer_-_everything.png", driver)
+    smart_overpass_capture('http://overpass-turbo.eu/s/zNL', "Nepal_-_glacier.png", driver)
 finally:
     driver.quit()
