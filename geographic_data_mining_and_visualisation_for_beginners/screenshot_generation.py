@@ -39,5 +39,6 @@ driver.save_screenshot("hamm_playgrounds.png")
 try:
     smart_overpass_capture('http://overpass-turbo.eu/s/zMi', "Hamm_-_playgrounds.png")
     smart_overpass_capture('http://overpass-turbo.eu/s/zMQ', "Kampong_Ayer_-_everything.png")
+    smart_overpass_capture('http://overpass-turbo.eu/s/zNL', "Nepal_-_glacier.png")
 finally:
     driver.quit()
