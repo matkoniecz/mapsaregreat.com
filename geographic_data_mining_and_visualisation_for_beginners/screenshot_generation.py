@@ -35,11 +35,12 @@ driver.get('http://overpass-turbo.eu/s/zMi')
 time.sleep(5)
 driver.save_screenshot("hamm_playgrounds.png")
 """
-
+driver.set_window_size(1024, 400)
 driver.get('https://duckduckgo.com/?q=wetland+OSM+Wiki&ia=web')
 driver.save_screenshot('wetland_search_results.png')
 
 try:
+    driver.set_window_size(1024, 768)
     smart_overpass_capture('http://overpass-turbo.eu/s/zMi', "Hamm_-_playgrounds.png", driver)
     smart_overpass_capture('http://overpass-turbo.eu/s/zMQ', "Kampong_Ayer_-_everything.png", driver)
     smart_overpass_capture('http://overpass-turbo.eu/s/zNL', "Nepal_-_glacier.png", driver)
