@@ -37,13 +37,11 @@ TODO: add an animated image
 
 <img src="Kampong_Ayer_-_everything.png" />
 
-<p>You can click on specific object, it cause a box with some info about object to appear. Typical object will have some tags defining its meaning.</p>
-
 <p>I just mentioned that this query will get everything. Fortunately, it is not true. It will get everything within area visible in your map view. You can pan around to see that objects not inside this area are not downloaded. After moving map to a different location and select "run" button on top-left to see results of query in a different location.</p>
 
 <p>So far all presented querries take into account part of the map visible on the screen. But avoid zooming out to much - large areas like entire cities have to much data to display at once.</p>
 
-<p>Filtering is necessary to display data for larger area - attempt to download all data at once would not succeded. Currently OSM database has size of {TODO: MAKE IT AUTOUPDATABLE}, displaying all of it is a complicated task that requires more specialized tools than a web browser.</p>
+<p>Filtering is necessary to display data for larger area - attempt to download all data at once would not succeded. OSM database <a href="https://munin.openstreetmap.org/postgresql-year.html">crossed 500 GB long time ago</a>, displaying all of it is a complicated task that requires more specialized tools than a web browser.</p>
 
 <p>Querries that filter data (like ones presented before "get everything" query) will work for much bigger areas, some may even allow to scan entire world and display all objects matching filter!</p>
 
@@ -64,6 +62,10 @@ TODO: add an animated image
 
 TODO: add an animated image
 </p>
+
+TODO: find a good place to mention this without overhelming learner 
+<p>You can click on specific object, it will cause a box with some info about the object to appear. Typical object will have some tags defining its meaning.</p>
+
 
   </body>
 </html>
