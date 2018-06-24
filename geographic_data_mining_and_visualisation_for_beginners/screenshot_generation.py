@@ -43,6 +43,6 @@ try:
     driver.set_window_size(1024, 768)
     smart_overpass_capture('http://overpass-turbo.eu/s/zMi', "Hamm_-_playgrounds.png", driver)
     smart_overpass_capture('http://overpass-turbo.eu/s/zMQ', "Kampong_Ayer_-_everything.png", driver)
-    smart_overpass_capture('http://overpass-turbo.eu/s/zNL', "Nepal_-_glacier.png", driver)
+    smart_overpass_capture('http://overpass-turbo.eu/s/zNL', "Nepal_-_glaciers.png", driver)
 finally:
     driver.quit()
