@@ -19,18 +19,32 @@
 <h1>Geographic data mining and visualisation for beginners - Overpass turbo tutorial</h1>
 <h2>Introduction</h2>
 
+<p>OpenStreetMap is a Wikipedia of maps. It is a massive geographic database collected by hobbyists and this data may be used by anybody.</p>
+
 <p>Go to <a target="_blank" href="https://www.openstreetmap.org/">openstreetmap.org</a> and look around.</p>
 
 <p>Default map at that page displays small part of data collected by the OpenStreetMap contributors. Depending on region various features should be visible - roads, rivers, railways, forests, buildings, shops, peaks, lakes, cemeteries, caves, hospitals, paths, springs and many more.</p>
 
-<p>It is possible to download and use this data, on this page I will present my favourite method - a tool called Overpass turbo.</p>
+<p>It is possible to download and use this data, for example it is possible to get data about</p>
+<ol>
+  <li>museums</li>
+  <li>playgrounds</li>
+  <li>or all data at once</li>
+  <li>glaciers</li>
+  <li>wetlands</li>
+  <li>volcanoes</li>
+</ol>
+<p>on this page I will present my favourite method to do that - a tool called Overpass turbo.</p>
 
+<h2>Exercise 1 - museums</h2>
 <p>Let's open <a target="_blank" href="http://overpass-turbo.eu/s/zMg">the first query</a>. It should show page with map on the right and panel with mysterious text on the left. Ignore gibberish on the left and wait for the query to complete. Within seconds museums in Kraków should be marked on the map.</p>
 
+<h2>Exercise 2 - playgrounds</h2>
 <p>Now lets try something else - public playgrounds in Hamm -  <a target="_blank" href="http://overpass-turbo.eu/s/zMi">follow this link</a> to try this query.</p>
 
 <img src="Hamm_-_playgrounds.png" />
 
+<h2>Exercise 3 - everything</h2>
 <p>Maybe you just want to grab all data from given area and download it? And do entire processing and filtering in other tool like QGIS?  Or just look at all what is mapped? Next query will show all data within specified area. Note that this data is a direct copy of OpenStreetMap database so you will need some help in interpreting the data. Next sections should help with that.</p>
 
 <p>So now <a target="_blank" href="http://overpass-turbo.eu/s/zMQ">a query to get everything</a>.</p>
@@ -47,7 +61,7 @@
 
 <p>But before trying our luck with worldwide querries (it requires using left panel, so lets ignore it for now) lets try a different adventure.</p>
 
-<h2>Generating a query</h2>
+<h2>Exercise 4 - glaciers</h2>
 
 <p>Now you will make a new query.</p>
 
@@ -62,7 +76,7 @@
 </ol>
 <img src="Nepal_-_glaciers.png" />
 
-<h2>How to get XYZ</h2>
+<h2>Exercise 5 - wetlands</h2>
 
 <p>Previous examples maybe were interesting but covered only a small group of examples.</p>
 
@@ -85,7 +99,7 @@
 <li>Congratulations!</li>
 </ol>
 
-<h2>Exercise 1</h2>
+<h2>Exercise 6 - volcanoes</h2>
 <p>Now time for an exercise - try to find volcanoes: again google for something like &lt;OSM wiki volcano&gt; and use wizard to create a new query with found tag value. If you have trouble see <a target="_blank" href="volcano-solution.html">here for a help</a></p>
 
 <h2>Using data (license, export)</h2>
