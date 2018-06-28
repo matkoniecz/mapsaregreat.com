@@ -10,6 +10,8 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
+# good documentations is at https://selenium-python.readthedocs.io/
+
 # as recommended on http://selenium-python.readthedocs.io/waits.html#explicit-waits
 def smart_overpass_capture(url, image_file, driver):
     driver.get(url)
@@ -38,6 +40,22 @@ driver.save_screenshot("hamm_playgrounds.png")
 driver.set_window_size(1024, 400)
 driver.get('https://duckduckgo.com/?q=wetland+OSM+Wiki&ia=web')
 driver.save_screenshot('wetland_search_results.png')
+
+driver.set_window_size(1024, 768)
+driver.get('https://www.openstreetmap.org/#map=10/54.2066/-4.5782')
+
+#hide banners about SOtM and other spam
+for popup in driver.find_elements_by_class_name("close-wrap"):
+    popup.click()
+driver.save_screenshot('Isle-of-Man.png')
+
+#try saving just map, without interface
+#for further cleaning up see
+#https://stackoverflow.com/questions/17911980/selenium-with-python-how-to-modify-an-element-css-style
+#https://selenium-python.readthedocs.io/faq.html#how-to-scroll-down-to-the-bottom-of-a-page
+#https://stackoverflow.com/questions/35922259/modify-innerhtml-using-selenium
+#element = driver.find_element_by_id('map')
+#element.screenshot('test.png')
 
 try:
     driver.set_window_size(1024, 768)
