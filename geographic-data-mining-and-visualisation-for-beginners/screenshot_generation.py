@@ -17,7 +17,7 @@ def smart_overpass_capture(url, image_file, driver):
     driver.get(url)
     element = WebDriverWait(driver, 10).until_not(
         EC.presence_of_element_located((By.CLASS_NAME, "loading"))
-        #EC.presence_of_element_located((By.ID, "aborter")) # requires additonal sleep to avoid capturing "rendering geojson" stage
+        #EC.presence_of_element_located((By.ID, "aborter")) # requires additional sleep to avoid capturing "rendering geojson" stage
     )
     driver.save_screenshot(image_file)
 
