@@ -62,5 +62,6 @@ try:
     smart_overpass_capture('http://overpass-turbo.eu/s/zMi', "Hamm-playgrounds.png", driver)
     smart_overpass_capture('http://overpass-turbo.eu/s/zMQ', "Kampong_Ayer-everything.png", driver)
     smart_overpass_capture('http://overpass-turbo.eu/s/zNL', "Nepal-glaciers.png", driver)
+    smart_overpass_capture('http://overpass-turbo.eu/s/Acj', "Hawaii-volcanoes.png", driver)
 finally:
     driver.quit()
