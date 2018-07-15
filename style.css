@@ -455,9 +455,6 @@ form{
     body{
         font-size:14px
     }
-    #downloads{
-        display:none
-    }
     .inner{
         min-width:320px;
         max-width:480px
@@ -490,9 +487,6 @@ form{
 @media screen and (max-width: 320px){
     body{
         font-size:14px
-    }
-    #downloads{
-        display:none
     }
     .inner{
         min-width:240px;
