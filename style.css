@@ -405,7 +405,22 @@ form{
 }
 .inner{
     position:relative;
-    max-width:640px;
+    max-width:22cm;
+    /*
+    usually desirable px was deliberately NOT used
+    yes, I know about https://www.w3.org/Style/Examples/007/units.en.html
+    in this case usual justification for not using cm as unit on webpage does not apply,
+    as I am not interested in precise measurement, +-20% is perfectly OK
+
+    I want to achieve not applying margins on small screens, small as defined by
+    physical size, not in logical, real, or magical CSS pixels
+
+    so em, ex is useless as it depends on font size
+    px is useless as magical CSS px unit is "usually not related to physical centimeters"
+    % is obviously useless to measure width of screen that is available
+
+    so only units that are usually not recommended remain
+    */
     padding:20px 10px;
     margin:0 auto
 }
