@@ -235,7 +235,7 @@ body{
     box-sizing:border-box;
     color:#373737;
     background:#212121;
-    font-size:16px;
+    font-size:18px;
     font-family:'Myriad Pro', Calibri, Helvetica, Arial, sans-serif;
     line-height:1.5;
     -webkit-font-smoothing:antialiased
@@ -263,10 +263,10 @@ h4{
     font-size:21px
 }
 h5{
-    font-size:18px
+    font-size:20px
 }
 h6{
-    font-size:16px
+    font-size:19px
 }
 p{
     margin:10px 0 15px 0
