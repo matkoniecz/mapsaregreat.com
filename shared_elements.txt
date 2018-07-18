@@ -1,0 +1,3 @@
+generic alt text:
+
+alt="please send an email to matkoniecz@tutanota.com if replacing this placeholder alt attribute of image by a real alt attribute would be useful for you" 
