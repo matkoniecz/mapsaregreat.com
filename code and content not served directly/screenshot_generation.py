@@ -9,6 +9,8 @@ import time
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+import os
+import inspect
 
 # good documentations is at https://selenium-python.readthedocs.io/
 
@@ -25,6 +27,11 @@ firefox_options = webdriver.FirefoxOptions()
 # in production mode headless is likely to be preferrable
 # firefox_options.set_headless()
 driver = webdriver.Firefox(firefox_options=firefox_options)
+
+# recommended by https://stackoverflow.com/a/31867043/4130619
+os.chdir(os.path.dirname(os.path.abspath(inspect.stack()[0][1])))
+print(os.path.dirname(os.path.abspath(inspect.stack()[0][1])))
+os.chdir("../geographic-data-mining-and-visualisation-for-beginners")
 
 # supposedly captures entire page or its part, untested
 # firefox_elem = firefox_driver.find_element_by_tag_name('html')
