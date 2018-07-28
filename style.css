@@ -1,6 +1,30 @@
 /* this CSS file is compiled CC0 licensed sass theme from https://github.com/pages-themes/slate */
 /* style preview page: https://pages-themes.github.io/slate/ */
-
+/*
+overall main change was increasing minimum text size
+index of changes up to 2019-07-28:
+- max-width of content set in cm rather px (search ".inner" for comment why I consider it desirable)
+- increase text size to make it legible:
+   for big screens
+    - h2 size reduced from 32 to 28 px
+    - h5 size increased from 18 px to 20 px
+    - h6 size increased from 16 px to 19 px
+    - text size increased from 16 px to 18 px
+   for small screens
+    - h4 size increased from 18 px to 19 px
+    - h5 size increased from 14 px to 18 px
+    - h6 size increased from 12 px to 17 px
+    - text size increased from 14 px to 16 px
+    - code size increased from 11 px to 16 px
+   for very small screens
+    - h3 size increased from 18 px to 20 px
+    - h4 size increased from 16 px to 19 px
+    - h5 size increased from 14 px to 18 px
+    - h6 size increased from 12 px to 17 px
+    - text size increased from 14 px to 16 px
+    - code size increased from 11 px to 16 px
+ - drop dead code unused on my page (like "fork me" banner styling)
+*/
 html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td,article,aside,canvas,details,embed,figure,figcaption,footer,header,hgroup,menu,nav,output,ruby,section,summary,time,mark,audio,video{
     margin:0;
     padding:0;
