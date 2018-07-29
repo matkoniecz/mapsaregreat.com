@@ -67,11 +67,10 @@ driver.save_screenshot('Isle-of-Man.png')
 #element = driver.find_element_by_id('map')
 #element.screenshot('test.png')
 
-try:
-    driver.set_window_size(screenshot_width, screenshot_height_standard)
-    smart_overpass_capture('http://overpass-turbo.eu/s/zMi', "Hamm-playgrounds.png", driver)
-    smart_overpass_capture('http://overpass-turbo.eu/s/zMQ', "Kampong_Ayer-everything.png", driver)
-    smart_overpass_capture('http://overpass-turbo.eu/s/zNL', "Nepal-glaciers.png", driver)
-    smart_overpass_capture('http://overpass-turbo.eu/s/Acj', "Hawaii-volcanoes.png", driver)
-finally:
-    driver.quit()
+driver.set_window_size(screenshot_width, screenshot_height_standard)
+smart_overpass_capture('http://overpass-turbo.eu/s/zMi', "Hamm-playgrounds.png", driver)
+smart_overpass_capture('http://overpass-turbo.eu/s/zMQ', "Kampong_Ayer-everything.png", driver)
+smart_overpass_capture('http://overpass-turbo.eu/s/zNL', "Nepal-glaciers.png", driver)
+smart_overpass_capture('http://overpass-turbo.eu/s/Acj', "Hawaii-volcanoes.png", driver)
+
+driver.quit()
