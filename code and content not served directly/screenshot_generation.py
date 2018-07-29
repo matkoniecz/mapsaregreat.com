@@ -12,6 +12,8 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import os
 import inspect
+from PIL import Image
+from io import BytesIO
 
 screenshot_width = 1024
 screenshot_height_standard = 768
@@ -72,5 +74,26 @@ smart_overpass_capture('http://overpass-turbo.eu/s/zMi', "Hamm-playgrounds.png",
 smart_overpass_capture('http://overpass-turbo.eu/s/zMQ', "Kampong_Ayer-everything.png", driver)
 smart_overpass_capture('http://overpass-turbo.eu/s/zNL', "Nepal-glaciers.png", driver)
 smart_overpass_capture('http://overpass-turbo.eu/s/Acj', "Hawaii-volcanoes.png", driver)
+
+
+
+os.chdir("..")
+mapy_cz_screenshot_height = screenshot_height_small
+driver.set_window_size(screenshot_width+200, mapy_cz_screenshot_height+300)
+driver.get('https://en.mapy.cz/turisticka?x=19.5695394&y=49.5988771&z=14')
+for sidebar_hider in driver.find_elements_by_id("resizer"):
+    sidebar_hider.click()
+time.sleep(5)
+screenshot = driver.get_screenshot_as_png()
+img = Image.open(BytesIO(screenshot))
+
+left = 100
+top = 100
+width = screenshot_width
+height = mapy_cz_screenshot_height
+# box = (left, upper, right, lower)
+box = (left, top, left+width, top+height)
+area = img.crop(box)
+area.save('mapy.cz-tourist-map-layer.png')
 
 driver.quit()
