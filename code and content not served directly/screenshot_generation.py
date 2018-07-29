@@ -80,7 +80,7 @@ smart_overpass_capture('http://overpass-turbo.eu/s/Acj', "Hawaii-volcanoes.png",
 os.chdir("..")
 mapy_cz_screenshot_height = screenshot_height_small
 driver.set_window_size(screenshot_width+200, mapy_cz_screenshot_height+300)
-driver.get('https://en.mapy.cz/turisticka?x=19.5695394&y=49.5988771&z=14')
+driver.get('https://en.mapy.cz/turisticka?x=19.5695394&y=49.5988771&z=14') #note that images in html link using this URL! Do not change it just here!
 for sidebar_hider in driver.find_elements_by_id("resizer"):
     sidebar_hider.click()
 time.sleep(5)
