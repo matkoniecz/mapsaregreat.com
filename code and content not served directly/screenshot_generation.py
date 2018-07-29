@@ -3,6 +3,7 @@
 # instructions for Linux using Firefox
 # download Geckodriver binary - https://github.com/mozilla/geckodriver/releases
 # put it somewhere where $PATH will find it
+# good documentations is at https://selenium-python.readthedocs.io/
 
 from selenium import webdriver
 import time
@@ -12,7 +13,9 @@ from selenium.webdriver.support import expected_conditions as EC
 import os
 import inspect
 
-# good documentations is at https://selenium-python.readthedocs.io/
+screenshot_width = 1024
+screenshot_height_standard = 768
+screenshot_height_small = 400
 
 # as recommended on http://selenium-python.readthedocs.io/waits.html#explicit-waits
 def smart_overpass_capture(url, image_file, driver):
@@ -44,11 +47,11 @@ driver.get('http://overpass-turbo.eu/s/zMi')
 time.sleep(5)
 driver.save_screenshot("hamm-playgrounds.png")
 """
-driver.set_window_size(1024, 400)
+driver.set_window_size(screenshot_width, screenshot_height_small)
 driver.get('https://duckduckgo.com/?q=wetland+OSM+Wiki&ia=web')
 driver.save_screenshot('wetland-search-results.png')
 
-driver.set_window_size(1024, 768)
+driver.set_window_size(screenshot_width, screenshot_height_standard)
 driver.get('https://www.openstreetmap.org/#map=10/54.2066/-4.5782')
 
 #hide banners about SOtM and other spam
@@ -65,7 +68,7 @@ driver.save_screenshot('Isle-of-Man.png')
 #element.screenshot('test.png')
 
 try:
-    driver.set_window_size(1024, 768)
+    driver.set_window_size(screenshot_width, screenshot_height_standard)
     smart_overpass_capture('http://overpass-turbo.eu/s/zMi', "Hamm-playgrounds.png", driver)
     smart_overpass_capture('http://overpass-turbo.eu/s/zMQ', "Kampong_Ayer-everything.png", driver)
     smart_overpass_capture('http://overpass-turbo.eu/s/zNL', "Nepal-glaciers.png", driver)
