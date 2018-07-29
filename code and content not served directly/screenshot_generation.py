@@ -1,4 +1,4 @@
-# this file is licenced under CC0 (or it is public domain anyway if content is not considered as copyrightable)
+# this file is licenced under CC0
 
 # instructions for Linux using Firefox
 # download Geckodriver binary - https://github.com/mozilla/geckodriver/releases
