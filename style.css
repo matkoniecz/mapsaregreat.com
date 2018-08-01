@@ -41,7 +41,9 @@ article,aside,details,figcaption,figure,footer,header,hgroup,menu,nav,section{
     width:100%
 }
 .inner{
+    padding:20px 10px;
     position:relative;
+    margin:0 auto;
     max-width:22cm;
     /*
     usually desirable px was deliberately NOT used
@@ -58,8 +60,9 @@ article,aside,details,figcaption,figure,footer,header,hgroup,menu,nav,section{
 
     so only units that are usually not recommended remain
     */
-    padding:20px 10px;
-    margin:0 auto
+}
+img {
+    max-width:21.7cm; /* to fit into a wrapper container */
 }
 #header_wrap{
     background:#212121;
@@ -178,23 +181,28 @@ strong{
 img{
     position:relative;
     margin:0 auto;
-    max-width:739px;
     padding:5px;
-    margin:10px 0 10px 0;
-    border:1px solid #ebebeb;
-    box-shadow:0 0 5px #ebebeb;
-    -webkit-box-shadow:0 0 5px #ebebeb;
-    -moz-box-shadow:0 0 5px #ebebeb;
-    -o-box-shadow:0 0 5px #ebebeb;
-    -ms-box-shadow:0 0 5px #ebebeb
+    margin:5px 0 0 0;
+ }
+img.wrapped_in_img_container {
+	margin: 0;
+	padding: 0;
 }
-p img{
-    display:inline;
-    margin:0;
-    padding:0;
-    vertical-align:middle;
-    text-align:center;
-    border:none
+img:not(.wrapped_in_img_container), div.img_container{
+    border:1px solid #e0e0e0;
+    box-shadow:0 0 5px #e0e0e0;
+    -webkit-box-shadow:0 0 5px #e0e0e0;
+    -moz-box-shadow:0 0 5px #e0e0e0;
+    -o-box-shadow:0 0 5px #e0e0e0;
+    -ms-box-shadow:0 0 5px #e0e0e0;
+  padding: 5px 5px 5px 5px;
+}
+.img_container p {
+	font-size:16px;
+  margin: 0px 5px;
+}
+.img_container {
+	margin: 0;
 }
 pre,code{
     color:#222;
