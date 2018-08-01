@@ -64,6 +64,10 @@ article,aside,details,figcaption,figure,footer,header,hgroup,menu,nav,section{
 img {
     max-width:21.7cm; /* to fit into a wrapper container */
 }
+.main-nav {
+    max-width:30cm;
+    margin: auto;
+}
 #header_wrap{
     background:#212121;
     background:-moz-linear-gradient(top, #373737, #212121);
@@ -359,14 +363,8 @@ form{
 .main-nav {
   background: #eee;
 }
-.main-nav div.filler {
-  flex-grow: 1;
-  flex-shrink: 1000;
-  flex-basis: 0px;
-}
 .main-nav li {
-  flex-grow: 0.1;
-  flex-basis: 120px;
+  flex: 1 1 120px;
 }
 .main-nav ul {
   margin: 0;
