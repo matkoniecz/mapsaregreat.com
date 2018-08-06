@@ -163,7 +163,7 @@ img.wrapped_in_img_container {
 	margin: 0;
 	padding: 0;
 }
-img:not(.wrapped_in_img_container), div.img_container{
+img.image_with_frame, div.img_container{
     border:1px solid #e0e0e0;
     box-shadow:0 0 5px #e0e0e0;
     -webkit-box-shadow:0 0 5px #e0e0e0;
