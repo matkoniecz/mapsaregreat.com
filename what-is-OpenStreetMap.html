@@ -5,6 +5,10 @@
     <meta charset="UTF-8">
     <link rel="stylesheet" href="style.css" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="imported-code/leaflet.css" integrity="sha512-Rksm5RenBEKSKFjgI3a41vrjkw4EVPlJ3+OiI65vTjIdo9brlAacEuKOiQ5OFh7cOI1bkDwLqdLw3Zg0cRJAAQ==" crossorigin=""/>
+    <script src="imported-code/leaflet.js" integrity="sha512-tAGcCfR4Sc5ZP5ZoVz0quoZDYX5aCtEm/eu1KhSLj2c9eFrylXZknQYmxUssFaVJKvvc0dJQixhGjG2yXWiV9Q==" crossorigin=""></script>
+
+
   </head>
   <body>
 <div id="main_content_wrap" class="outer">
@@ -53,11 +57,42 @@ humanitarian organisations in places where official data is unavailable or of lo
 
 <p>To be more exact OpenStreetMap is not a map - people editing are not directly creating map ("this area should be in brown colour to represent a building here" or "here should be a blue line to represent a motorway") but rather collecting data ("this area is a residential building" or "here is a motorway with 3 lanes in each direction with road code A7").</p>
 
-<p>This data may be presented in many ways see below for example. All map styles use OpenStreetMap data but in different ways</p>
+<p>This data may be presented in many ways - see below for an example. You can select multiple map styles, each using OpenStreetMap data but displaying it in different ways making it suitable for different purposes or audiences. It is possible to do far more with OpenStreetMap data, see for example <a href="recommendations.html">some of my recommendations</a>.</p>
 
 <p>OpenStreetMap data is frequently used instead of official government data that is often unavailable without special permissions, fees. In addition official data is often outdated, incomplete or hard to process.</p>
 
 <p>OpenStreetMap project website is at <a href="https://openstreetmap.org/">openstreetmap.org</a>.</p>
+
+<div id='map' style="width: 600px; height: 400px;"></div>
+<script>
+	var mbAttr = 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, ' +
+			'<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
+			'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+		mbUrl = 'https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWF0a29uaWVjeiIsImEiOiJkYTY0MDEwZTJjMjcyMDc0MjAxYzBlZDBiN2IzNTQ1OSJ9';
+
+	var positron   = L.tileLayer('https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png', {
+        attribution: '#{openstreetmap_copyright_notice}, basemap: &copy; <a href=\"http://cartodb.com/attributions\">CartoDB</a>',
+        subdomains: 'abcd',
+        maxZoom: 19
+    }),
+		osmcarto  = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+});
+
+	var map = L.map('map', {
+		center: [39.73, -104.99],
+		zoom: 6,
+		layers: [osmcarto]
+	});
+
+	var baseLayers = {
+		"Default OSM style": osmcarto,
+		"Positron by CartoDB": positron,
+	};
+
+	L.control.layers(baseLayers, {}, {collapsed: false}).addTo(map);
+</script>
+
 </section>
 </div>
 </body>
