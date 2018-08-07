@@ -44,7 +44,7 @@ article,aside,details,figcaption,figure,footer,header,hgroup,menu,nav,section{
     padding:20px 10px;
     position:relative;
     margin:0 auto;
-    max-width:22cm;
+    max-width:22cm; /* coupled with leaflet_interactive_map and img and indirectly with main-nav */
     /*
     usually desirable px was deliberately NOT used
     yes, I know about https://www.w3.org/Style/Examples/007/units.en.html
@@ -372,7 +372,8 @@ form{
 
 
 .leaflet_interactive_map {
-    width: 90%;
+    max-width: 22cm;
+    width: 90vw;
     height: 90vh;
     margin: auto;
 }
