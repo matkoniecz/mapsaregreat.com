@@ -9,132 +9,126 @@
     <script src="imported-code/leaflet/leaflet.js" crossorigin=""></script>
   </head>
   <body>
-<div id="main_content_wrap" class="outer">
-<nav role='navigation' class="main-nav">
-  <ul id="main-nav-list">
-    <li>
-      <a href="index.html">
-        <div>
-          Home
-        </div>
-      </a>
-    </li>
-    <li>
-      <a href="articles.html" class="active">
-        <div>
-          Articles
-        </div>
-      </a>
-    </li>
-    <li>
-      <a href="recommendations.html">
-        <div>
-          Recommendations
-        </div>
-      </a>
-    </li>
-    <li>
-      <a href="contact.html">
-        <div>
-          Contact
-        </div>
-      </a>
-    </li>
-  </ul>
-</nav>
-<section id="main_content" class="inner">
-<h1>What is OpenStreetMap?</h1>
+    <div id="main_content_wrap" class="outer">
+      <nav role='navigation' class="main-nav">
+        <ul id="main-nav-list">
+          <li>
+            <a href="index.html">
+              <div>
+                Home
+              </div>
+            </a>
+          </li>
+          <li>
+            <a href="articles.html" class="active">
+              <div>
+                Articles
+              </div>
+            </a>
+          </li>
+          <li>
+            <a href="recommendations.html">
+              <div>
+                Recommendations
+              </div>
+            </a>
+          </li>
+          <li>
+            <a href="contact.html">
+              <div>
+                Contact
+              </div>
+            </a>
+          </li>
+        </ul>
+      </nav>
+      <section id="main_content" class="inner">
+        <h1>What is OpenStreetMap?</h1>
+        <p><a href="https://openstreetmap.org/">OpenStreetMap</a> is a map created by people across the world. Everybody can map what is interesting or important for them. It may be nearly anything - from forests through roads and museums to shops. People map buildings, hiking routes, tourism attractions, rocks and fire hydrants.</p>
 
-<p><a href="https://openstreetmap.org/">OpenStreetMap</a> is a map created by people across the world. Everybody can map what is interesting or important for them. It may be nearly anything - from forests through roads and museums to shops. People map buildings, hiking routes, tourism attractions, rocks and fire hydrants.</p>
+        <p>Collected data can be used by anyone, as long as OpenStreetMap contributors are credited and data stays open. It may be used for making maps, from the usual ones to those showing some specific data like hiking routes. The data was used also in flood preparation planning, making maps for blind people, art projects. OpenStreetMap was also used in routers guiding cars, bicycles, pedestrians and boatsm and making city models in flight simulators.</p>
 
-<p>Collected data can be used by anyone, as long as OpenStreetMap contributors are credited and data stays open. It may be used for making maps, from the usual ones to those showing some specific data like hiking routes. The data was used also in flood preparation planning, making maps for blind people, art projects. OpenStreetMap was also used in routers guiding cars, bicycles, pedestrians and boatsm and making city models in flight simulators.</p>
+        <p>To be more exact OpenStreetMap is not a map - people editing are not directly creating map but directly collecting geodata. So mappers are not making choices like "this area should be in brown colour to represent a building here" or "here should be a blue line to represent a motorway", but rather map things as they exist: "this area is a residential building" or "here is a motorway with 3 lanes in each direction with road code A7".</p>
 
-<p>To be more exact OpenStreetMap is not a map - people editing are not directly creating map but directly collecting geodata. So mappers are not making choices like "this area should be in brown colour to represent a building here" or "here should be a blue line to represent a motorway", but rather map things as they exist: "this area is a residential building" or "here is a motorway with 3 lanes in each direction with road code A7".</p>
+        <p>This data may be presented in many ways - see below for examples. You can select a map style, each style uses the same OpenStreetMap data but displays it differently making it suitable for a specific purpose or audience. Selection below is limited to selection of map styles that are for some reason notable or interesting.</p>
 
-<p>This data may be presented in many ways - see below for examples. You can select a map style, each style uses the same OpenStreetMap data but displays it differently making it suitable for a specific purpose or audience. Selection below is limited to selection of map styles that are for some reason notable or interesting.</p>
-
-<p>Try to change map styles to see what kind of data is presented in each style. Try to pan around, zoom in and zoom out. Every style has worldwide coverage and is using data from OpenStreetMap database. On small screen list of styles is collapsed by default, tap layer image in top right to show it and select map style. To hide it again tap on map area.</p>
-
-<div id='map' class="leaflet_interactive_map"></div>
-<div id='leaflet_interactive_map_collapse_switch'></div>
-<script>
-	var mbAttr = 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, ' +
-			'<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
-			'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
-		mbUrl = 'https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWF0a29uaWVjeiIsImEiOiJkYTY0MDEwZTJjMjcyMDc0MjAxYzBlZDBiN2IzNTQ1OSJ9';
-
-	var osmcarto = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-});
-
-	var map = L.map('map', {
-		center: [50.053, 19.932],
-		zoom: 16,
-		layers: [osmcarto]
-	});
-
-	var baseLayers = {
-		//from http://leaflet-extras.github.io/leaflet-providers/preview/index.html
-		"style attempting to display many features (Default OSM style)": osmcarto,
-		"great background map (Positron by CartoDB)": L.tileLayer('https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png', {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, map style: &copy; <a href=\"http://cartodb.com/attributions\">CartoDB</a>',
-        subdomains: 'abcd',
-        maxZoom: 19
-    }),
-		"style for humanitarian organisations using OSM as a basemap": L.tileLayer("https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png", {
-	maxZoom: 19,
-	attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>, Tiles courtesy of <a href="http://hot.openstreetmap.org/" target="_blank">Humanitarian OpenStreetMap Team</a>'
-}),
-		"black & white minimalistic style (Stamen Toner)": L.tileLayer('https://stamen-tiles-{s}.a.ssl.fastly.net/toner/{z}/{x}/{y}{r}.{ext}', {
-	attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-	subdomains: 'abcd',
-	minZoom: 0,
-	maxZoom: 20,
-	ext: 'png'
-}),
-		"artistic curiosity (Stamen Watercolor)": L.tileLayer('https://stamen-tiles-{s}.a.ssl.fastly.net/watercolor/{z}/{x}/{y}.{ext}', {
-	attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-	subdomains: 'abcd',
-	minZoom: 1,
-	maxZoom: 16,
-	ext: 'png'
-}),
-		"map with marked cycling routes (OpenCycleMap)": L.tileLayer('https://{s}.tile.thunderforest.com/cycle/{z}/{x}/{y}.png?apikey={apikey}', {
-	attribution: '&copy; <a href="http://www.thunderforest.com/">Thunderforest</a>, &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-	apikey: '3dd1a92284ad4b2db133ff4bd3a5a2ae',
-	maxZoom: 22
-}),
-		"includes elevation data in addition to OSM data (Thunderforest Landscape)": L.tileLayer('https://{s}.tile.thunderforest.com/landscape/{z}/{x}/{y}.png?apikey=3dd1a92284ad4b2db133ff4bd3a5a2ae', {
-	attribution: '&copy; <a href="http://www.thunderforest.com/">Thunderforest</a>, &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-	apikey: '<your apikey>',
-	maxZoom: 22
-}),
-		"electricity infrastructure (OpenInfraMap Power) [zoom out to see data]": L.tileLayer('https://tiles-{s}.openinframap.org/power/{z}/{x}/{y}.png', {
-	maxZoom: 18,
-	attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>, <a href="http://www.openinframap.org/about.html">About OpenInfraMap</a>'
-}),
-		"localised style for French users, displaying French names where available": L.tileLayer('https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png', {
-	maxZoom: 20,
-	attribution: '&copy; Openstreetmap France | &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-}),
-	};
-
-	var isCollapsed = window.getComputedStyle(
-    document.querySelector('#leaflet_interactive_map_collapse_switch'), ':after'
-).getPropertyValue('content');
-	if(isCollapsed === '"false"') {
-		isCollapsed = false;
-	} else {
-		isCollapsed = true;
-	}
-	L.control.layers(baseLayers, {}, {collapsed: isCollapsed}).addTo(map);
-</script>
-
-It is possible to do far more with OpenStreetMap data, see for example <a href="recommendations.html">some of my recommendations</a>.
-
-</section>
-</div>
-</body>
+        <p>Try to change map styles to see what kind of data is presented in each style. Try to pan around, zoom in and zoom out. Every style has worldwide coverage and is using data from OpenStreetMap database. On small screen list of styles is collapsed by default, tap layer image in top right to show it and select map style. To hide it again tap on map area.</p>
+        <div id='map' class="leaflet_interactive_map"></div>
+        <div id='leaflet_interactive_map_collapse_switch'></div>
+        <script>
+          var mbAttr = 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, ' +
+          		'<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
+          		'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+          	mbUrl = 'https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWF0a29uaWVjeiIsImEiOiJkYTY0MDEwZTJjMjcyMDc0MjAxYzBlZDBiN2IzNTQ1OSJ9';
+          
+          var osmcarto = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          });
+          
+          var map = L.map('map', {
+          	center: [50.053, 19.932],
+          	zoom: 16,
+          	layers: [osmcarto]
+          });
+          
+          var baseLayers = {
+          	//from http://leaflet-extras.github.io/leaflet-providers/preview/index.html
+          	"style attempting to display many features (Default OSM style)": osmcarto,
+          	"great background map (Positron by CartoDB)": L.tileLayer('https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png', {
+                 attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, map style: &copy; <a href=\"http://cartodb.com/attributions\">CartoDB</a>',
+                 subdomains: 'abcd',
+                 maxZoom: 19
+             }),
+          	"style for humanitarian organisations using OSM as a basemap": L.tileLayer("https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png", {
+          maxZoom: 19,
+          attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>, Tiles courtesy of <a href="http://hot.openstreetmap.org/" target="_blank">Humanitarian OpenStreetMap Team</a>'
+          }),
+          	"black & white minimalistic style (Stamen Toner)": L.tileLayer('https://stamen-tiles-{s}.a.ssl.fastly.net/toner/{z}/{x}/{y}{r}.{ext}', {
+          attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+          subdomains: 'abcd',
+          minZoom: 0,
+          maxZoom: 20,
+          ext: 'png'
+          }),
+          	"artistic curiosity (Stamen Watercolor)": L.tileLayer('https://stamen-tiles-{s}.a.ssl.fastly.net/watercolor/{z}/{x}/{y}.{ext}', {
+          attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+          subdomains: 'abcd',
+          minZoom: 1,
+          maxZoom: 16,
+          ext: 'png'
+          }),
+          	"map with marked cycling routes (OpenCycleMap)": L.tileLayer('https://{s}.tile.thunderforest.com/cycle/{z}/{x}/{y}.png?apikey={apikey}', {
+          attribution: '&copy; <a href="http://www.thunderforest.com/">Thunderforest</a>, &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+          apikey: '3dd1a92284ad4b2db133ff4bd3a5a2ae',
+          maxZoom: 22
+          }),
+          	"includes elevation data in addition to OSM data (Thunderforest Landscape)": L.tileLayer('https://{s}.tile.thunderforest.com/landscape/{z}/{x}/{y}.png?apikey=3dd1a92284ad4b2db133ff4bd3a5a2ae', {
+          attribution: '&copy; <a href="http://www.thunderforest.com/">Thunderforest</a>, &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+          apikey: '<your apikey>',
+          maxZoom: 22
+          }),
+          	"electricity infrastructure (OpenInfraMap Power) [zoom out to see data]": L.tileLayer('https://tiles-{s}.openinframap.org/power/{z}/{x}/{y}.png', {
+          maxZoom: 18,
+          attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>, <a href="http://www.openinframap.org/about.html">About OpenInfraMap</a>'
+          }),
+          	"localised style for French users, displaying French names where available": L.tileLayer('https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png', {
+          maxZoom: 20,
+          attribution: '&copy; Openstreetmap France | &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+          }),
+          };
+          
+          var isCollapsed = window.getComputedStyle(
+             document.querySelector('#leaflet_interactive_map_collapse_switch'), ':after'
+          ).getPropertyValue('content');
+          if(isCollapsed === '"false"') {
+          	isCollapsed = false;
+          } else {
+          	isCollapsed = true;
+          }
+          L.control.layers(baseLayers, {}, {collapsed: isCollapsed}).addTo(map);
+        </script>
+        It is possible to do far more with OpenStreetMap data, see for example <a href="recommendations.html">some of my recommendations</a>.
+      </section>
+    </div>
+  </body>
 </html>
-
-
