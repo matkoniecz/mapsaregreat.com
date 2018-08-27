@@ -7,170 +7,180 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
   </head>
   <body>
-<div id="main_content_wrap" class="outer">
-<nav role='navigation' class="main-nav">
-  <ul id="main-nav-list">
-    <li>
-      <a href="../index.html">
-        <div>
-          Home
-        </div>
-      </a>
-    </li>
-    <li>
-      <a href="../articles.html" class="active">
-        <div>
-          Articles
-        </div>
-      </a>
-    </li>
-    <li>
-      <a href="../recommendations.html">
-        <div>
-          Recommendations
-        </div>
-      </a>
-    </li>
-    <li>
-      <a href="../contact.html">
-        <div>
-          Contact
-        </div>
-      </a>
-    </li>
-  </ul>
-</nav>
-<section id="main_content" class="inner">
-<h1>Geographic data mining and visualisation for beginners - Overpass turbo tutorial</h1>
-<h2>Introduction</h2>
+    <div id="main_content_wrap" class="outer">
+      <nav role='navigation' class="main-nav">
+        <ul id="main-nav-list">
+          <li>
+            <a href="../index.html">
+              <div>
+                Home
+              </div>
+            </a>
+          </li>
+          <li>
+            <a href="../articles.html" class="active">
+              <div>
+                Articles
+              </div>
+            </a>
+          </li>
+          <li>
+            <a href="../recommendations.html">
+              <div>
+                Recommendations
+              </div>
+            </a>
+          </li>
+          <li>
+            <a href="../contact.html">
+              <div>
+                Contact
+              </div>
+            </a>
+          </li>
+        </ul>
+      </nav>
+      <section id="main_content" class="inner">
+        <h1>Geographic data mining and visualisation for beginners - Overpass turbo tutorial</h1>
+        <h2>Introduction</h2>
 
-<p>OpenStreetMap is a Wikipedia of maps. It is a massive geographic database collected by hobbyists and this data may be used by anybody.</p>
+        <p>OpenStreetMap is a Wikipedia of maps. It is a massive geographic database collected by hobbyists and this data may be used by anybody.</p>
 
-<p>It has mapped roads, buildings, parks, shops, forests, nature reserves, universities, police stations, beaches, prisons, geysers, reefs, hospitals, administrative borders, caves, lighthouses and many more.</p>
+        <p>It has mapped roads, buildings, parks, shops, forests, nature reserves, universities, police stations, beaches, prisons, geysers, reefs, hospitals, administrative borders, caves, lighthouses and many more.</p>
 
-<p>This data is available in full for free under a <a href="https://www.openstreetmap.org/copyright">friendly ODbL license</a>. It is possible to use this data for a variety of projects. For example image below is a 3D printed map for blind based on OpenStreetMap data.</p>
+        <p>This data is available in full for free under a <a href="https://www.openstreetmap.org/copyright">friendly ODbL license</a>. It is possible to use this data for a variety of projects. For example image below is a 3D printed map for blind based on OpenStreetMap data.</p>
 
-<a href="https://wiki.openstreetmap.org/wiki/File:Touch_Mapper_Kartta_kasissa.jpg"><img src="../3D-printed-map-from-OpenStreetMap-data-cc-by-license-photo-by-Samuli-Kärkkäinen-the-creator-of-Touch-Mapper.jpeg" alt="please send an email to matkoniecz@tutanota.com if replacing this placeholder alt attribute of image by a real alt attribute would be useful for you" class="image_with_frame"/></a>
+        <a href="https://wiki.openstreetmap.org/wiki/File:Touch_Mapper_Kartta_kasissa.jpg"><img src="../3D-printed-map-from-OpenStreetMap-data-cc-by-license-photo-by-Samuli-Kärkkäinen-the-creator-of-Touch-Mapper.jpeg" alt="please send an email to matkoniecz@tutanota.com if replacing this placeholder alt attribute of image by a real alt attribute would be useful for you" class="image_with_frame"/></a>
 
-<p>The easiest way to explore data collected by OSM users is to look at one of generated maps. You can do it by visiting <a target="_blank" href="https://www.openstreetmap.org/">openstreetmap.org</a> and looking around.</p>
+        <p>The easiest way to explore data collected by OSM users is to look at one of generated maps. You can do it by visiting <a target="_blank" href="https://www.openstreetmap.org/">openstreetmap.org</a> and looking around.</p>
 
-<p>Default map at that page displays a small part of data collected by the OpenStreetMap contributors. Depending on region various features should be visible - roads, rivers, railways, forests, buildings, shops, peaks, lakes, cemeteries, caves, hospitals, paths, springs and many more.</p>
+        <p>Default map at that page displays a small part of data collected by the OpenStreetMap contributors. Depending on region various features should be visible - roads, rivers, railways, forests, buildings, shops, peaks, lakes, cemeteries, caves, hospitals, paths, springs and many more.</p>
 
-<img src="Isle-of-Man.png" alt="please send an email to matkoniecz@tutanota.com if replacing this placeholder alt attribute of image by a real alt attribute would be useful for you" class="image_with_frame"/>
+        <img src="Isle-of-Man.png" alt="please send an email to matkoniecz@tutanota.com if replacing this placeholder alt attribute of image by a real alt attribute would be useful for you" class="image_with_frame"/>
 
-<p>But using specific map designed by someone else is just start of using OpenStreetMap power. It is possible to extract specific data. For example, one may want to get</p>
-<ol>
-  <li>museums</li>
-  <li>playgrounds</li>
-  <li>glaciers</li>
-  <li>wetlands</li>
-  <li>volcanoes</li>
-  <li>geometry of a specific motorway</li>
-  <li>or all data at once</li>
-</ol>
-<p>On this page I will present my favourite method to do that - a tool called Overpass turbo.</p>
+        <p>But using specific map designed by someone else is just start of using OpenStreetMap power. It is possible to extract specific data. For example, one may want to get</p>
+        <ol>
+          <li>museums</li>
+          <li>playgrounds</li>
+          <li>glaciers</li>
+          <li>wetlands</li>
+          <li>volcanoes</li>
+          <li>geometry of a specific motorway</li>
+          <li>or all data at once</li>
+        </ol>
 
-<p>It will be a series of exercises, starting from very simple ones with more interesting ones appearing later. No programming or OpenStreetMap knowledge will be required to understand them. Everything required to understand what is happening will be explained.</p>
+        <p>On this page I will present my favourite method to do that - a tool called Overpass turbo.</p>
 
-<p>Initial ones will just download and visualise one group of objects.</p>
+        <p>It will be a series of exercises, starting from very simple ones with more interesting ones appearing later. No programming or OpenStreetMap knowledge will be required to understand them. Everything required to understand what is happening will be explained.</p>
 
-<h2>Exercise 1 - museums</h2>
-<p>Let's open <a target="_blank" href="http://overpass-turbo.eu/s/zMg">the first query</a>. It should show a page with a map on the right and panel with mysterious text on the left. Ignore gibberish on the left and wait for the query to complete. Within seconds museums in Kraków should be marked on the map.</p>
+        <p>Initial ones will just download and visualise one group of objects.</p>
 
-<h2>Exercise 2 - playgrounds</h2>
-<p>Now let's try something else - public playgrounds in Hamm - <a target="_blank" href="http://overpass-turbo.eu/s/zMi">follow this link</a> to try this query.</p>
+        <h2>Exercise 1 - museums</h2>
 
-<img src="Hamm-playgrounds.png" alt="please send an email to matkoniecz@tutanota.com if replacing this placeholder alt attribute of image by a real alt attribute would be useful for you" class="image_with_frame"/>
+        <p>Let's open <a target="_blank" href="http://overpass-turbo.eu/s/zMg">the first query</a>. It should show a page with a map on the right and panel with mysterious text on the left. Ignore gibberish on the left and wait for the query to complete. Within seconds museums in Kraków should be marked on the map.</p>
 
-<h2>Exercise 3 - everything</h2>
-<p>Maybe you just want to grab all data from given area and download it? And do entire processing and filtering in another tool like QGIS? Or just look at all what is mapped? Next query will show all data within a specified area. Note that this data is a direct copy of OpenStreetMap database so you will need some help in interpreting the data. Next sections should help with that.</p>
+        <h2>Exercise 2 - playgrounds</h2>
 
-<p>So now <a target="_blank" href="http://overpass-turbo.eu/s/zMQ">a query to get everything</a>.</p>
+        <p>Now let's try something else - public playgrounds in Hamm - <a target="_blank" href="http://overpass-turbo.eu/s/zMi">follow this link</a> to try this query.</p>
+        <img src="Hamm-playgrounds.png" alt="please send an email to matkoniecz@tutanota.com if replacing this placeholder alt attribute of image by a real alt attribute would be useful for you" class="image_with_frame"/>
 
-<img src="Kampong_Ayer-everything.png" alt="please send an email to matkoniecz@tutanota.com if replacing this placeholder alt attribute of image by a real alt attribute would be useful for you" class="image_with_frame"/>
+        <h2>Exercise 3 - everything</h2>
 
-<p>I just mentioned that this query will get everything. Fortunately, it is not true. It will get everything within area visible in your map view. You can pan around to see that objects not inside this area are not downloaded. After moving view to a different location and select "run" button on top-left to see results of the query in a different location.</p>
+        <p>Maybe you just want to grab all data from given area and download it? And do entire processing and filtering in another tool like QGIS? Or just look at all what is mapped? Next query will show all data within a specified area. Note that this data is a direct copy of OpenStreetMap database so you will need some help in interpreting the data. Next sections should help with that.</p>
 
-<p>Like previous query only area visible on the screen is processed. Try to zoom out, pan to an area familiar to you and zoom in. But avoid running queries that will return too much data. Especially "show all data" will fail for large areas.</p>
+        <p>So now <a target="_blank" href="http://overpass-turbo.eu/s/zMQ">a query to get everything</a>.</p>
+        <img src="Kampong_Ayer-everything.png" alt="please send an email to matkoniecz@tutanota.com if replacing this placeholder alt attribute of image by a real alt attribute would be useful for you" class="image_with_frame"/>
 
-<p>Filtering is necessary to display data for a larger area - attempt to download all data at once would not succeded. OSM database crossed 500 GB<!--https://munin.openstreetmap.org/postgresql-year.html--> a long time ago, displaying all of it is a complicated task that requires more specialized tools than a web browser.</p>
+        <p>I just mentioned that this query will get everything. Fortunately, it is not true. It will get everything within area visible in your map view. You can pan around to see that objects not inside this area are not downloaded. After moving view to a different location and select "run" button on top-left to see results of the query in a different location.</p>
 
-<p>Queries that filter data (like ones presented before "get everything" query) will work for much bigger areas, some may even allow to scan the entire world and display all objects matching filter!</p>
+        <p>Like previous query only area visible on the screen is processed. Try to zoom out, pan to an area familiar to you and zoom in. But avoid running queries that will return too much data. Especially "show all data" will fail for large areas.</p>
 
-<p>But before trying our luck with worldwide queries (it requires using the left panel, so we will leave it for later) so let's try a different adventure.</p>
+        <p>
+          Filtering is necessary to display data for a larger area - attempt to download all data at once would not succeded. OSM database crossed 500 GB<!--https://munin.openstreetmap.org/postgresql-year.html--> a long time ago, displaying all of it is a complicated task that requires more specialized tools than a web browser.
+        </p>
 
-<h2>Exercise 4 - glaciers</h2>
+        <p>Queries that filter data (like ones presented before "get everything" query) will work for much bigger areas, some may even allow to scan the entire world and display all objects matching filter!</p>
 
-<p>Now you will make a new query.</p>
+        <p>But before trying our luck with worldwide queries (it requires using the left panel, so we will leave it for later) so let's try a different adventure.</p>
 
-<p>Let's say that we want to query for glaciers.</p>
-<ol>
-<li> Go to <a target="_blank" href="http://overpass-turbo.eu/s/zWt">http://overpass-turbo.eu/s/zWt</a> (this link places you in the Himalayas so looking for a place with glaciers is not necessary). </li>
-<li>Press the "Wizard" button on the top menu. A window should appear </li>
-<li>Into box type: <code>natural=glacier</code></li>
-<li>Press 'build and run query'</li>
-<li>you should see marked areas representing glaciers!</li>
-<li>Congratulations!</li>
-</ol>
-<img src="Nepal-glaciers.png" alt="please send an email to matkoniecz@tutanota.com if replacing this placeholder alt attribute of image by a real alt attribute would be useful for you" class="image_with_frame"/>
+        <h2>Exercise 4 - glaciers</h2>
 
-<h2>Exercise 5 - wetlands</h2>
+        <p>Now you will make a new query.</p>
 
-<p>Previous examples maybe were interesting but covered only a small group of examples.</p>
+        <p>Let's say that we want to query for glaciers.</p>
 
-<p>How one is supposed to guess what should be used to display wetland areas? Or universities? Or prisons? Or other feature among thousands possible?</p>
+        <ol>
+          <li> Go to <a target="_blank" href="http://overpass-turbo.eu/s/zWt">http://overpass-turbo.eu/s/zWt</a> (this link places you in the Himalayas so looking for a place with glaciers is not necessary). </li>
+          <li>Press the "Wizard" button on the top menu. A window should appear </li>
+          <li>Into box type: <code>natural=glacier</code></li>
+          <li>Press 'build and run query'</li>
+          <li>you should see marked areas representing glaciers!</li>
+          <li>Congratulations!</li>
+        </ol>
+        <img src="Nepal-glaciers.png" alt="please send an email to matkoniecz@tutanota.com if replacing this placeholder alt attribute of image by a real alt attribute would be useful for you" class="image_with_frame"/>
 
-<p>Fortunately guessing is not necessary. There is a project documenting how tags are used and it is called OSM Wiki. Let's say that we want to display wetlands. In that case we should try googling &lt;<a target="_blank" href="https://duckduckgo.com/?q=wetland+OSM+Wiki">wetland OSM Wiki</a>&gt;</p>
-<img src="wetland-search-results.png" alt="please send an email to matkoniecz@tutanota.com if replacing this placeholder alt attribute of image by a real alt attribute would be useful for you" class="image_with_frame"/>
-<p>Results should include <a target="_blank" href="https://wiki.openstreetmap.org/wiki/Tag:natural=wetland">a page describing wetlands</a> as one of results.</p>
+        <h2>Exercise 5 - wetlands</h2>
 
-<p>This page has a description that describes that <code>natural=wetland</code> is used to tag wetlands.</p>
+        <p>Previous examples maybe were interesting but covered only a small group of examples.</p>
 
+        <p>How one is supposed to guess what should be used to display wetland areas? Or universities? Or prisons? Or other feature among thousands possible?</p>
 
-<p>So we want to hunt for wetlands.</p>
-<ol>
-<li> Go to <a target="_blank" href="http://overpass-turbo.eu/s/zNS">http://overpass-turbo.eu/s/zNS</a> (this link places you at a specific area). </li>
-<li>Press "Wizard" button on the top menu. A window should appear </li>
-<li>Into box type: <code>natural=wetland</code></li>
-<li>Press 'build and run query'</li>
-<li>you should see marked areas representing wetlands!</li>
-<li>Congratulations!</li>
-</ol>
+        <p>Fortunately guessing is not necessary. There is a project documenting how tags are used and it is called OSM Wiki. Let's say that we want to display wetlands. In that case we should try googling &lt;<a target="_blank" href="https://duckduckgo.com/?q=wetland+OSM+Wiki">wetland OSM Wiki</a>&gt;</p>
 
-<h2>Exercise 6 - volcanoes</h2>
-<p>Now time for an exercise - try to find volcanoes: again google for something like &lt;OSM wiki volcano&gt; and use wizard to create a new query with the found tag value. If you have trouble see <a target="_blank" href="volcano-solution.html">here for a help</a>.</p>
+        <img src="wetland-search-results.png" alt="please send an email to matkoniecz@tutanota.com if replacing this placeholder alt attribute of image by a real alt attribute would be useful for you" class="image_with_frame"/>
 
-<h2>Using data (license, export)</h2>
-<p>So now you can to at least some types of queries that return some data. So it is a good moment to mention how this data may be used. Basically, you are allowed to do anything with it as long as you credit OpenStreetMap and its contributors and distribute derived work on the same license. For details see <a target="_blank" href="https://www.openstreetmap.org/copyright">https://www.openstreetmap.org/copyright</a>
-It will not be covered in this tutorial but you can process this data using also other software.</p>
+        <p>Results should include <a target="_blank" href="https://wiki.openstreetmap.org/wiki/Tag:natural=wetland">a page describing wetlands</a> as one of results.</p>
 
-<p>So how we may download this data as a file? See the button "Export". After clicking it you may select one of the standard data formats. Any reasonable tool for processing geodata will support at least one.</p>
+        <p>This page has a description that describes that <code>natural=wetland</code> is used to tag wetlands.</p>
 
-<h2>External resources</h2>
-<ul>
-	<li><a target="_blank" href="https://wiki.openstreetmap.org/wiki/Overpass_turbo">Overpass turbo - page on OpenStreetMap Wiki</a></li>
-	<li><a target="_blank" href="https://wiki.openstreetmap.org/wiki/Overpass_turbo/Wizard">Overpass turbo - Wizard - page on OpenStreetMap Wiki</a></li>
-	<li><a target="_blank" href="https://wiki.openstreetmap.org/wiki/Overpass_API/Overpass_API_by_Example">Overpass turbo examples - page on OpenStreetMap Wiki</a></li>
-	<li><a target="_blank" href="https://wiki.openstreetmap.org/wiki/Overpass_API/Overpass_QL">Overpass API - full documentation of query syntax. Opposite approach to this tutorial - page on OpenStreetMap Wiki</a></li>
-</ul>
+        <p>So we want to hunt for wetlands.</p>
+        <ol>
+          <li> Go to <a target="_blank" href="http://overpass-turbo.eu/s/zNS">http://overpass-turbo.eu/s/zNS</a> (this link places you at a specific area). </li>
+          <li>Press "Wizard" button on the top menu. A window should appear </li>
+          <li>Into box type: <code>natural=wetland</code></li>
+          <li>Press 'build and run query'</li>
+          <li>you should see marked areas representing wetlands!</li>
+          <li>Congratulations!</li>
+        </ol>
 
+        <h2>Exercise 6 - volcanoes</h2>
 
-<h2>To be continued?</h2>
+        <p>Now time for an exercise - try to find volcanoes: again google for something like &lt;OSM wiki volcano&gt; and use wizard to create a new query with the found tag value. If you have trouble see <a target="_blank" href="volcano-solution.html">here for a help</a>.</p>
 
-<p>At least, for now, tutorial ends here. If you want more - send mail to <a href="mailto:matkoniecz@gmail.com">matkoniecz@gmail.com</a>, it will likely result in continued work on this page.</p>
+        <h2>Using data (license, export)</h2>
 
-<h3>Status</h3>
-<p>Status: unfinished draft that is actively updated (as of June 2018).</p>
+        <p>So now you can to at least some types of queries that return some data. So it is a good moment to mention how this data may be used. Basically, you are allowed to do anything with it as long as you credit OpenStreetMap and its contributors and distribute derived work on the same license. For details see <a target="_blank" href="https://www.openstreetmap.org/copyright">https://www.openstreetmap.org/copyright</a>
+          It will not be covered in this tutorial but you can process this data using also other software.
+        </p>
 
-<p>Published part is unfinished and ends abruptly. But it is supposed to be free from mistakes, typos, unclear text, missing explanations, grammar problems etc. Please sent mail to matkoniecz@gmail.com if you spot anything wrong!</p>
+        <p>So how we may download this data as a file? See the button "Export". After clicking it you may select one of the standard data formats. Any reasonable tool for processing geodata will support at least one.</p>
 
-<p>Please also send an email if any part is unclear - this page is supposed to be easy to follow for everybody, with no required OpenStreetMap or programming knowledge.</p>
+        <h2>External resources</h2>
+        <ul>
+          <li><a target="_blank" href="https://wiki.openstreetmap.org/wiki/Overpass_turbo">Overpass turbo - page on OpenStreetMap Wiki</a></li>
+          <li><a target="_blank" href="https://wiki.openstreetmap.org/wiki/Overpass_turbo/Wizard">Overpass turbo - Wizard - page on OpenStreetMap Wiki</a></li>
+          <li><a target="_blank" href="https://wiki.openstreetmap.org/wiki/Overpass_API/Overpass_API_by_Example">Overpass turbo examples - page on OpenStreetMap Wiki</a></li>
+          <li><a target="_blank" href="https://wiki.openstreetmap.org/wiki/Overpass_API/Overpass_QL">Overpass API - full documentation of query syntax. Opposite approach to this tutorial - page on OpenStreetMap Wiki</a></li>
+        </ul>
 
-<p>Feel free to send mail also if this page was useful for you :)</p>
+        <h2>To be continued?</h2>
 
-<h2>Exercise 7 - specific motorway</h2>
+        <p>At least, for now, tutorial ends here. If you want more - send mail to <a href="mailto:matkoniecz@gmail.com">matkoniecz@gmail.com</a>, it will likely result in continued work on this page.</p>
 
-<p>See above</p>
+        <h3>Status</h3>
+
+        <p>Status: unfinished draft that is actively updated (as of August 2018).</p>
+
+        <p>Published part is unfinished and ends abruptly. But it is supposed to be free from mistakes, typos, unclear text, missing explanations, grammar problems etc. Please sent mail to matkoniecz@gmail.com if you spot anything wrong!</p>
+
+        <p>Please also send an email if any part is unclear - this page is supposed to be easy to follow for everybody, with no required OpenStreetMap or programming knowledge.</p>
+
+        <p>Feel free to send mail also if this page was useful for you :)</p>
+
+        <h2>Exercise 7 - specific motorway</h2>
+
+        <p>See above</p>
+
       </section>
     </div>
   </body>
