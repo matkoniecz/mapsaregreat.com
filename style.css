@@ -344,8 +344,7 @@ form{
   list-style: none;
 }
 .main-nav a {
-  max-width: 500000px;
-  /*TODO HACK without this NOP hover background styling breaks - and background area starts to mismatch the text area */
+  max-width: 500000px; /*TODO HACK without this NOP hover background styling breaks - and background area starts to mismatch the text area */
   padding: 1.25rem 0.5rem;
   font-size: 1.6rem;
   font-weight: bold;
