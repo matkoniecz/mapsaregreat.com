@@ -5,15 +5,16 @@
 # put it somewhere where $PATH will find it
 # good documentations is at https://selenium-python.readthedocs.io/
 
-from selenium import webdriver
 import time
+import os
+import inspect
+from io import BytesIO
+
+from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-import os
-import inspect
 from PIL import Image
-from io import BytesIO
 
 screenshot_width = 1024
 screenshot_height_standard = 768
