@@ -379,6 +379,13 @@ form{
   content: 'true';
 }
 
+.leaflet_full_size_interactive_map {
+    max-width: 100%;
+    width: 100vw;
+    height: 100vh;
+    margin: auto;
+}
+
 @media (min-width: 600px) {
   #leaflet_interactive_map_collapse_switch::after {
     display: none;

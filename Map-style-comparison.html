@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>What is OpenStreetMap by Mateusz Konieczny</title>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="style.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="imported-code/leaflet/leaflet.css" crossorigin=""/>
+    <script src="imported-code/leaflet/leaflet.js" crossorigin=""></script>
+  </head>
+  <body>
+    <div id="main_content_wrap">
+      <section>
+        <div id='map' class="leaflet_full_size_interactive_map"></div>
+        <div id='leaflet_interactive_map_collapse_switch'></div>
+        <script>
+          var mbAttr = 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, ' +
+          		'<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
+          		'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+          	mbUrl = 'https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWF0a29uaWVjeiIsImEiOiJkYTY0MDEwZTJjMjcyMDc0MjAxYzBlZDBiN2IzNTQ1OSJ9';
+          
+          var osmcarto = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          });
+          
+          var map = L.map('map', {
+          	center: [50.053, 19.932],
+          	zoom: 16,
+          	layers: [osmcarto]
+          });
+          
+          var baseLayers = {
+          	//from http://leaflet-extras.github.io/leaflet-providers/preview/index.html
+          	"style attempting to display many features (Default OSM style)": osmcarto,
+          	"great background map (Positron by CartoDB)": L.tileLayer('https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png', {
+                 attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, map style: &copy; <a href=\"http://cartodb.com/attributions\">CartoDB</a>',
+                 subdomains: 'abcd',
+                 maxZoom: 19
+             }),
+          	"style for humanitarian organisations using OSM as a basemap": L.tileLayer("https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png", {
+          maxZoom: 19,
+          attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>, Tiles courtesy of <a href="http://hot.openstreetmap.org/" target="_blank">Humanitarian OpenStreetMap Team</a>'
+          }),
+          	"black & white minimalistic style (Stamen Toner)": L.tileLayer('https://stamen-tiles-{s}.a.ssl.fastly.net/toner/{z}/{x}/{y}{r}.{ext}', {
+          attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+          subdomains: 'abcd',
+          minZoom: 0,
+          maxZoom: 20,
+          ext: 'png'
+          }),
+          	"artistic curiosity (Stamen Watercolor)": L.tileLayer('https://stamen-tiles-{s}.a.ssl.fastly.net/watercolor/{z}/{x}/{y}.{ext}', {
+          attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+          subdomains: 'abcd',
+          minZoom: 1,
+          maxZoom: 16,
+          ext: 'png'
+          }),
+          	"map with marked cycling routes (OpenCycleMap)": L.tileLayer('https://{s}.tile.thunderforest.com/cycle/{z}/{x}/{y}.png?apikey={apikey}', {
+          attribution: '&copy; <a href="http://www.thunderforest.com/">Thunderforest</a>, &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+          apikey: '3dd1a92284ad4b2db133ff4bd3a5a2ae',
+          maxZoom: 22
+          }),
+          	"includes elevation data in addition to OSM data (Thunderforest Landscape)": L.tileLayer('https://{s}.tile.thunderforest.com/landscape/{z}/{x}/{y}.png?apikey=3dd1a92284ad4b2db133ff4bd3a5a2ae', {
+          attribution: '&copy; <a href="http://www.thunderforest.com/">Thunderforest</a>, &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+          apikey: '<your apikey>',
+          maxZoom: 22
+          }),
+          	"electricity infrastructure (OpenInfraMap Power) [zoom out to see data]": L.tileLayer('https://tiles-{s}.openinframap.org/power/{z}/{x}/{y}.png', {
+          maxZoom: 18,
+          attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>, <a href="http://www.openinframap.org/about.html">About OpenInfraMap</a>'
+          }),
+          	"localised style for French users, displaying French names where available<br><br><a href=\"What-is-OpenStreetMap.html\">Exit full screen view</a>": L.tileLayer('https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png', {
+          maxZoom: 20,
+          attribution: '&copy; Openstreetmap France | &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+          }),
+          };
+          
+          var isCollapsed = window.getComputedStyle(
+             document.querySelector('#leaflet_interactive_map_collapse_switch'), ':after'
+          ).getPropertyValue('content');
+          if(isCollapsed === '"false"') {
+          	isCollapsed = false;
+          } else {
+          	isCollapsed = true;
+          }
+          L.control.layers(baseLayers, {}, {collapsed: isCollapsed}).addTo(map);
+        </script>
+      </section>
+    </div>
+  </body>
+</html>
