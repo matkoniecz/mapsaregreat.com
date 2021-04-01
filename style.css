@@ -374,7 +374,10 @@ form{
 
 .leaflet_interactive_map {
     max-width: 22cm;
-    width: 90vw;
+    width: 80vw; /*
+    it is necessary to leave enough space on sides to allow scrolling through this section of website.
+    80% of viewport is nicely becoming not relevant on larger screens, as map will simply fill entire space between margins :)
+    */
     height: 90vh;
     margin: auto;
 }
