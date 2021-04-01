@@ -79,11 +79,12 @@
     <p>(there is more text below map)
     
     <div id="map" class="leaflet_interactive_map_not_hiding_further_content"></div><!-- 
-        note: right now id="map" is mandatory - without it everything will break.
+            note: right now id="map" is mandatory - without it everything will break.
         Feel free to make PR if that is causing problems for you
     -->
   <!-- dependencies of library-->
   <script src="lunar_assembler_dependencies/leaflet-version0.7.js"></script> <!-- leaflet must be imported after map id exists-->
+
   <!--
   released version of leaflet.draw has breaking bug on mobile devices
   <script src="lunar_assembler_dependencies/leaflet.draw.js"></script>
@@ -131,8 +132,6 @@
   <!--
       END OF TEMPORARY HACK
   -->
-  <script src='lunar_assembler_dependencies/osmtogeojson.js'></script>
-  <script src="lunar_assembler_dependencies/turf.min.js"></script>
 
   <!-- library for drawing -->
   <script src="lunar_assembler.js"></script> <!-- must be imorted after leaflet-->
@@ -140,7 +139,7 @@
   <!-- actual code -->
   <script src="high_zoom_map_style.js"></script>
 
-<div id="generated_svg_within">
+<div class="generated_svg_map_within" id="generated_svg_within">
 </div>
     <button id="download" href="#">Download SVG</button>
   
@@ -155,7 +154,7 @@
     
     <p>If you want to map something (map missing objects, fix mistake) and you are unsure how to start - visit <a href="https://www.openstreetmap.org/">openstreetmap.org</a>, zoom in to interesting area and press "edit" button and follow instructions. You can contact OpenStreetMap community using one of global or local channels listed at <a href="https://community.osm.be/">community.osm.be</a>.</p>
     
-    You can visit <a href="https://github.com/matkoniecz/lunar_assembler">matkoniecz/lunar_assembler</a> to see code, obtain code or contribute. This software as <a href="https://www.gnu.org/licenses/agpl-3.0.html">AGPLv3</a> licesed.
+    You can visit <a href="https://github.com/matkoniecz/lunar_assembler">matkoniecz/lunar_assembler</a> to see code, obtain code or contribute. This software as <a href="https://www.gnu.org/licenses/agpl-3.0.html">AGPLv3</a> licenced.
     <script>
       d3.select("#download").on("click", function(){
           download("generated.svg", document.getElementById('generated_svg_within').innerHTML);
