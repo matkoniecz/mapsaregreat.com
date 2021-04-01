@@ -15,7 +15,8 @@ var drawControl = new L.Control.Draw({
         polygon: false,
         polyline: false,
         marker: false,
-        circle: false
+        circle: false,
+        circlemarker: false
     }
 });
 map.addControl(drawControl);
@@ -101,7 +102,10 @@ async function handleTriggerFromGUI(bounds){
               const response = await fetch("https://overpass-api.de/api/interpreter", {
                   method: 'POST',
                   headers: {
-                      'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+                      'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                      // considered adding also deployed at ' + window.location.href + ' -
+                      // but it may leak private data
+                      "User-Agent": 'lunar_assembler SVG generator - please contact Mateusz Konieczny matkoniecz@gmail.com (library author) or website operator if usage is causing any issues',
                   },
                   body: new URLSearchParams({'data': query})
               })
@@ -110,7 +114,7 @@ async function handleTriggerFromGUI(bounds){
                 const osmJSON = responseData;
                 return osmJSON;
               } else {
-                alert("Overpass Turbo refused to provide data, you likely exceed usage limit of that free service.")
+                alert("Overpass API refused to provide data. Either selected area was too large, or you exceed usage limit of that free service. Please wait a bit and retry. Overpass API is used to get data from OpenStreetMap for a given area.")
               }
           } 
           function toGeoJSON(osmJSON) {
@@ -157,7 +161,6 @@ async function handleTriggerFromGUI(bounds){
       d3_data_geojson.features.sort(mapStyle.paintOrderCompareFunction)
       console.log(d3_data_geojson.features)
       update3Map(geoGenerator, d3_data_geojson, selector, mapStyle);
-      download("generated.svg", document.getElementById('generated_svg_within').innerHTML)
     }
     
     function update3Map(geoGenerator, used_data, selector) {

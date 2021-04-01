@@ -90,7 +90,7 @@ fillColoring(feature){
       "service", "track", "road"].includes(feature.properties["area:highway"])) {
       return "#555555";
     }
-    if(["footway", "pedestrian", "path"].includes(feature.properties["area:highway"]) || (feature.properties["highway"] == "pedestrian" && feature.properties["area"] === "yes")) {
+    if(["footway", "pedestrian", "path", "steps"].includes(feature.properties["area:highway"]) || (feature.properties["highway"] == "pedestrian" && feature.properties["area"] === "yes")) {
       return "#aaaaaa";
     }
     if(feature.properties["area:highway"] === "cycleway" ) {
@@ -108,7 +108,7 @@ fillColoring(feature){
     if(feature.properties["natural"] === "wood" || feature.properties["landuse"] === "forest")  {
       return "green";
     }
-    if(["industrial", "railway"].includes(feature.properties["landuse"])){
+    if(["industrial", "railway", "quarry"].includes(feature.properties["landuse"])){
         return "#efdfef";
     }
     if(["residential", "highway", "retail", "commercial", "garages"].includes(feature.properties["landuse"]) || ["school", "kidergarten", "university"].includes(feature.properties["amenity"])){
