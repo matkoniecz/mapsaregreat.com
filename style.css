@@ -378,7 +378,20 @@ form{
     height: 90vh;
     margin: auto;
 }
-#leaflet_interactive_map_collapse_switch::after {
+
+
+/*
+interactive_map_collapse_switch is a way to pass information from CSS to JS
+
+on page load JS will read it and collapse map switch if content is set to 'true'
+it is hacky, but still better than JS manipulating style based on rules set in a completely
+different place
+
+note that div and JS code needs to be places manually :(
+
+if there is a smarter way to do this, let me know
+https://github.com/matkoniecz/mapsaregreat.com/issues
+*/ #leaflet_interactive_map_collapse_switch::after {
   display: none;
   content: 'true';
 }
