@@ -44,7 +44,7 @@ article,aside,details,figcaption,figure,footer,header,hgroup,menu,nav,section{
     padding:20px 10px;
     position:relative;
     margin:0 auto;
-    max-width:22cm; /* coordinated with leaflet_interactive_map and img and indirectly with main-nav */
+    max-width:22cm; /* coordinated with large_leaflet_interactive_map, leaflet_interactive_map_not_hiding_further_content, and img and indirectly with main-nav */
     /*
     usually desirable px was deliberately NOT used
     yes, I know about https://www.w3.org/Style/Examples/007/units.en.html
@@ -62,7 +62,7 @@ article,aside,details,figcaption,figure,footer,header,hgroup,menu,nav,section{
     */
 }
 img {
-    max-width:21.7cm; /* to fit into a wrapper container, coordinated with .inner and img and indirectly with main-nav */
+    max-width:21.7cm; /* to fit into a wrapper container, coordinated with large_leaflet_interactive_map, leaflet_interactive_map_not_hiding_further_content, .inner and img and indirectly with main-nav */
 }
 .main-nav {
     max-width:30cm;
@@ -372,13 +372,31 @@ form{
 }
 
 
-.leaflet_interactive_map {
-    max-width: 22cm; /* coordinated with .inner and img and indirectly with main-nav */
+.full_size_leaflet_interactive_map {
+    max-width: 100%;
+    width: 100vw;
+    height: 100vh;
+    margin: auto;
+}
+
+
+.large_leaflet_interactive_map {
+    max-width: 22cm; /* coordinated with leaflet_interactive_map_not_hiding_further_content,  .inner and img and indirectly with main-nav */
     width: 80vw; /*
     it is necessary to leave enough space on sides to allow scrolling through this section of website.
     80% of viewport is nicely becoming not relevant on larger screens, as map will simply fill entire space between margins :)
     */
     height: 90vh;
+    margin: auto;
+}
+
+.leaflet_interactive_map_not_hiding_further_content {
+    max-width: 22cm; /* coordinated with large_leaflet_interactive_map, .inner and img and indirectly with main-nav */
+    width: 80vw; /*
+    it is necessary to leave enough space on sides to allow scrolling through this section of website.
+    80% of viewport is nicely becoming not relevant on larger screens, as map will simply fill entire space between margins :)
+    */
+    height: 50vh;
     margin: auto;
 }
 
@@ -397,13 +415,6 @@ https://github.com/matkoniecz/mapsaregreat.com/issues
 */ #leaflet_interactive_map_collapse_switch::after {
   display: none;
   content: 'true';
-}
-
-.leaflet_full_size_interactive_map {
-    max-width: 100%;
-    width: 100vw;
-    height: 100vh;
-    margin: auto;
 }
 
 @media (min-width: 600px) {
