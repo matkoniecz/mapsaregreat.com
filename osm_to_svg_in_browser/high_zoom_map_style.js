@@ -73,6 +73,13 @@ paintOrder(feature) {
     return 0;
 },
 
+motorizedRoadValuesArray(){
+  return ["motorway", "motorway_link", "trunk", "trunk_link", "primary", "primary_link",
+  "secondary", "secondary_link", "tertiary", "tertiary_link",
+  "unclassified", "residential",
+  "service", "track", "road"]
+},
+
 fillColoring(feature){
     console.log(feature);
     if (["Point"].includes(feature.geometry.type)) {
@@ -84,10 +91,7 @@ fillColoring(feature){
     if(feature.properties["building"] != null) {
       return "black";
     }
-    if(["motorway", "motorway_link", "trunk", "trunk_link", "primary", "primary_link",
-      "secondary", "secondary_link", "tertiary", "tertiary_link",
-      "unclassified", "residential",
-      "service", "track", "road"].includes(feature.properties["area:highway"])) {
+    if(mapStyle.motorizedRoadValuesArray().includes(feature.properties["area:highway"])) {
       return "#555555";
     }
     if(["footway", "pedestrian", "path", "steps"].includes(feature.properties["area:highway"]) || (feature.properties["highway"] == "pedestrian" && feature.properties["area"] === "yes")) {
@@ -120,7 +124,7 @@ fillColoring(feature){
     if(["park", "pitch"].includes(feature.properties["leisure"]) || feature.properties["landuse"] === "village_green") {
       return "#c8facc";
     }
-    if(["grass", "allotments", "orchard"].includes(feature.properties["landuse"]) || ["grassland", "meadow"].includes(feature.properties["natural"]) || ["garden"].includes(feature.properties["leisure"])) {
+    if(["grass", "allotments", "orchard"].includes(feature.properties["landuse"]) || ["grassland", "meadow", "scrub", "heath"].includes(feature.properties["natural"]) || ["garden"].includes(feature.properties["leisure"])) {
       return "#a2ce8d";
     }
     if(feature.properties["man_made"] === "bridge") {
@@ -137,10 +141,7 @@ strokeColoring(feature){
     if(["fence", "wall"].includes(feature.properties["barrier"])) {
         return "black";
     }
-    if(["motorway", "motorway_link", "trunk", "trunk_link", "primary", "primary_link",
-        "secondary", "secondary_link", "tertiary", "tertiary_link",
-        "unclassified", "residential",
-        "service", "track", "road"].includes(feature.properties["highway"])) {
+    if(mapStyle.motorizedRoadValuesArray().includes(feature.properties["highway"])) {
         return "#555555";
       }
       if(["footway", "pedestrian", "path", "pedestrian"].includes(feature.properties["highway"])) {
@@ -165,9 +166,7 @@ strokeColoring(feature){
   },
   
 strokeWidth(feature){
-    if(["motorway", "motorway_link", "trunk", "trunk_link", "primary", "primary_link",
-        "secondary", "secondary_link", "tertiary", "tertiary_link",
-        "unclassified", "residential"].includes(feature.properties["highway"])) {
+    if(mapStyle.motorizedRoadValuesArray().includes(feature.properties["highway"])) {
         return 2;
       }
       if(feature.properties["aeroway"] === "runway" ) {
@@ -194,6 +193,24 @@ strokeWidth(feature){
   
     return 1
   },
+
+mergeIntoGroup(feature){
+  // note that points and lines are not being merged!
+  // only areas (including multipolygins) can be merged for now
+  // please open an issue if you need it, it increaes chance of implementation a bit
+  // or open pull request with an implementation
+  if(mapStyle.motorizedRoadValuesArray().includes(feature.properties["area:highway"])) {
+    return 'area:highway_carriageway';
+  }
+  if(["footway", "pedestrian", "path", "steps"].includes(feature.properties["area:highway"]) || (feature.properties["highway"] == "pedestrian" && feature.properties["area"] === "yes")) {
+    return 'area:highway_footway';
+  }
+  if(feature.properties["area:highway"] == "cycleway") {
+    return 'area:highway_cycleway';
+  }
+  return null;
+},
+
   
 name(feature){
     return feature.properties.name
