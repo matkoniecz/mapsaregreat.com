@@ -74,15 +74,21 @@ img {
 #main_content{
     padding-top:40px
 }
-@media screen and (max-width: 640px){
+@media screen and (max-width: 1000px){
     #main_content{
         padding-top:20px
     }
 }
 
+@media screen and (max-width: 640px){
+    #main_content{
+        padding-top:13px
+    }
+}
+
 @media screen and (max-width: 410px){
     #main_content{
-        padding-top:10px
+        padding-top:5px
     }
 }
 
