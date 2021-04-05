@@ -74,6 +74,18 @@ img {
 #main_content{
     padding-top:40px
 }
+@media screen and (max-width: 480px){
+    #main_content{
+        padding-top:20px
+    }
+}
+
+@media screen and (max-width: 320px){
+    #main_content{
+        padding-top:10px
+    }
+}
+
 #footer_wrap{
     background:#212121
 }
@@ -123,6 +135,18 @@ p{
     /* font-size set in body */
     margin:10px 0 15px 0
 }
+@media screen and (max-width: 480px){
+    p{
+        margin:8px 0 12px 0
+    }
+}
+
+@media screen and (max-width: 320px){
+    p{
+        margin:7px 0 9px 0
+    }
+}
+
 footer p{
     color:#f2f2f2
 }
@@ -357,6 +381,7 @@ form{
   justify-content: center;
   color: #333;
 }
+
 .main-nav a:hover, .main-nav a:focus {
   background: #ccc;
   color: black;
@@ -366,11 +391,18 @@ form{
 }
 
 @media (min-width: 1000px) {
-  .main-nav a {
-    font-size: 2rem;
-  }
+    .main-nav a {
+      font-size: 2rem;
+    }
 }
-
+  
+@media (max-width: 480px) {
+    .main-nav a {
+        padding: 1rem 0.4rem;
+        font-size: 1.4rem;
+    }
+}
+  
 
 .full_size_leaflet_interactive_map {
     max-width: 100%;
