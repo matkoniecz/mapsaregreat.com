@@ -292,8 +292,7 @@ form{
         font-size:16px
     }
     .inner{
-        min-width:320px;
-        max-width:480px
+        max-width:100%
     }
     #project_title{
         font-size:32px
