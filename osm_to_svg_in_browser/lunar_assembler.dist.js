@@ -6,7 +6,85 @@
 
 /*lunar_assembler.js*/
 
-function initializeLunarAssembler({map_div_id, download_trigger_id, lat, lon, zoom} = {}) {
+/*
+    lunar_assembler - tool for generating SVG files from OpenStreetMap data. Available as a website.
+    Copyright (C) 2021 Mateusz Konieczny
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, under version 3 of the
+    License only.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
+
+const predictedTimeInSeconds = 35;
+var completed = false;
+var doneInPercents = 0;
+const timeBetweenUpdatesInSeconds = 0.1;
+const updateCount = predictedTimeInSeconds / timeBetweenUpdatesInSeconds;
+const incrementOnUpdateBy = 100 / updateCount;
+let progressBar;
+let handleOfProgressBarAnimation;
+
+function initializeLunarAssembler({map_div_id, download_trigger_id, progress_bar_id, lat, lon, zoom} = {}) {
+  initializeSelectorMap(map_div_id, lat, lon, zoom, download_trigger_id);
+  initilizeDownloadButton(download_trigger_id);
+  progressBar = document.getElementById(progress_bar_id);
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// progress bar fun
+// TODO:
+// not entirely fake as it is based on expected real time
+// and not intentionally misleading like for example randomized booking.com displays
+//
+// it would be nice to have it based on area size - there is probably some relation here
+
+function setProgressValue(newProgress) {
+  doneInPercents = newProgress;
+  if(doneInPercents >= 100) {
+    doneInPercents = 100;
+  }
+  progressBar.value = doneInPercents;
+}
+
+function markAsCompleted(){
+  setProgressValue(100);
+  completed = true;
+}
+
+function markAsFailed(){
+  clearInterval(handleOfProgressBarAnimation); // terminates
+  setProgressValue(0);
+}
+
+function startShowingProgress(){
+  doneInPercents = 0;
+  completed = false;
+  handleOfProgressBarAnimation = setInterval(() => {
+  if(completed) {
+    clearInterval(handleOfProgressBarAnimation); // terminates
+  } else {
+    var progress = doneInPercents + incrementOnUpdateBy;
+    if (progress > 95) {
+      progress = 10;
+    }
+    setProgressValue(progress)
+  }
+}, timeBetweenUpdatesInSeconds * 1000);
+}
+
+// end of progress bar fun
+//////////////////////////////////////////////////////////////////////////////////////////
+
+function initializeSelectorMap(map_div_id, lat, lon, zoom, download_trigger_id) {
   var map = L.map(map_div_id).setView([lat, lon], zoom);
   var mapLink = 
       '<a href="https://openstreetmap.org">OpenStreetMap</a>';
@@ -39,16 +117,24 @@ function initializeLunarAssembler({map_div_id, download_trigger_id, lat, lon, zo
 
       handleTriggerFromGUI(layer.getBounds(), download_trigger_id);
   });
+}
 
+function initilizeDownloadButton(download_trigger_id){
   d3.select("#" + download_trigger_id).on("click", function(){
-    download("generated.svg", document.getElementById('generated_svg_within').innerHTML);
+    download("generated.svg", document.getElementById(nameOfSVGHolderId()).innerHTML);
   })
 }
 
+function nameOfSVGHolderId(){
+  return "generated_svg_within";
+}
 async function handleTriggerFromGUI(bounds, download_trigger_id){
+    startShowingProgress();
     let osmJSON = await downloadOpenStreetMapData(bounds) // https://leafletjs.com/reference-1.6.0.html#latlngbounds-getcenter
     if(osmJSON == -1) {
       console.log("FILURE of download!");
+      markAsFailed();
+      alert("Overpass API refused to provide data. Either selected area was too large, or you exceed usage limit of that free service. Please wait a bit and retry. Overpass API is used to get data from OpenStreetMap for a given area.")
       return;
     }
     let geoJSON = toGeoJSON(osmJSON)
@@ -57,6 +143,7 @@ async function handleTriggerFromGUI(bounds, download_trigger_id){
     render(bounds.getWest(), bounds.getSouth(), bounds.getEast(), bounds.getNorth(), geoJSON, width, height, mapStyle); //mapStyle is defined in separate .js file, imported here - TODO, pass it here(???? what about multple styles at once?)
     document.getElementById(download_trigger_id).style.display = '';
     document.getElementById('instruction_hidden_after_first_generation').style.display = 'none';
+    markAsCompleted();
 }
 
 // TODO - there is a function to do this, right?
@@ -133,7 +220,6 @@ async function handleTriggerFromGUI(bounds, download_trigger_id){
                 const osmJSON = responseData;
                 return osmJSON;
               } else {
-                alert("Overpass API refused to provide data. Either selected area was too large, or you exceed usage limit of that free service. Please wait a bit and retry. Overpass API is used to get data from OpenStreetMap for a given area.")
                 return -1 // is there a better way to handle failures? throw exception? From looking at https://stackoverflow.com/a/27724419/4130619 code for that would be even worse
               }
           } 
@@ -318,9 +404,9 @@ function dropDegenerateGeometrySegments(feature){
       var geoGenerator = d3.geoPath()
       .projection(projection);
   
-      selector = '#generated_svg_within g.generated_map'
+      selector = '#' + nameOfSVGHolderId() +' g.generated_map'
       let generated = '<svg height="100%" width="100%" viewBox="0 0 ' + width + ' ' + height + '">' + "\n" + '<g class="generated_map" id="generated_map"></g>' + "\n" + '</svg>'
-      document.getElementById('generated_svg_within').innerHTML=generated
+      document.getElementById(nameOfSVGHolderId()).innerHTML=generated
   
       d3_data_geojson.features.sort(mapStyle.paintOrderCompareFunction)
       console.log(d3_data_geojson.features)

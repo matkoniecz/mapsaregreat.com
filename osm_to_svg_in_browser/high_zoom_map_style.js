@@ -16,7 +16,18 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 var mapStyle = {
-paintOrderCompareFunction(featureFirst, featureSecond) {
+  motorizedRoadValuesArray(){
+    return ["motorway", "motorway_link", "trunk", "trunk_link", "primary", "primary_link",
+    "secondary", "secondary_link", "tertiary", "tertiary_link",
+    "unclassified", "residential",
+    "service", "track", "road"]
+  },
+  
+  railwayLinearValuesArray(){
+    return ["rail", "disused", "tram", "subway", "narrow_gauge", "light_rail", "preserved", "construction", "miniature", "monorail"];
+  },
+  
+  paintOrderCompareFunction(featureFirst, featureSecond) {
     // < 0 - First element must be placed before second
     // 0 - Both elements is equal, do not change order.
     // > 0 - Second element must be placed before first.
@@ -34,50 +45,75 @@ paintOrderCompareFunction(featureFirst, featureSecond) {
 paintOrder(feature) {
     // higher values: more on top
 
-    // TODO:
-    // it WILL fail for: buildings under bridges
-    // bridges over bridges
-    // water bridges over something
-    // undeground buildings and other features undegrounds and in tunnels
+    var valueRangeForOneLayer = 10000;
+    var layer = 0;
+    if(feature.properties["layer"] != null) {
+      /* 
+      ignore layer tag on buildings and similar 
+      to discourage tagging for renderer
+      note that undeground buildings are later skipped
+      */
+      if(feature.properties["building"] == null 
+          && (feature.properties["natural"] == null || feature.properties["natural"] == "water") 
+          && feature.properties["landuse"] == null
+          && feature.properties["leisure"] == null
+          ) {
+            layer = feature.properties["layer"];
+      }
+    }
+    
     if(feature.properties["area:highway"] != null) {
-        return 1000;
+        var priority = 0.99;
+        return valueRangeForOneLayer * priority + valueRangeForOneLayer * layer;
     }
-    if(feature.properties["building"] != null) {
-        return 900;
-    }
-    if(feature.properties["barrier"] != null) {
-        return 850;
-    }
-    if(feature.properties["waterway"] != null) {
-      return 830;
+    if(feature.properties["building"] != null && feature.properties["location"] != "underground") {
+      var priority = 0.95;
+      return valueRangeForOneLayer * priority + valueRangeForOneLayer * layer;
   }
-    if(feature.properties["highway"] != null) {
-        return 800;
-    }
-    if(feature.properties["man_made"] === "bridge") {
-        return 700;
-    }
+    if(feature.properties["barrier"] != null) {
+      var priority = 0.90;
+      return valueRangeForOneLayer * priority + valueRangeForOneLayer * layer;
+  }
+    if(feature.properties["highway"] != null || mapStyle.railwayLinearValuesArray().includes(feature.properties["railway"])) {
+      var priority = 0.85;
+      return valueRangeForOneLayer * priority + valueRangeForOneLayer * layer;
+  }
+  if(feature.properties["barrier"] != null) {
+    var priority = 0.70;
+    return valueRangeForOneLayer * priority + valueRangeForOneLayer * layer;
+}
+  if(feature.properties["man_made"] === "bridge") {
+      var priority = 0.70;
+      return valueRangeForOneLayer * priority + valueRangeForOneLayer * layer;
+  }
+    if(feature.properties["waterway"] != null) {
+      /* render waterway lines under bridge areas */
+      var priority = 0.60;
+      return valueRangeForOneLayer * priority + valueRangeForOneLayer * layer;
+  }
     if(feature.properties["natural"] === "water" || feature.properties["waterway"] === "riverbank") {
       // render natural=wood below natural=water
-      return 2;
-  }
+      var priority = 0.10;
+      return valueRangeForOneLayer * priority + valueRangeForOneLayer * layer;
+}
   if(feature.properties["natural"] === "bare_rock") {
     // render natural=wood below natural=bare_rock
     // render water rather than underwater rocks
-    return 2;
-  }
+    var priority = 0.05;
+    return valueRangeForOneLayer * priority + valueRangeForOneLayer * layer;
+}
     if(feature.properties["leisure"] != null) {
         // render leisure=park below natural=water or natural=wood
-        return -2;
+        // but above landuse=residential
+        var priority = 0.03;
+        return valueRangeForOneLayer * priority + valueRangeForOneLayer * layer;
     }
-    return 0;
-},
-
-motorizedRoadValuesArray(){
-  return ["motorway", "motorway_link", "trunk", "trunk_link", "primary", "primary_link",
-  "secondary", "secondary_link", "tertiary", "tertiary_link",
-  "unclassified", "residential",
-  "service", "track", "road"]
+    if(feature.properties["landuse"] != null) {
+      //better higher and trigger layering problems quickly that have something failing ONLY in parks
+      var priority = 0.02;
+      return valueRangeForOneLayer * priority + valueRangeForOneLayer * layer;
+    }
+    return valueRangeForOneLayer * layer;
 },
 
 fillColoring(feature){
@@ -112,7 +148,7 @@ fillColoring(feature){
     if(feature.properties["natural"] === "wood" || feature.properties["landuse"] === "forest")  {
       return "green";
     }
-    if(["industrial", "railway", "quarry"].includes(feature.properties["landuse"])){
+    if(["industrial", "railway", "quarry", "construction", "military"].includes(feature.properties["landuse"]) || feature.properties["aeroway"] === "aerodrome"){
         return "#efdfef";
     }
     if(["residential", "highway", "retail", "commercial", "garages"].includes(feature.properties["landuse"]) || ["school", "kidergarten", "university"].includes(feature.properties["amenity"])){
@@ -121,7 +157,7 @@ fillColoring(feature){
     if(["farmland", "vineyard"].includes(feature.properties["landuse"])){
       return "#eef0d5";
     }
-    if(["park", "pitch"].includes(feature.properties["leisure"]) || feature.properties["landuse"] === "village_green") {
+    if(["park", "pitch", "playground"].includes(feature.properties["leisure"]) || feature.properties["landuse"] === "village_green") {
       return "#c8facc";
     }
     if(["grass", "allotments", "orchard"].includes(feature.properties["landuse"]) || ["grassland", "meadow", "scrub", "heath"].includes(feature.properties["natural"]) || ["garden"].includes(feature.properties["leisure"])) {
@@ -155,7 +191,7 @@ strokeColoring(feature){
         return "purple";
       }
   
-      if(["rail", "disused", "tram", "subway", "narrow_gauge", "light_rail", "preserved", "construction", "miniature", "monorail"].includes(feature.properties["railway"])) {
+      if(mapStyle.railwayLinearValuesArray().includes(feature.properties["railway"])) {
         return "black";
       }
       if(feature.properties["waterway"] != null ) {
@@ -187,7 +223,7 @@ strokeWidth(feature){
       if(feature.properties["aeroway"] === "taxiway" ) {
         return 2;
       }
-      if(["rail", "disused", "tram", "subway", "narrow_gauge", "light_rail", "preserved", "construction", "miniature", "monorail"].includes(feature.properties["railway"])) {
+      if(mapStyle.railwayLinearValuesArray().includes(feature.properties["railway"])) {
         return 2;
       }
   
