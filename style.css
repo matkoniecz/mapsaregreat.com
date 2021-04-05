@@ -324,8 +324,7 @@ form{
         font-size:16px
     }
     .inner{
-        min-width:240px;
-        max-width:320px
+        max-width:100%
     }
     #project_title{
         font-size:28px
@@ -350,7 +349,7 @@ form{
     }
     code,pre{
         min-width:240px;
-        max-width:320px;
+        max-width:100%;
         font-size:16px
     }
 }
