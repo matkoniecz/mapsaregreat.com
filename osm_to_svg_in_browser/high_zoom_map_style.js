@@ -151,7 +151,7 @@ fillColoring(feature){
     if(["industrial", "railway", "quarry", "construction", "military"].includes(feature.properties["landuse"]) || feature.properties["aeroway"] === "aerodrome"){
         return "#efdfef";
     }
-    if(["residential", "highway", "retail", "commercial", "garages"].includes(feature.properties["landuse"]) || ["school", "kidergarten", "university"].includes(feature.properties["amenity"])){
+    if(["residential", "highway", "retail", "commercial", "garages", "farmyard"].includes(feature.properties["landuse"]) || ["school", "kidergarten", "university"].includes(feature.properties["amenity"])){
         return "#efefef";
     }
     if(["farmland", "vineyard"].includes(feature.properties["landuse"])){
@@ -160,7 +160,7 @@ fillColoring(feature){
     if(["park", "pitch", "playground"].includes(feature.properties["leisure"]) || feature.properties["landuse"] === "village_green") {
       return "#c8facc";
     }
-    if(["grass", "allotments", "orchard"].includes(feature.properties["landuse"]) || ["grassland", "meadow", "scrub", "heath"].includes(feature.properties["natural"]) || ["garden"].includes(feature.properties["leisure"])) {
+    if(["grass", "allotments", "orchard", "meadow"].includes(feature.properties["landuse"]) || ["grassland", "scrub", "heath"].includes(feature.properties["natural"]) || ["garden"].includes(feature.properties["leisure"])) {
       return "#a2ce8d";
     }
     if(feature.properties["man_made"] === "bridge") {
