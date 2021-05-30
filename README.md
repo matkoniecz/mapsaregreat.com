@@ -3,3 +3,19 @@ This is code of my personal wesite, available at [http://mapsaregreat.com/](http
 Reports about inaccuracies, mistakes, dead links, typos etc are welcomed - either by mailing me at [matkoniecz@gmail.com](mailto:matkoniecz@gmail.com), [creating issues](https://github.com/matkoniecz/mapsaregreat.com/issues) or by submitting PRs.
 
 Repository is located at [https://github.com/matkoniecz/mapsaregreat.com](https://github.com/matkoniecz/mapsaregreat.com). Code with the development version, published on the Internet during tests is at [https://github.com/matkoniecz/matkoniecz.github.io](https://github.com/matkoniecz/matkoniecz.github.io).
+
+# Notes about maintaining, deploying etc.
+
+## Validation of code
+
+```
+cd "code and content not served directly"
+python3 custom_validator.py
+```
+
+## Updating to the latest lunar assembler
+
+```
+cd "code and content not served directly"
+python3 lunar_assembler_update.py
+```

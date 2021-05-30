@@ -33,9 +33,18 @@ const incrementOnUpdateBy = 100 / updateCount;
 let progressBar;
 let handleOfProgressBarAnimation;
 
-function initializeLunarAssembler({map_div_id, download_trigger_id, progress_bar_id, lat, lon, zoom} = {}) {
-  initializeSelectorMap(map_div_id, lat, lon, zoom, download_trigger_id);
-  initilizeDownloadButton(download_trigger_id);
+function initializeLunarAssembler({
+  map_styles,
+  map_div_id,
+  download_trigger_id,
+  progress_bar_id,
+  outputHolderId,
+  lat,
+  lon,
+  zoom,
+} = {}) {
+  initializeSelectorMap(map_styles, map_div_id, lat, lon, zoom, download_trigger_id, outputHolderId);
+  initilizeDownloadButton(download_trigger_id, outputHolderId);
   progressBar = document.getElementById(progress_bar_id);
 }
 
@@ -49,224 +58,252 @@ function initializeLunarAssembler({map_div_id, download_trigger_id, progress_bar
 
 function setProgressValue(newProgress) {
   doneInPercents = newProgress;
-  if(doneInPercents >= 100) {
+  if (doneInPercents >= 100) {
     doneInPercents = 100;
   }
   progressBar.value = doneInPercents;
 }
 
-function markAsCompleted(){
+function markAsCompleted() {
   setProgressValue(100);
   completed = true;
 }
 
-function markAsFailed(){
+function markAsFailed() {
   clearInterval(handleOfProgressBarAnimation); // terminates
   setProgressValue(0);
 }
 
-function startShowingProgress(){
+function startShowingProgress() {
   doneInPercents = 0;
   completed = false;
   handleOfProgressBarAnimation = setInterval(() => {
-  if(completed) {
-    clearInterval(handleOfProgressBarAnimation); // terminates
-  } else {
-    var progress = doneInPercents + incrementOnUpdateBy;
-    if (progress > 95) {
-      progress = 10;
+    if (completed) {
+      clearInterval(handleOfProgressBarAnimation); // terminates
+    } else {
+      var progress = doneInPercents + incrementOnUpdateBy;
+      if (progress > 95) {
+        progress = 10;
+      }
+      setProgressValue(progress);
     }
-    setProgressValue(progress)
-  }
-}, timeBetweenUpdatesInSeconds * 1000);
+  }, timeBetweenUpdatesInSeconds * 1000);
 }
 
 // end of progress bar fun
 //////////////////////////////////////////////////////////////////////////////////////////
 
-function initializeSelectorMap(map_div_id, lat, lon, zoom, download_trigger_id) {
+function initializeSelectorMap(
+  mapStyles,
+  map_div_id,
+  lat,
+  lon,
+  zoom,
+  download_trigger_id,
+  outputHolderId
+) {
   var map = L.map(map_div_id).setView([lat, lon], zoom);
-  var mapLink = 
-      '<a href="https://openstreetmap.org">OpenStreetMap</a>';
-  L.tileLayer(
-      'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; ' + mapLink + ' Contributors',
-      maxZoom: 19,
-      }).addTo(map);
+  var mapLink = '<a href="https://openstreetmap.org">OpenStreetMap</a>';
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    attribution: "&copy; " + mapLink + " Contributors",
+    maxZoom: 19,
+  }).addTo(map);
 
   var drawnItems = new L.FeatureGroup();
   map.addLayer(drawnItems);
 
   var drawControl = new L.Control.Draw({
-      draw: {
-          polygon: false,
-          polyline: false,
-          marker: false,
-          circle: false,
-          circlemarker: false
-      }
+    draw: {
+      polygon: false,
+      polyline: false,
+      marker: false,
+      circle: false,
+      circlemarker: false,
+    },
   });
   map.addControl(drawControl);
 
-  map.on('draw:created', function (e) {
-      var type = e.layerType,
-          layer = e.layer;
-          corners = layer.getLatLngs();
+  map.on("draw:created", function (e) {
+    var type = e.layerType,
+      layer = e.layer;
+    corners = layer.getLatLngs();
 
-      drawnItems.addLayer(layer);
+    drawnItems.addLayer(layer);
 
-      handleTriggerFromGUI(layer.getBounds(), download_trigger_id);
+    var bounds = layer.getBounds();
+    var readableBounds = { west: bounds.getWest(), south: bounds.getSouth(), east: bounds.getEast(), north: bounds.getNorth() };
+    handleTriggerFromGUI(readableBounds, download_trigger_id, outputHolderId, mapStyles[0]); // TODO handle passing more than one map style!
+  });
+
+  var queryString = location.search;
+  let params = new URLSearchParams(queryString);
+  if (params.get("rerun_query") == "yes") {
+    // parameters (technically still GUI, right) requested running query immediately
+    handleTriggerFromGUI(JSON.parse(params.get("bounds")), download_trigger_id, outputHolderId, mapStyles[0]);
+  }
+}
+
+function initilizeDownloadButton(download_trigger_id, outputHolderId) {
+  d3.select("#" + download_trigger_id).on("click", function () {
+    download("generated.svg", document.getElementById(idOfGeneratedMap()).outerHTML);
   });
 }
 
-function initilizeDownloadButton(download_trigger_id){
-  d3.select("#" + download_trigger_id).on("click", function(){
-    download("generated.svg", document.getElementById(nameOfSVGHolderId()).innerHTML);
-  })
+async function handleTriggerFromGUI(readableBounds, download_trigger_id, outputHolderId, mapStyle) {
+  startShowingProgress();
+  let osmJSON = await downloadOpenStreetMapData(readableBounds); // https://leafletjs.com/reference-1.6.0.html#latlngbounds-getcenter
+  if (osmJSON == -1) {
+    console.log("FAILURE of download!");
+    markAsFailed();
+    alert(
+      "Overpass API refused to provide data. Either selected area was too large, or you exceed usage limit of that free service. Please wait a bit and retry. Overpass API is used to get data from OpenStreetMap for a given area."
+    );
+    return;
+  }
+  let geoJSON = toGeoJSON(osmJSON);
+  const width = 800;
+  const height = 600;
+  render(readableBounds, geoJSON, width, height, mapStyle, outputHolderId);
+  document.getElementById(download_trigger_id).style.display = "";
+  document.getElementById("instruction_hidden_after_first_generation").style.display = "none";
+  markAsCompleted();
+  var generated = '<a href="?rerun_query=yes&bounds=' + encodeURIComponent(JSON.stringify(readableBounds)) + '">link to repeat this query</a>';
+  document.getElementById("redo_link_holder").innerHTML = generated;
 }
 
-function nameOfSVGHolderId(){
-  return "generated_svg_within";
+function geoJSONPolygonRepresentingBBox(readableBounds) {
+  var west = readableBounds["west"];
+  var south = readableBounds["south"];
+  var east = readableBounds["east"];
+  var north = readableBounds["north"];
+  return {
+    type: "FeatureCollection",
+    features: [
+      {
+        type: "Feature",
+        properties: {},
+        geometry: {
+          type: "Polygon",
+          coordinates: [
+            [
+              [west, south],
+              [east, south],
+              [east, north],
+              [west, north],
+              [west, south],
+            ],
+          ],
+        },
+      },
+    ],
+  };
 }
-async function handleTriggerFromGUI(bounds, download_trigger_id){
-    startShowingProgress();
-    let osmJSON = await downloadOpenStreetMapData(bounds) // https://leafletjs.com/reference-1.6.0.html#latlngbounds-getcenter
-    if(osmJSON == -1) {
-      console.log("FILURE of download!");
-      markAsFailed();
-      alert("Overpass API refused to provide data. Either selected area was too large, or you exceed usage limit of that free service. Please wait a bit and retry. Overpass API is used to get data from OpenStreetMap for a given area.")
-      return;
+
+// downloading OSM data
+async function downloadOpenStreetMapData(readableBounds) {
+  // https://leafletjs.com/reference-1.6.0.html#latlngbounds-getcenter
+  query = "";
+  // note: extra filters will break data in case of some bad/poor/substandard tagging or where someone want this kind of data
+  // extra filters are useful to reduce data overload during debugging, often bug is reproducible in their presence
+  var extra_filters = "[type!=route][type!=parking_fee][type!=waterway][type!=boundary][boundary!=administrative][boundary!=religious_administration]";
+  query += "[out:json][timeout:25];nwr" + extra_filters + "(";
+  query += readableBounds["south"];
+  query += ",";
+  query += readableBounds["west"];
+  query += ",";
+  query += readableBounds["north"];
+  query += ",";
+  query += readableBounds["east"];
+  query += ");";
+  query += "out body;>;out skel qt;";
+  console.log("overpass query in the next line:");
+  console.log(query);
+
+  const response = await fetch("https://overpass-api.de/api/interpreter", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+      // considered adding also deployed at ' + window.location.href + ' -
+      // but it may leak private data
+      "User-Agent": "lunar_assembler SVG generator - please contact Mateusz Konieczny matkoniecz@gmail.com (library author) or website operator if usage is causing any issues",
+    },
+    body: new URLSearchParams({ data: query }),
+  }).catch((err) => {
+    alert(err);
+    console.log(err.response.data);
+    return -1;
+  });
+  if (response.ok) {
+    const responseData = response.json();
+    const osmJSON = responseData;
+    return osmJSON;
+  } else {
+    return -1; // is there a better way to handle failures? throw exception? From looking at https://stackoverflow.com/a/27724419/4130619 code for that would be even worse
+  }
+}
+function toGeoJSON(osmJSON) {
+  let geoJSON = osmtogeojson(osmJSON);
+  return geoJSON;
+}
+
+// TODO: what kind of geojson is accepted here? will it crash when I pass a point here?
+function rewind(geojson_that_is_7946_compliant_with_right_hand_winding_order) {
+  // ARGHHHHHH ARGHHHHHH ARGHHHH
+  // https://gis.stackexchange.com/questions/392452/why-d3-js-works-only-with-geojson-violating-right-hand-rule
+  // I opened https://github.com/d3/d3-shape/issues/178
+  const d3_geojson = {
+    ...geojson_that_is_7946_compliant_with_right_hand_winding_order,
+  };
+  d3_geojson.features = d3_geojson.features.map((f) => {
+    //console.log(f);
+    return turf.rewind(f, { reverse: true });
+  });
+  //alert(JSON.stringify(d3_geojson))
+  return d3_geojson;
+}
+
+function render(readableBounds, data_geojson, width, height, mapStyle, outputHolderId) {
+  if ("transformGeometryAsInitialStep" in mapStyle) {
+    data_geojson = mapStyle.transformGeometryAsInitialStep(data_geojson, readableBounds);
+  }
+  validateGeometries(data_geojson)
+  data_geojson = clipGeometries(readableBounds, data_geojson);
+  data_geojson = mergeAsRequestedByMapStyle(data_geojson, mapStyle);
+  if ("transformGeometryAtFinalStep" in mapStyle) {
+    data_geojson = mapStyle.transformGeometryAtFinalStep(data_geojson, readableBounds);
+  }
+  renderUsingD3(readableBounds, data_geojson, width, height, mapStyle, outputHolderId);
+}
+
+function validateGeometries(data_geojson) {
+  var i = data_geojson.features.length;
+  while (i--) {
+    var feature = data_geojson.features[i];
+    if(feature.geometry == undefined) {
+      var warning = "broken feature, geometry is missing!"
+      alert(warning + JSON.stringify(feature))
+      console.warn(warning)
+      console.warn(feature)
     }
-    let geoJSON = toGeoJSON(osmJSON)
-    const width=800;
-    const height=600;
-    render(bounds.getWest(), bounds.getSouth(), bounds.getEast(), bounds.getNorth(), geoJSON, width, height, mapStyle); //mapStyle is defined in separate .js file, imported here - TODO, pass it here(???? what about multple styles at once?)
-    document.getElementById(download_trigger_id).style.display = '';
-    document.getElementById('instruction_hidden_after_first_generation').style.display = 'none';
-    markAsCompleted();
-}
-
-// TODO - there is a function to do this, right?
-        function geoJSONPolygonRepresentingBBox(west, south, east, north) {
-            return {
-              "type": "FeatureCollection",
-              "features": [
-                {
-                  "type": "Feature",
-                  "properties": {},
-                  "geometry": {
-                    "type": "Polygon",
-                    "coordinates": [
-                      [
-                        [
-                          west, south,
-                        ],
-                        [
-                          east, south,
-                        ],
-                        [
-                          east, north,
-                        ],
-                        [
-                          west, north,
-                        ],
-                        [
-                          west, south,
-                        ]
-                      ]
-                    ]
-                  }
-                }
-              ]
-            }
-          }
-  
-          // downloading OSM data
-          async function downloadOpenStreetMapData(bounds){
-              // https://leafletjs.com/reference-1.6.0.html#latlngbounds-getcenter
-              query = "";
-              // note: extra filters will break data in case of some bad/poor/substandard tagging or where someone want this kind of data
-              // extra filters are useful to reduce data overload during debugging, often bug is reproducible in their presence
-              var extra_filters = "[type!=route][type!=parking_fee][type!=waterway][type!=boundary][boundary!=administrative][boundary!=religious_administration]"
-              query += "[out:json][timeout:25];nwr" + extra_filters + "(";
-              query += bounds.getSouth();
-              query += ","
-              query += bounds.getWest();
-              query += ","
-              query += bounds.getNorth();
-              query += ","
-              query += bounds.getEast();
-              query += ");";
-              query += "out body;>;out skel qt;";
-              console.log("overpass query in the next line:");
-              console.log(query);
-  
-              const response = await fetch("https://overpass-api.de/api/interpreter", {
-                  method: 'POST',
-                  headers: {
-                      'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-                      // considered adding also deployed at ' + window.location.href + ' -
-                      // but it may leak private data
-                      "User-Agent": 'lunar_assembler SVG generator - please contact Mateusz Konieczny matkoniecz@gmail.com (library author) or website operator if usage is causing any issues',
-                  },
-                  body: new URLSearchParams({'data': query})
-              }).catch(err => {
-                alert(err);
-                console.log(err.response.data);
-                return -1
-              });
-              if (response.ok) {
-                const responseData = response.json();
-                const osmJSON = responseData;
-                return osmJSON;
-              } else {
-                return -1 // is there a better way to handle failures? throw exception? From looking at https://stackoverflow.com/a/27724419/4130619 code for that would be even worse
-              }
-          } 
-          function toGeoJSON(osmJSON) {
-              let geoJSON = osmtogeojson(osmJSON);
-              return geoJSON;
-          }
-  
-  
-      // TODO: what kind of geojson is accepted here? will it crash when I pass a point here?
-      function rewind(geojson_that_is_7946_compliant_with_right_hand_winding_order) {
-        // ARGHHHHHH ARGHHHHHH ARGHHHH
-        // https://gis.stackexchange.com/questions/392452/why-d3-js-works-only-with-geojson-violating-right-hand-rule
-        // I opened https://github.com/d3/d3-shape/issues/178
-        const d3_geojson = { ...geojson_that_is_7946_compliant_with_right_hand_winding_order };
-        d3_geojson.features = d3_geojson.features.map(f => {
-            //console.log(f);
-            return turf.rewind(f, { reverse: true })
-          }
-        );
-        //alert(JSON.stringify(d3_geojson))
-        return d3_geojson;
-      }
-  
-  
-  function render(west, south, east, north, data_geojson, width, height, mapStyle) {
-    data_geojson = clipGeometries(west, south, east, north, data_geojson);
-    data_geojson = mergeAsRequestedByMapStyle(data_geojson, mapStyle);
-    renderUsingD3(west, south, east, north, data_geojson, width, height, mapStyle);
+  }
 }
 
 function mergeAsRequestedByMapStyle(data_geojson, mapStyle) {
   var i = data_geojson.features.length;
   var processeedFeatures = [];
-  var mergingGroups = {}
+  var mergingGroups = {};
   while (i--) {
-    var feature = data_geojson.features[i]
-    if(feature.geometry.type == "Point" || feature.geometry.type === "MultiPoint") {
+    var feature = data_geojson.features[i];
+    if (feature.geometry.type == "Point" || feature.geometry.type === "MultiPoint") {
       // skipping handling them for now
       // once point rendering will appear something will need to be done with it
       processeedFeatures.push(feature);
-    } else if (feature.geometry.type ==  "LineString" || feature.geometry.type == "MultiLineString") {
+    } else if (feature.geometry.type == "LineString" || feature.geometry.type == "MultiLineString") {
       // also not supported, lines are not being merged for now
       processeedFeatures.push(feature);
-    } else if (feature.geometry.type ==  "Polygon" || feature.geometry.type == "MultiPolygon") {
+    } else if (feature.geometry.type == "Polygon" || feature.geometry.type == "MultiPolygon") {
       const mergeGroup = mapStyle.mergeIntoGroup(feature);
-      if(mergeGroup === null) {
+      if (mergeGroup === null) {
         processeedFeatures.push(feature);
       } else {
         if (mergingGroups[mergeGroup] === undefined) {
@@ -276,45 +313,50 @@ function mergeAsRequestedByMapStyle(data_geojson, mapStyle) {
       }
     } else {
       processeedFeatures.push(feature);
-      console.log("very unexpected " + feature.geometry.type + " appeared in mergeAsRequestedByMapStyle, logging its data <")
-      console.log(feature)
-      console.log("> LOGGED")
+      console.log("very unexpected " + feature.geometry.type + " appeared in mergeAsRequestedByMapStyle, logging its data <");
+      console.log(feature);
+      console.log("> LOGGED");
     }
   }
-  keys = Object.keys(mergingGroups)
-  for(var i=0; i<keys.length; i++) {
-    const key = keys[i]
-    const forMerging = mergingGroups[key]
+  keys = Object.keys(mergingGroups);
+  for (var i = 0; i < keys.length; i++) {
+    const key = keys[i];
+    const forMerging = mergingGroups[key];
     // TODO: how to deal with tag values? I will just take the first object
     var produced = forMerging[0];
-    var coordinatesForMerging = []
-    for(var k=0; k<forMerging.length; k++) {
-      coordinatesForMerging.push(forMerging[k].geometry.coordinates)
+    var coordinatesForMerging = [];
+    for (var k = 0; k < forMerging.length; k++) {
+      coordinatesForMerging.push(forMerging[k].geometry.coordinates);
     }
     // it is union so output will be nonepty
     // https://github.com/mfogel/polygon-clipping#output
-    produced.geometry.type = "MultiPolygon" 
-    produced.geometry.coordinates = polygonClipping.union(...coordinatesForMerging)
-    processeedFeatures.push(produced)
+    produced.geometry.type = "MultiPolygon";
+    produced.geometry.coordinates = polygonClipping.union(...coordinatesForMerging);
+    produced.properties["lunar_assembler_merge_group"] = key;
+    processeedFeatures.push(produced);
   }
   data_geojson.features = processeedFeatures;
   return data_geojson;
 }
 
-function clipGeometries(west, south, east, north, data_geojson) {
+function clipGeometries(readableBounds, data_geojson) {
+  var west = readableBounds["west"];
+  var south = readableBounds["south"];
+  var east = readableBounds["east"];
+  var north = readableBounds["north"];
   var bbox = [west, south, east, north];
   var i = data_geojson.features.length;
   var survivingFeatures = [];
   while (i--) {
     // once point rendering will appear something
     // like https://www.npmjs.com/package/@turf/boolean-point-in-polygon
-    // will need to be used    
+    // will need to be used
     var feature = data_geojson.features[i];
-    if(feature.geometry.type != "Point" && feature.geometry.type != "MultiPoint") {
-        feature.geometry = turf.bboxClip(feature.geometry, bbox).geometry;
+    if (feature.geometry.type != "Point" && feature.geometry.type != "MultiPoint") {
+      feature.geometry = turf.bboxClip(feature.geometry, bbox).geometry;
     }
-    var filtered = dropDegenerateGeometrySegments(feature)
-    if(filtered != null) {
+    var filtered = dropDegenerateGeometrySegments(feature);
+    if (filtered != null) {
       survivingFeatures.push(feature);
     }
   }
@@ -322,10 +364,10 @@ function clipGeometries(west, south, east, north, data_geojson) {
   return data_geojson;
 }
 
-function dropDegenerateGeometrySegments(feature){
+function dropDegenerateGeometrySegments(feature) {
   if (feature.geometry.type == "MultiPolygon") {
     // multipolygon may have multiple outer rings
-    // in case where some of them are completely outside bounding box, 
+    // in case where some of them are completely outside bounding box,
     // their geometry part becomes []
     // what crashes further processing
     // following is a real case:
@@ -366,12 +408,12 @@ function dropDegenerateGeometrySegments(feature){
       ]
     }
     */
-    var survivingGeometryParts = []
-    var k = feature.geometry.coordinates.length
+    var survivingGeometryParts = [];
+    var k = feature.geometry.coordinates.length;
     while (k--) {
       var geometryPart = feature.geometry.coordinates[k];
-      if (geometryPart.length != 0) /* in js [] != [] */ {
-        survivingGeometryParts.push(geometryPart);
+      if (geometryPart.length != 0) {
+        /* in js [] != [] */ survivingGeometryParts.push(geometryPart);
       }
     }
     if (survivingGeometryParts.length == 0) {
@@ -381,65 +423,266 @@ function dropDegenerateGeometrySegments(feature){
       feature.geometry.coordinates = survivingGeometryParts;
     }
   }
-  console.log(feature)
+  console.log(feature);
   return feature;
 }
-  function renderUsingD3(west, south, east, north, data_geojson, width, height, mapStyle) {
-      var geoJSONRepresentingBoundaries = geoJSONPolygonRepresentingBBox(west, south, east, north);
-      // rewinding is sometimes needed, sometimes not
-      // rewinding is sometimes broken in my code (at least in oce case it was borked by my bug in futher processing!), sometimes not
-      // see https://gis.stackexchange.com/questions/392452/why-d3-js-works-only-with-geojson-violating-right-hand-rule
-      // not sure what is going on here
+function renderUsingD3(readableBounds, data_geojson, width, height, mapStyle, outputHolderId) {
+  var geoJSONRepresentingBoundaries = geoJSONPolygonRepresentingBBox(readableBounds);
+  // rewinding is sometimes needed, sometimes not
+  // rewinding is sometimes broken in my code (at least in oce case it was borked by my bug in futher processing!), sometimes not
+  // see https://gis.stackexchange.com/questions/392452/why-d3-js-works-only-with-geojson-violating-right-hand-rule
+  // not sure what is going on here
 
-      console.log("data_geojson in the next line (before d3 rewind):")
-      console.log(JSON.stringify(data_geojson))
-      var d3_data_geojson = rewind(data_geojson);
-      var d3_geoJSONRepresentingBoundaries = rewind(geoJSONRepresentingBoundaries);
-      console.log("data_geojson in the next line (after d3 rewind):")
-      console.log(JSON.stringify(d3_data_geojson))
-  
-      var projection = d3.geoMercator().fitSize([width, height], d3_geoJSONRepresentingBoundaries)
-  
-  
-      var geoGenerator = d3.geoPath()
-      .projection(projection);
-  
-      selector = '#' + nameOfSVGHolderId() +' g.generated_map'
-      let generated = '<svg height="100%" width="100%" viewBox="0 0 ' + width + ' ' + height + '">' + "\n" + '<g class="generated_map" id="generated_map"></g>' + "\n" + '</svg>'
-      document.getElementById(nameOfSVGHolderId()).innerHTML=generated
-  
-      d3_data_geojson.features.sort(mapStyle.paintOrderCompareFunction)
-      console.log(d3_data_geojson.features)
-      update3Map(geoGenerator, d3_data_geojson, selector, mapStyle);
-    }
+  console.log("data_geojson in the next line (before d3 rewind):");
+  console.log(JSON.stringify(data_geojson));
+  var d3_data_geojson = rewind(data_geojson);
+  var d3_geoJSONRepresentingBoundaries = rewind(geoJSONRepresentingBoundaries);
+  console.log("data_geojson in the next line (after d3 rewind):");
+  console.log(JSON.stringify(d3_data_geojson));
 
-    function update3Map(geoGenerator, used_data, selector) {
-      var u = d3.select(selector) // should use selector
-        .selectAll('path')
-        .data(used_data.features);
-    
-      u.enter()
-        .append('path')
-        .attr('d', geoGenerator)
-        .attr("stroke", mapStyle.strokeColoring)
-          .attr("stroke-width", mapStyle.strokeWidth)
-          .attr("fill", mapStyle.fillColoring)
-          //.attr("name", mapStyle.name) - note that passing name with & breaks SVG (at least more fragile ones) - TODO: fix and reenable or drop that
+  var projection = d3
+    .geoMercator()
+    .fitSize([width, height], d3_geoJSONRepresentingBoundaries);
+
+  var geoGenerator = d3.geoPath().projection(projection);
+
+  selector = "#" + outputHolderId + " svg";
+  let generated =
+    '<svg xmlns="http://www.w3.org/2000/svg" id="' + idOfGeneratedMap() + '" height="100%" width="100%" viewBox="0 0 ' +
+    width +
+    " " +
+    height +
+    '">' +
+    "\n" +
+    "</svg>" +
+    "\n" +
+    '<div id="redo_link_holder"><div/>';
+  document.getElementById(outputHolderId).innerHTML = generated;
+
+  // turn function returning value (layering order of function)
+  // into function taking two features and ordering them
+  var compareFunction = makeCompareFunctionForLayering(mapStyle.paintOrder);
+  d3_data_geojson.features.sort(compareFunction);
+  console.log(d3_data_geojson.features);
+  update3Map(geoGenerator, d3_data_geojson, selector, mapStyle);
+}
+
+function idOfGeneratedMap() {
+  return "mapGeneratedFromOpenStreetMap data"
+}
+function makeCompareFunctionForLayering(paintOrderFunction) {
+  // paintOrderFunction takes feature as input and outputs number
+  // higher number - more on top
+  return function (a, b) {
+    // < 0 - First element must be placed before second
+    // 0 - Both elements is equal, do not change order.
+    // > 0 - Second element must be placed before first.
+    // https://stackoverflow.com/a/41121134/4130619
+
+    // if featureFirst should be drawn over featureSecond
+    // on top of it, hding it
+    // return 1
+
+    return paintOrderFunction(a) - paintOrderFunction(b);
+    // TODO to halve calculations it would be possible to map features to values,
+    // and sort that values, right? Or maybe not...
+  };
+}
+
+function update3Map(geoGenerator, used_data, selector, mapStyle) {
+  var u = d3
+    .select(selector)
+    .selectAll("path")
+    .data(used_data.features);
+
+  u.enter()
+    .append("path")
+    .attr("d", geoGenerator)
+    .attr("stroke", mapStyle.strokeColoring)
+    .attr("stroke-width", mapStyle.strokeWidth)
+    .attr("fill", mapStyle.fillColoring);
+  //.attr("name", mapStyle.name) - note that passing name with & breaks SVG (at least more fragile ones) - TODO: fix and reenable or drop that
+}
+
+function download(filename, text) {
+  var element = document.createElement("a");
+  element.setAttribute(
+    "href",
+    "data:text/plain;charset=utf-8," + encodeURIComponent(text)
+  );
+  element.setAttribute("download", filename);
+
+  element.style.display = "none";
+  document.body.appendChild(element);
+
+  element.click();
+
+  document.body.removeChild(element);
+}
+
+
+/* ------------------------ */
+
+/*lunar_assembler_helpful_functions_for_map_styles.js*/
+
+/*
+    lunar_assembler - tool for generating SVG files from OpenStreetMap data. Available as a website.
+    Copyright (C) 2021 Mateusz Konieczny
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, under version 3 of the
+    License only.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
+
+function isMultipolygonAsExpected(feature) {
+    if(feature == undefined) {
+      alert(
+        "UNEXPECTED undefined" +
+          " in " +
+          JSON.stringify(feature) +
+          "\nIf OSM data is correct and output is broken, please report to https://github.com/matkoniecz/lunar_assembler/issues"
+      )
+      return false;
     }
-    
-    
-      function download(filename, text) {
-        var element = document.createElement('a');
-        element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
-        element.setAttribute('download', filename);
-      
-        element.style.display = 'none';
-        document.body.appendChild(element);
-      
-        element.click();
-      
-        document.body.removeChild(element);
+    if (feature.geometry.type == "Point" || feature.geometry.type === "MultiPoint") {
+      alert(
+        "UNEXPECTED " +
+          feature.geometry.type +
+          " in " +
+          JSON.stringify(feature) +
+          "\nIf OSM data is correct and output is broken, please report to https://github.com/matkoniecz/lunar_assembler/issues"
+      );
+      return false;
+    } else if (feature.geometry.type == "LineString" || feature.geometry.type == "MultiLineString") {
+      alert(
+        "UNEXPECTED " +
+          feature.geometry.type +
+          " in " +
+          JSON.stringify(feature) +
+          "\nIf OSM data is correct and output is broken, please report to https://github.com/matkoniecz/lunar_assembler/issues"
+      );
+      return false;
+    } else if (feature.geometry.type == "Polygon") {
+      alert(
+        "UNEXPECTED " +
+          feature.geometry.type +
+          " in " +
+          JSON.stringify(feature) +
+          "\nIf OSM data is correct and output is broken, please report to https://github.com/matkoniecz/lunar_assembler/issues"
+      );
+      return false;
+    } else if (feature.geometry.type == "MultiPolygon") {
+      return true;
+    }
+    alert("UNEXPECTED GEOMETRY " + feature.geometry.type);
+    return false;
+  }
+
+function intersectGeometryWithHorizontalStripes(feature, stripeSizeInDegrees, distanceBetweenStripesInDegrees) {
+    bbox = turf.bbox(feature);
+    var minLongitude = bbox[0];
+    var minLatitude = bbox[1];
+    var maxLongitude = bbox[2];
+    var maxLatitude = bbox[3];
+    if (!isMultipolygonAsExpected(feature)) {
+      return null;
+    }
+    var collected = [];
+    // gathering horizontal stripes
+    var minLatitudeForStripe = minLatitude;
+    while (minLatitudeForStripe < maxLatitude) {
+      var maxLatitudeForStripe = minLatitudeForStripe + stripeSizeInDegrees;
+      var stripeRing = [
+        [minLongitude, minLatitudeForStripe],
+        [maxLongitude, minLatitudeForStripe],
+        [maxLongitude, maxLatitudeForStripe],
+        [minLongitude, maxLatitudeForStripe],
+        [minLongitude, minLatitudeForStripe],
+      ];
+      var stripe = [stripeRing];
+      var intersectedStripe = polygonClipping.intersection(feature.geometry.coordinates, stripe);
+      if (intersectedStripe != []) {
+        collected.push(intersectedStripe);
       }
+      minLatitudeForStripe += stripeSizeInDegrees + distanceBetweenStripesInDegrees;
+    }
+    var generated = polygonClipping.union(...collected);
+
+    var cloned = JSON.parse(JSON.stringify(feature));
+    cloned.geometry.coordinates = generated;
+    return cloned;
+  }
+
+  function intersectGeometryWithPlaneHavingRectangularHoles(feature, holeVerticalInDegrees, holeHorizontalInDegrees, spaceVerticalInDegrees, spaceHorizontalInDegrees) {
+    bbox = turf.bbox(feature);
+    var minLongitude = bbox[0];
+    var minLatitude = bbox[1];
+    var maxLongitude = bbox[2];
+    var maxLatitude = bbox[3];
+    if (!isMultipolygonAsExpected(feature)) {
+      return null;
+    }
+    var collected = [];
+    // gathering horizontal stripes
+    var minLatitudeForStripe = minLatitude;
+    while (minLatitudeForStripe < maxLatitude) {
+      var maxLatitudeForStripe = minLatitudeForStripe + spaceVerticalInDegrees;
+      var stripeRing = [
+        [minLongitude, minLatitudeForStripe],
+        [maxLongitude, minLatitudeForStripe],
+        [maxLongitude, maxLatitudeForStripe],
+        [minLongitude, maxLatitudeForStripe],
+        [minLongitude, minLatitudeForStripe],
+      ];
+      var stripe = [stripeRing];
+      var intersectedStripe = polygonClipping.intersection(feature.geometry.coordinates, stripe);
+      if (intersectedStripe.length > 0) {
+        collected.push(intersectedStripe);
+      }
+      minLatitudeForStripe += spaceVerticalInDegrees + holeVerticalInDegrees;
+    }
+    // spkit in pairs due to https://github.com/mfogel/polygon-clipping/issues/118
+    var generatedHorizontal = polygonClipping.union(...collected);
+    collected = [];
+
+    // gathering vertical stripes
+    var minLongitudeForStripe = minLongitude;
+    while (minLongitudeForStripe < maxLongitude) {
+      var maxLongitudeForStripe = minLongitudeForStripe + spaceHorizontalInDegrees;
+      var stripeRing = [
+        [minLongitudeForStripe, minLatitude],
+        [maxLongitudeForStripe, minLatitude],
+        [maxLongitudeForStripe, maxLatitude],
+        [minLongitudeForStripe, maxLatitude],
+        [minLongitudeForStripe, minLatitude],
+      ];
+      var stripe = [stripeRing];
+      var intersectedStripe = polygonClipping.intersection(feature.geometry.coordinates, stripe);
+      if (intersectedStripe.length > 0) {
+        collected.push(intersectedStripe);
+      }
+      minLongitudeForStripe += spaceHorizontalInDegrees + holeHorizontalInDegrees;
+    }
+    var generatedVertical = polygonClipping.union(...collected);
+    var generated = polygonClipping.union(generatedHorizontal, generatedVertical);
+    //console.warn("road pattern follows");
+    //console.warn(generated);
+    //console.warn("road pattern above");
+
+    var cloned = JSON.parse(JSON.stringify(feature));
+    cloned.geometry.coordinates = generated;
+    return cloned;
+  }
+
 
 /* ------------------------ */
 
