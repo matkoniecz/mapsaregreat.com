@@ -1,6 +1,12 @@
 import glob, os
 from bs4 import BeautifulSoup
 
+"""
+validates my website for some things that I want to check
+
+including custom stuff specific to only that site
+"""
+
 def is_properly_handled_image(image):
     # all images should either
     # - have image_with_frame class (on img tag)
