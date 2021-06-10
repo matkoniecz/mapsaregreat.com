@@ -5,7 +5,7 @@ os.chdir("../osm_to_svg_in_browser")
 
 session = requests.Session()
 
-response = session.get('https://raw.githubusercontent.com/matkoniecz/lunar_assembler/master/examples/dev.html')
+response = session.get('https://raw.githubusercontent.com/matkoniecz/lunar_assembler/master/examples/general_high_zoom.html')
 with open('index.html', 'w') as file:
     page_text = response.text
     replacable = """<div id="main_content_wrap" class="outer">"""
@@ -59,7 +59,7 @@ response = session.get('https://raw.githubusercontent.com/matkoniecz/lunar_assem
 with open('lunar_assembler_in_action.gif', 'wb') as file:
     file.write(response.content)
 
-response = session.get('https://raw.githubusercontent.com/matkoniecz/lunar_assembler/master/examples/high_zoom_map_style.js')
-with open('high_zoom_map_style.js', 'w') as file:
+response = session.get('https://raw.githubusercontent.com/matkoniecz/lunar_assembler/master/examples/general_high_zoom_map_style.js')
+with open('general_high_zoom_map_style.js', 'w') as file:
     file.write(response.text)
 
