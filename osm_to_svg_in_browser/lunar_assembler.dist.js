@@ -34,18 +34,20 @@ let progressBar;
 let handleOfProgressBarAnimation;
 
 function initializeLunarAssembler({
-  map_styles,
-  map_div_id,
-  download_trigger_id,
-  progress_bar_id,
-  outputHolderId,
+  mapStyles,
+  mapDivId,
+  downloadTriggerId,
+  progressBarId,
+  mapOutputHolderId,
+  logOutputId,
   lat,
   lon,
   zoom,
 } = {}) {
-  initializeSelectorMap(map_styles, map_div_id, lat, lon, zoom, download_trigger_id, outputHolderId);
-  initilizeDownloadButton(download_trigger_id, outputHolderId);
-  progressBar = document.getElementById(progress_bar_id);
+  //document.getElementById(logOutputId).innerHTML = "Hello world!"
+  initializeSelectorMap(mapStyles, mapDivId, lat, lon, zoom, downloadTriggerId, mapOutputHolderId);
+  initilizeDownloadButton(downloadTriggerId, mapOutputHolderId);
+  progressBar = document.getElementById(progressBarId);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -95,14 +97,14 @@ function startShowingProgress() {
 
 function initializeSelectorMap(
   mapStyles,
-  map_div_id,
+  mapDivId,
   lat,
   lon,
   zoom,
-  download_trigger_id,
-  outputHolderId
+  downloadTriggerId,
+  mapOutputHolderId
 ) {
-  var map = L.map(map_div_id).setView([lat, lon], zoom);
+  var map = L.map(mapDivId).setView([lat, lon], zoom);
   var mapLink = '<a href="https://openstreetmap.org">OpenStreetMap</a>';
   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
     attribution: "&copy; " + mapLink + " Contributors",
@@ -132,24 +134,24 @@ function initializeSelectorMap(
 
     var bounds = layer.getBounds();
     var readableBounds = { west: bounds.getWest(), south: bounds.getSouth(), east: bounds.getEast(), north: bounds.getNorth() };
-    handleTriggerFromGUI(readableBounds, download_trigger_id, outputHolderId, mapStyles[0]); // TODO handle passing more than one map style!
+    handleTriggerFromGUI(readableBounds, downloadTriggerId, mapOutputHolderId, mapStyles[0]); // TODO handle passing more than one map style!
   });
 
   var queryString = location.search;
   let params = new URLSearchParams(queryString);
   if (params.get("rerun_query") == "yes") {
     // parameters (technically still GUI, right) requested running query immediately
-    handleTriggerFromGUI(JSON.parse(params.get("bounds")), download_trigger_id, outputHolderId, mapStyles[0]);
+    handleTriggerFromGUI(JSON.parse(params.get("bounds")), downloadTriggerId, mapOutputHolderId, mapStyles[0]);
   }
 }
 
-function initilizeDownloadButton(download_trigger_id, outputHolderId) {
-  d3.select("#" + download_trigger_id).on("click", function () {
+function initilizeDownloadButton(downloadTriggerId, mapOutputHolderId) {
+  d3.select("#" + downloadTriggerId).on("click", function () {
     download("generated.svg", document.getElementById(idOfGeneratedMap()).outerHTML);
   });
 }
 
-async function handleTriggerFromGUI(readableBounds, download_trigger_id, outputHolderId, mapStyle) {
+async function handleTriggerFromGUI(readableBounds, downloadTriggerId, mapOutputHolderId, mapStyle) {
   startShowingProgress();
   let osmJSON = await downloadOpenStreetMapData(readableBounds); // https://leafletjs.com/reference-1.6.0.html#latlngbounds-getcenter
   if (osmJSON == -1) {
@@ -163,8 +165,8 @@ async function handleTriggerFromGUI(readableBounds, download_trigger_id, outputH
   let geoJSON = toGeoJSON(osmJSON);
   const width = 800;
   const height = 600;
-  render(readableBounds, geoJSON, width, height, mapStyle, outputHolderId);
-  document.getElementById(download_trigger_id).style.display = "";
+  render(readableBounds, geoJSON, width, height, mapStyle, mapOutputHolderId);
+  document.getElementById(downloadTriggerId).style.display = "";
   document.getElementById("instruction_hidden_after_first_generation").style.display = "none";
   markAsCompleted();
   var generated = '<a href="?rerun_query=yes&bounds=' + encodeURIComponent(JSON.stringify(readableBounds)) + '">link to repeat this query</a>';
@@ -205,7 +207,7 @@ async function downloadOpenStreetMapData(readableBounds) {
   query = "";
   // note: extra filters will break data in case of some bad/poor/substandard tagging or where someone want this kind of data
   // extra filters are useful to reduce data overload during debugging, often bug is reproducible in their presence
-  var extra_filters = "[type!=route][type!=parking_fee][type!=waterway][type!=boundary][boundary!=administrative][boundary!=religious_administration]";
+  var extra_filters = "[type!=site][type!=route][type!=parking_fee][type!=waterway][type!=boundary][boundary!=administrative][boundary!=religious_administration]";
   query += "[out:json][timeout:25];nwr" + extra_filters + "(";
   query += readableBounds["south"];
   query += ",";
@@ -246,11 +248,52 @@ function toGeoJSON(osmJSON) {
   return geoJSON;
 }
 
+function isMultipolygonAsExpected(feature) {
+  if (isAreaAsExpected(feature) == false) {
+    return false;
+  }
+  if (feature.geometry.type == "Polygon") {
+    alert(
+      "UNEXPECTED " + feature.geometry.type + " in " + JSON.stringify(feature) + "\nIf OSM data is correct and output is broken, please report to https://github.com/matkoniecz/lunar_assembler/issues"
+    );
+    return false;
+  }
+  return true;
+}
+
+function isAreaAsExpected(feature) {
+  if (feature == undefined) {
+    alert("UNEXPECTED undefined" + " in " + JSON.stringify(feature) + "\nIf OSM data is correct and output is broken, please report to https://github.com/matkoniecz/lunar_assembler/issues");
+    return false;
+  }
+  if (feature.geometry.type == "Point" || feature.geometry.type === "MultiPoint") {
+    alert(
+      "UNEXPECTED " + feature.geometry.type + " in " + JSON.stringify(feature) + "\nIf OSM data is correct and output is broken, please report to https://github.com/matkoniecz/lunar_assembler/issues"
+    );
+    return false;
+  } else if (feature.geometry.type == "LineString" || feature.geometry.type == "MultiLineString") {
+    alert(
+      "UNEXPECTED " + feature.geometry.type + " in " + JSON.stringify(feature) + "\nIf OSM data is correct and output is broken, please report to https://github.com/matkoniecz/lunar_assembler/issues"
+    );
+    return false;
+  } else if (feature.geometry.type == "Polygon") {
+    return true;
+  } else if (feature.geometry.type == "MultiPolygon") {
+    return true;
+  }
+  alert("UNEXPECTED GEOMETRY " + feature.geometry.type);
+  return false;
+}
 // TODO: what kind of geojson is accepted here? will it crash when I pass a point here?
 function rewind(geojson_that_is_7946_compliant_with_right_hand_winding_order) {
   // ARGHHHHHH ARGHHHHHH ARGHHHH
   // https://gis.stackexchange.com/questions/392452/why-d3-js-works-only-with-geojson-violating-right-hand-rule
   // I opened https://github.com/d3/d3-shape/issues/178
+
+  if(geojson_that_is_7946_compliant_with_right_hand_winding_order.length == 1) {
+    console.warn("one element! Is spread working as expected? See #68") // TODO - trigger and debug it
+  }
+
   const d3_geojson = {
     ...geojson_that_is_7946_compliant_with_right_hand_winding_order,
   };
@@ -262,38 +305,38 @@ function rewind(geojson_that_is_7946_compliant_with_right_hand_winding_order) {
   return d3_geojson;
 }
 
-function render(readableBounds, data_geojson, width, height, mapStyle, outputHolderId) {
+function render(readableBounds, dataGeojson, width, height, mapStyle, mapOutputHolderId) {
   if ("transformGeometryAsInitialStep" in mapStyle) {
-    data_geojson = mapStyle.transformGeometryAsInitialStep(data_geojson, readableBounds);
+    dataGeojson = mapStyle.transformGeometryAsInitialStep(dataGeojson, readableBounds);
   }
-  validateGeometries(data_geojson)
-  data_geojson = clipGeometries(readableBounds, data_geojson);
-  data_geojson = mergeAsRequestedByMapStyle(data_geojson, mapStyle);
+  validateGeometries(dataGeojson);
+  dataGeojson = mergeAsRequestedByMapStyle(dataGeojson, mapStyle);
   if ("transformGeometryAtFinalStep" in mapStyle) {
-    data_geojson = mapStyle.transformGeometryAtFinalStep(data_geojson, readableBounds);
+    dataGeojson = mapStyle.transformGeometryAtFinalStep(dataGeojson, readableBounds);
   }
-  renderUsingD3(readableBounds, data_geojson, width, height, mapStyle, outputHolderId);
+  dataGeojson = clipGeometries(readableBounds, dataGeojson);
+  renderUsingD3(readableBounds, dataGeojson, width, height, mapStyle, mapOutputHolderId);
 }
 
-function validateGeometries(data_geojson) {
-  var i = data_geojson.features.length;
+function validateGeometries(dataGeojson) {
+  var i = dataGeojson.features.length;
   while (i--) {
-    var feature = data_geojson.features[i];
-    if(feature.geometry == undefined) {
-      var warning = "broken feature, geometry is missing!"
-      alert(warning + JSON.stringify(feature))
-      console.warn(warning)
-      console.warn(feature)
+    var feature = dataGeojson.features[i];
+    if (feature.geometry == undefined) {
+      var warning = "broken feature, geometry is missing!";
+      alert(warning + JSON.stringify(feature));
+      console.warn(warning);
+      console.warn(feature);
     }
   }
 }
 
-function mergeAsRequestedByMapStyle(data_geojson, mapStyle) {
-  var i = data_geojson.features.length;
+function mergeAsRequestedByMapStyle(dataGeojson, mapStyle) {
+  var i = dataGeojson.features.length;
   var processeedFeatures = [];
   var mergingGroups = {};
   while (i--) {
-    var feature = data_geojson.features[i];
+    var feature = dataGeojson.features[i];
     if (feature.geometry.type == "Point" || feature.geometry.type === "MultiPoint") {
       // skipping handling them for now
       // once point rendering will appear something will need to be done with it
@@ -326,32 +369,52 @@ function mergeAsRequestedByMapStyle(data_geojson, mapStyle) {
     var produced = forMerging[0];
     var coordinatesForMerging = [];
     for (var k = 0; k < forMerging.length; k++) {
+      if(isAreaAsExpected(forMerging[k]) == false) {
+        console.error("================================")
+        console.error("expected area, got not area, something want wrong, this is a bug!")
+        console.error(forMerging[k])
+        console.error("please report it on https://github.com/matkoniecz/lunar_assembler/issues ")
+        console.error("================================")
+      }
       coordinatesForMerging.push(forMerging[k].geometry.coordinates);
     }
     // it is union so output will be nonepty
     // https://github.com/mfogel/polygon-clipping#output
     produced.geometry.type = "MultiPolygon";
-    produced.geometry.coordinates = polygonClipping.union(...coordinatesForMerging);
+    if(coordinatesForMerging.length == 1) {
+      // adding it fixed crashing on empty areas for laser map style and private/public areas
+      // https://github.com/matkoniecz/lunar_assembler/issues/68
+      // necessary as ... will go multiple levels deep to decompose single element array
+      // for some Godforsaken reason
+      produced.geometry.coordinates = polygonClipping.union(coordinatesForMerging);
+      // uncomment below code to crash again
+      // console.log(coordinatesForMerging)
+      // console.log(...coordinatesForMerging)
+      //produced.geometry.coordinates = polygonClipping.union(...coordinatesForMerging);
+    } else {
+      produced.geometry.coordinates = polygonClipping.union(...coordinatesForMerging);
+    }
     produced.properties["lunar_assembler_merge_group"] = key;
     processeedFeatures.push(produced);
   }
-  data_geojson.features = processeedFeatures;
-  return data_geojson;
+  dataGeojson.features = processeedFeatures;
+  return dataGeojson;
 }
 
-function clipGeometries(readableBounds, data_geojson) {
+// for searching: crop
+function clipGeometries(readableBounds, dataGeojson) {
   var west = readableBounds["west"];
   var south = readableBounds["south"];
   var east = readableBounds["east"];
   var north = readableBounds["north"];
   var bbox = [west, south, east, north];
-  var i = data_geojson.features.length;
+  var i = dataGeojson.features.length;
   var survivingFeatures = [];
   while (i--) {
     // once point rendering will appear something
     // like https://www.npmjs.com/package/@turf/boolean-point-in-polygon
     // will need to be used
-    var feature = data_geojson.features[i];
+    var feature = dataGeojson.features[i];
     if (feature.geometry.type != "Point" && feature.geometry.type != "MultiPoint") {
       feature.geometry = turf.bboxClip(feature.geometry, bbox).geometry;
     }
@@ -360,8 +423,8 @@ function clipGeometries(readableBounds, data_geojson) {
       survivingFeatures.push(feature);
     }
   }
-  data_geojson.features = survivingFeatures;
-  return data_geojson;
+  dataGeojson.features = survivingFeatures;
+  return dataGeojson;
 }
 
 function dropDegenerateGeometrySegments(feature) {
@@ -419,26 +482,26 @@ function dropDegenerateGeometrySegments(feature) {
     if (survivingGeometryParts.length == 0) {
       return null;
     } else {
-      console.log(survivingGeometryParts);
+      //console.log(survivingGeometryParts);
       feature.geometry.coordinates = survivingGeometryParts;
     }
   }
-  console.log(feature);
+  //console.log(feature);
   return feature;
 }
-function renderUsingD3(readableBounds, data_geojson, width, height, mapStyle, outputHolderId) {
+function renderUsingD3(readableBounds, dataGeojson, width, height, mapStyle, mapOutputHolderId) {
   var geoJSONRepresentingBoundaries = geoJSONPolygonRepresentingBBox(readableBounds);
   // rewinding is sometimes needed, sometimes not
   // rewinding is sometimes broken in my code (at least in oce case it was borked by my bug in futher processing!), sometimes not
   // see https://gis.stackexchange.com/questions/392452/why-d3-js-works-only-with-geojson-violating-right-hand-rule
   // not sure what is going on here
 
-  console.log("data_geojson in the next line (before d3 rewind):");
-  console.log(JSON.stringify(data_geojson));
-  var d3_data_geojson = rewind(data_geojson);
+  console.log("dataGeojson in the next line (before d3 rewind):");
+  console.log(JSON.stringify(dataGeojson));
+  var d3_dataGeojson = rewind(dataGeojson);
   var d3_geoJSONRepresentingBoundaries = rewind(geoJSONRepresentingBoundaries);
-  console.log("data_geojson in the next line (after d3 rewind):");
-  console.log(JSON.stringify(d3_data_geojson));
+  console.log("dataGeojson in the next line (after d3 rewind):");
+  console.log(JSON.stringify(d3_dataGeojson));
 
   var projection = d3
     .geoMercator()
@@ -446,7 +509,7 @@ function renderUsingD3(readableBounds, data_geojson, width, height, mapStyle, ou
 
   var geoGenerator = d3.geoPath().projection(projection);
 
-  selector = "#" + outputHolderId + " svg";
+  selector = "#" + mapOutputHolderId + " svg";
   let generated =
     '<svg xmlns="http://www.w3.org/2000/svg" id="' + idOfGeneratedMap() + '" height="100%" width="100%" viewBox="0 0 ' +
     width +
@@ -457,18 +520,18 @@ function renderUsingD3(readableBounds, data_geojson, width, height, mapStyle, ou
     "</svg>" +
     "\n" +
     '<div id="redo_link_holder"><div/>';
-  document.getElementById(outputHolderId).innerHTML = generated;
+  document.getElementById(mapOutputHolderId).innerHTML = generated;
 
   // turn function returning value (layering order of function)
   // into function taking two features and ordering them
   var compareFunction = makeCompareFunctionForLayering(mapStyle.paintOrder);
-  d3_data_geojson.features.sort(compareFunction);
-  console.log(d3_data_geojson.features);
-  update3Map(geoGenerator, d3_data_geojson, selector, mapStyle);
+  d3_dataGeojson.features.sort(compareFunction);
+  console.log(d3_dataGeojson.features);
+  update3Map(geoGenerator, d3_dataGeojson, selector, mapStyle);
 }
 
 function idOfGeneratedMap() {
-  return "mapGeneratedFromOpenStreetMap data"
+  return "mapGeneratedFromOpenStreetMap data";
 }
 function makeCompareFunctionForLayering(paintOrderFunction) {
   // paintOrderFunction takes feature as input and outputs number
@@ -506,10 +569,7 @@ function update3Map(geoGenerator, used_data, selector, mapStyle) {
 
 function download(filename, text) {
   var element = document.createElement("a");
-  element.setAttribute(
-    "href",
-    "data:text/plain;charset=utf-8," + encodeURIComponent(text)
-  );
+  element.setAttribute("href", "data:text/plain;charset=utf-8," + encodeURIComponent(text));
   element.setAttribute("download", filename);
 
   element.style.display = "none";
@@ -543,145 +603,366 @@ function download(filename, text) {
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-function isMultipolygonAsExpected(feature) {
-    if(feature == undefined) {
-      alert(
-        "UNEXPECTED undefined" +
-          " in " +
-          JSON.stringify(feature) +
-          "\nIf OSM data is correct and output is broken, please report to https://github.com/matkoniecz/lunar_assembler/issues"
-      )
-      return false;
-    }
-    if (feature.geometry.type == "Point" || feature.geometry.type === "MultiPoint") {
-      alert(
-        "UNEXPECTED " +
-          feature.geometry.type +
-          " in " +
-          JSON.stringify(feature) +
-          "\nIf OSM data is correct and output is broken, please report to https://github.com/matkoniecz/lunar_assembler/issues"
-      );
-      return false;
-    } else if (feature.geometry.type == "LineString" || feature.geometry.type == "MultiLineString") {
-      alert(
-        "UNEXPECTED " +
-          feature.geometry.type +
-          " in " +
-          JSON.stringify(feature) +
-          "\nIf OSM data is correct and output is broken, please report to https://github.com/matkoniecz/lunar_assembler/issues"
-      );
-      return false;
-    } else if (feature.geometry.type == "Polygon") {
-      alert(
-        "UNEXPECTED " +
-          feature.geometry.type +
-          " in " +
-          JSON.stringify(feature) +
-          "\nIf OSM data is correct and output is broken, please report to https://github.com/matkoniecz/lunar_assembler/issues"
-      );
-      return false;
-    } else if (feature.geometry.type == "MultiPolygon") {
-      return true;
-    }
-    alert("UNEXPECTED GEOMETRY " + feature.geometry.type);
-    return false;
-  }
-
 function intersectGeometryWithHorizontalStripes(feature, stripeSizeInDegrees, distanceBetweenStripesInDegrees) {
-    bbox = turf.bbox(feature);
-    var minLongitude = bbox[0];
-    var minLatitude = bbox[1];
-    var maxLongitude = bbox[2];
-    var maxLatitude = bbox[3];
-    if (!isMultipolygonAsExpected(feature)) {
-      return null;
+  bbox = turf.bbox(feature);
+  var minLongitude = bbox[0];
+  var minLatitude = bbox[1];
+  var maxLongitude = bbox[2];
+  var maxLatitude = bbox[3];
+  if (!isMultipolygonAsExpected(feature)) {
+    return null;
+  }
+  var collected = [];
+  // gathering horizontal stripes
+  var minLatitudeForStripe = minLatitude;
+  while (minLatitudeForStripe < maxLatitude) {
+    var maxLatitudeForStripe = minLatitudeForStripe + stripeSizeInDegrees;
+    var stripeRing = [
+      [minLongitude, minLatitudeForStripe],
+      [maxLongitude, minLatitudeForStripe],
+      [maxLongitude, maxLatitudeForStripe],
+      [minLongitude, maxLatitudeForStripe],
+      [minLongitude, minLatitudeForStripe],
+    ];
+    var stripe = [stripeRing];
+    var intersectedStripe = polygonClipping.intersection(feature.geometry.coordinates, stripe);
+    if (intersectedStripe != []) {
+      collected.push(intersectedStripe);
     }
-    var collected = [];
-    // gathering horizontal stripes
-    var minLatitudeForStripe = minLatitude;
-    while (minLatitudeForStripe < maxLatitude) {
-      var maxLatitudeForStripe = minLatitudeForStripe + stripeSizeInDegrees;
-      var stripeRing = [
-        [minLongitude, minLatitudeForStripe],
-        [maxLongitude, minLatitudeForStripe],
-        [maxLongitude, maxLatitudeForStripe],
-        [minLongitude, maxLatitudeForStripe],
-        [minLongitude, minLatitudeForStripe],
-      ];
-      var stripe = [stripeRing];
-      var intersectedStripe = polygonClipping.intersection(feature.geometry.coordinates, stripe);
-      if (intersectedStripe != []) {
-        collected.push(intersectedStripe);
-      }
-      minLatitudeForStripe += stripeSizeInDegrees + distanceBetweenStripesInDegrees;
-    }
-    var generated = polygonClipping.union(...collected);
+    minLatitudeForStripe += stripeSizeInDegrees + distanceBetweenStripesInDegrees;
+  }
+  if(collected.length == 1) {
+    console.warn("one element! Is spread working as expected? See #68") // TODO - trigger and debug it
+  }
+  var generated = polygonClipping.union(...collected);
 
-    var cloned = JSON.parse(JSON.stringify(feature));
-    cloned.geometry.coordinates = generated;
-    return cloned;
+  var cloned = JSON.parse(JSON.stringify(feature));
+  cloned.geometry.coordinates = generated;
+  return cloned;
+}
+
+function intersectGeometryWithPlaneHavingRectangularHoles(feature, holeVerticalInDegrees, holeHorizontalInDegrees, spaceVerticalInDegrees, spaceHorizontalInDegrees) {
+  bbox = turf.bbox(feature);
+  var minLongitude = bbox[0];
+  var minLatitude = bbox[1];
+  var maxLongitude = bbox[2];
+  var maxLatitude = bbox[3];
+  if (!isMultipolygonAsExpected(feature)) {
+    return null;
+  }
+  var collected = [];
+  // gathering horizontal stripes
+  var minLatitudeForStripe = minLatitude;
+  while (minLatitudeForStripe < maxLatitude) {
+    var maxLatitudeForStripe = minLatitudeForStripe + spaceVerticalInDegrees;
+    var stripeRing = [
+      [minLongitude, minLatitudeForStripe],
+      [maxLongitude, minLatitudeForStripe],
+      [maxLongitude, maxLatitudeForStripe],
+      [minLongitude, maxLatitudeForStripe],
+      [minLongitude, minLatitudeForStripe],
+    ];
+    var stripe = [stripeRing];
+    var intersectedStripe = polygonClipping.intersection(feature.geometry.coordinates, stripe);
+    if (intersectedStripe.length > 0) {
+      collected.push(intersectedStripe);
+    }
+    minLatitudeForStripe += spaceVerticalInDegrees + holeVerticalInDegrees;
+  }
+  if(collected.length == 1) {
+    console.warn("one element! Is spread working as expected? See #68") // TODO - trigger and debug it
+  }
+  // split in pairs due to https://github.com/mfogel/polygon-clipping/issues/118
+  var generatedHorizontal = polygonClipping.union(...collected);
+  collected = [];
+
+  // gathering vertical stripes
+  var minLongitudeForStripe = minLongitude;
+  while (minLongitudeForStripe < maxLongitude) {
+    var maxLongitudeForStripe = minLongitudeForStripe + spaceHorizontalInDegrees;
+    var stripeRing = [
+      [minLongitudeForStripe, minLatitude],
+      [maxLongitudeForStripe, minLatitude],
+      [maxLongitudeForStripe, maxLatitude],
+      [minLongitudeForStripe, maxLatitude],
+      [minLongitudeForStripe, minLatitude],
+    ];
+    var stripe = [stripeRing];
+    var intersectedStripe = polygonClipping.intersection(feature.geometry.coordinates, stripe);
+    if (intersectedStripe.length > 0) {
+      collected.push(intersectedStripe);
+    }
+    minLongitudeForStripe += spaceHorizontalInDegrees + holeHorizontalInDegrees;
+  }
+  if(collected.length == 1) {
+    console.warn("one element! Is spread working as expected? See #68") // TODO - trigger and debug it
+  }
+  var generatedVertical = polygonClipping.union(...collected);
+  var generated = polygonClipping.union(generatedHorizontal, generatedVertical);
+  //console.warn("road pattern follows");
+  //console.warn(generated);
+  //console.warn("road pattern above");
+
+  var cloned = JSON.parse(JSON.stringify(feature));
+  cloned.geometry.coordinates = generated;
+  return cloned;
+}
+
+function findMergeGroupObject(dataGeojson, code) {
+  var i = dataGeojson.features.length;
+  var found = undefined;
+  while (i--) {
+    var feature = dataGeojson.features[i];
+    //lunar_assembler_merge_group is applied by lunar assembler, see mergeAsRequestedByMapStyle function
+    if (feature.properties["lunar_assembler_merge_group"] == code) {
+      if (found != undefined) {
+        alert("more than one area of " + code + " type what is unexpected, things may break. This is a bug, please report it on https://github.com/matkoniecz/lunar_assembler/issues");
+      }
+      found = feature;
+    }
+  }
+  if (found == undefined) {
+    console.warn("findMergeGroupObject failed to find " + code + " - if not expected please report at https://github.com/matkoniecz/lunar_assembler/issues");
+  }
+  return found;
+}
+
+
+/* ------------------------ */
+
+/*lunar_assembler_helpful_functions_for_map_styles_generate_symbolic_steps_from_area_highway.js*/
+
+function programaticallyGenerateSymbolicStepParts(dataGeojson) {
+    //alert(JSON.stringify(dataGeojson))
+    var pointsInSteps = dataToListOfPositionOfStepsNodes(dataGeojson);
+    var i = dataGeojson.features.length;
+    var generatedFeatures = [];
+    while (i--) {
+      var feature = dataGeojson.features[i];
+      const link = "https://www.openstreetmap.org/" + feature.id;
+      if (feature.properties["area:highway"] != "steps") {
+        continue;
+      }
+      const rings = feature.geometry.coordinates.length;
+      if (rings != 1) {
+        alert(
+          "untested for polygons with holes. And it seems that it should be represented as two highway=steps and two area:highway anyway. See " +
+            link +
+            "\nIf OSM data is correct and output is broken, please report to https://github.com/matkoniecz/lunar_assembler/issues"
+        );
+      }
+      var newFeaturesForAdding = buildAreasSplittingStepAreaIntoSymbolicSteps(feature, pointsInSteps);
+      if (newFeaturesForAdding != null) {
+        k = newFeaturesForAdding.length;
+        while (k--) {
+          generatedFeatures.push(newFeaturesForAdding[k]);
+        }
+      }
+    }
+    i = generatedFeatures.length;
+    while (i--) {
+      dataGeojson.features.push(generatedFeatures[i]);
+    }
+    return dataGeojson;
   }
 
-  function intersectGeometryWithPlaneHavingRectangularHoles(feature, holeVerticalInDegrees, holeHorizontalInDegrees, spaceVerticalInDegrees, spaceHorizontalInDegrees) {
-    bbox = turf.bbox(feature);
-    var minLongitude = bbox[0];
-    var minLatitude = bbox[1];
-    var maxLongitude = bbox[2];
-    var maxLatitude = bbox[3];
-    if (!isMultipolygonAsExpected(feature)) {
-      return null;
-    }
-    var collected = [];
-    // gathering horizontal stripes
-    var minLatitudeForStripe = minLatitude;
-    while (minLatitudeForStripe < maxLatitude) {
-      var maxLatitudeForStripe = minLatitudeForStripe + spaceVerticalInDegrees;
-      var stripeRing = [
-        [minLongitude, minLatitudeForStripe],
-        [maxLongitude, minLatitudeForStripe],
-        [maxLongitude, maxLatitudeForStripe],
-        [minLongitude, maxLatitudeForStripe],
-        [minLongitude, minLatitudeForStripe],
-      ];
-      var stripe = [stripeRing];
-      var intersectedStripe = polygonClipping.intersection(feature.geometry.coordinates, stripe);
-      if (intersectedStripe.length > 0) {
-        collected.push(intersectedStripe);
+  ////////////////////////////////////////////
+    // steps processing
+    function dataToListOfPositionOfStepsNodes(geojson) {
+      // TODO: document is the first on list lower or higher
+      pointsInSteps = [];
+      var i = geojson.features.length;
+      while (i--) {
+        var feature = geojson.features[i];
+        const link = "https://www.openstreetmap.org/" + feature.id;
+        if (feature.properties["highway"] == "steps") {
+          if (feature.properties["area"] == "yes" || feature.properties["type"] === "multipolygon") {
+            alert("steps mapped as an area should use area:highway=steps tagging, " + link + " needs fixing");
+          } else if (feature.geometry.type != "LineString") {
+            alert("Unexpected geometry for steps, expected a LineString, got " + feature.geometry.type + " " + link + " needs fixing");
+          } else {
+            var k = feature.geometry.coordinates.length;
+            if (feature.properties["incline"] == "down") {
+              // reverse order (assumes incline=up to be default)
+              index = 0;
+              while (index < k) {
+                pointsInSteps.push(feature.geometry.coordinates[index]);
+                index += 1;
+              }
+            } else {
+              while (k--) {
+                pointsInSteps.push(feature.geometry.coordinates[k]);
+              }
+            }
+          }
+        }
       }
-      minLatitudeForStripe += spaceVerticalInDegrees + holeVerticalInDegrees;
+      return pointsInSteps;
     }
-    // spkit in pairs due to https://github.com/mfogel/polygon-clipping/issues/118
-    var generatedHorizontal = polygonClipping.union(...collected);
-    collected = [];
 
-    // gathering vertical stripes
-    var minLongitudeForStripe = minLongitude;
-    while (minLongitudeForStripe < maxLongitude) {
-      var maxLongitudeForStripe = minLongitudeForStripe + spaceHorizontalInDegrees;
-      var stripeRing = [
-        [minLongitudeForStripe, minLatitude],
-        [maxLongitudeForStripe, minLatitude],
-        [maxLongitudeForStripe, maxLatitude],
-        [minLongitudeForStripe, maxLatitude],
-        [minLongitudeForStripe, minLatitude],
-      ];
-      var stripe = [stripeRing];
-      var intersectedStripe = polygonClipping.intersection(feature.geometry.coordinates, stripe);
-      if (intersectedStripe.length > 0) {
-        collected.push(intersectedStripe);
+    function buildAreasSplittingStepAreaIntoSymbolicSteps(feature, pointsInSteps) {
+        // gets feature (area:highway=steps) and list of points in highway=steps
+        // returns array of features with extra shapes giving symbolic depiction of steps
+  
+        // we can detect connecting nodes. Lets assume simplest case:
+        // two nodes where highway=steps are connected, without substantially changing geometry
+        // and area:highway has four more nodes for depicting steps geometry
+        // so, for given feature we can detect skeleton with two ways forming sides of steps
+        // this can be split into parts and form the expected steps
+        //
+        // it wil fail for more complicated steps!
+        // unit testing would be useful...
+        // write just standalone code for now? not with some testing framework?
+  
+        const link = "https://www.openstreetmap.org/" + feature.id;
+        var matches = indexesOfPointsWhichAreConnectedToStepsWay(feature, pointsInSteps);
+        if (matches === null) {
+          alert("unable to build steps pattern for " + link + " - please create an issue at https://github.com/matkoniecz/lunar_assembler/issues if that is unexpected and unwanted");
+          return null;
+        }
+        var nodeCountOnPolygon = feature.geometry.coordinates[0].length;
+        expectStepsPolygonCountToBeSixNodes(nodeCountOnPolygon, link);
+  
+        //alert((matches[0].indexInObject-1) + " " + (matches[1].indexInObject+1))
+        //alert((matches[0].indexInObject+1) + " " + (matches[1].indexInObject-1))
+  
+        var pointBetweenStarts = feature.geometry.coordinates[0][matches[0].indexInObject];
+        var pointBetweenEnds = feature.geometry.coordinates[0][matches[0].indexInObject];
+  
+        var firstLineStartIndex = (matches[0].indexInObject - 1) % nodeCountOnPolygon;
+        var firstLineStart = feature.geometry.coordinates[0][firstLineStartIndex];
+        var firstLineEndIndex = (matches[1].indexInObject + 1) % nodeCountOnPolygon;
+        var firstLineEnd = feature.geometry.coordinates[0][firstLineEndIndex];
+        //alert(JSON.stringify({type: 'LineString', coordinates: [firstLineStart, firstLineEnd]}));
+  
+        var secondLineStartIndex = (matches[0].indexInObject + 1) % nodeCountOnPolygon;
+        var secondLineStart = feature.geometry.coordinates[0][secondLineStartIndex];
+        var secondLineEndIndex = (matches[1].indexInObject - 1) % nodeCountOnPolygon;
+        var secondLineEnd = feature.geometry.coordinates[0][secondLineEndIndex];
+        //alert(JSON.stringify({type: 'LineString', coordinates: [secondLineStart, secondLineEnd]}));
+  
+        return buildAreasSplittingStepAreaIntoSymbolicStepsFromProvidedSkeletonLines(firstLineStart, firstLineEnd, secondLineStart, secondLineEnd, pointBetweenStarts, pointBetweenEnds);
       }
-      minLongitudeForStripe += spaceHorizontalInDegrees + holeHorizontalInDegrees;
+      
+      
+      function indexOfMatchingPointInArray(point, array) {
+      var indexOfMatchingPointInSteps = -1;
+      var stepIndex = array.length;
+      while (stepIndex--) {
+        if (point[0] === array[stepIndex][0] && point[1] === array[stepIndex][1]) {
+          indexOfMatchingPointInSteps = stepIndex;
+          return stepIndex;
+        }
+      }
+      return -1;
     }
-    var generatedVertical = polygonClipping.union(...collected);
-    var generated = polygonClipping.union(generatedHorizontal, generatedVertical);
-    //console.warn("road pattern follows");
-    //console.warn(generated);
-    //console.warn("road pattern above");
 
-    var cloned = JSON.parse(JSON.stringify(feature));
-    cloned.geometry.coordinates = generated;
-    return cloned;
-  }
+    function expectStepsPolygonCountToBeSixNodes(nodeCountOnPolygon, link) {
+      const expected = 6 + 1; // +1 as a border node is repeated
+      if (nodeCountOnPolygon != expected) {
+        if (nodeCountOnPolygon > expected) {
+          alert(
+            "untested for large (" +
+              nodeCountOnPolygon +
+              " nodes) area:highway=steps geometries with more than 6 nodes. See " +
+              link +
+              "\nIf OSM data is correct and output is broken, please report to https://github.com/matkoniecz/lunar_assembler/issues"
+          );
+        } else {
+          alert("unexpectedly low node count ( " + nodeCountOnPolygon + "), is highway=steps attached to area:highway=steps? See " + link);
+        }
+      }
+    }
+
+    function indexesOfPointsWhichAreConnectedToStepsWay(feature, pointsInSteps) {
+      const link = "https://www.openstreetmap.org/" + feature.id;
+      if (feature.geometry.type != "Polygon") {
+        alert(
+          "unsupported for " +
+            feature.geometry.type +
+            "! Skipping, see " +
+            link +
+            "\nIf OSM data is correct and output is broken, please report to https://github.com/matkoniecz/lunar_assembler/issues"
+        );
+        return null;
+      }
+      var nodeCountOnPolygon = feature.geometry.coordinates[0].length;
+      expectStepsPolygonCountToBeSixNodes(nodeCountOnPolygon, link);
+      var nodeIndex = nodeCountOnPolygon;
+      var theFirstIntersection = undefined;
+      var theSecondIntersection = undefined;
+      while (nodeIndex-- > 1) {
+        // > 1 is necessary as the last one is repetition of the first one
+        const point = feature.geometry.coordinates[0][nodeIndex];
+
+        indexOfMatchingPointInSteps = indexOfMatchingPointInArray(point, pointsInSteps);
+        if (indexOfMatchingPointInSteps != -1) {
+          //alert(point + " found at index " + indexOfMatchingPointInSteps + "of steps array");
+          if (theFirstIntersection == undefined) {
+            theFirstIntersection = { indexInObject: nodeIndex, indexInStepsArray: indexOfMatchingPointInSteps };
+          } else if (theSecondIntersection == undefined) {
+            theSecondIntersection = { indexInObject: nodeIndex, indexInStepsArray: indexOfMatchingPointInSteps };
+          } else {
+            alert("more than 2 intersections of area:highway=steps with highway=steps, at " + link + "\nOSM data needs fixing.");
+          }
+        }
+      }
+      if (theFirstIntersection == undefined || theSecondIntersection == undefined) {
+        alert(
+          "expected 2 intersections of area:highway=steps with highway=steps, got less at " +
+            link +
+            "\nIt can happen when steps area is within range but steps way is outside, special step pattern will not be generated for this steps."
+        );
+        return null;
+      }
+      if (theFirstIntersection["indexInStepsArray"] > theSecondIntersection["indexInStepsArray"]) {
+        // ensure that steps are going up/down - TODO!!!!
+        var swap = theFirstIntersection;
+        theFirstIntersection = theSecondIntersection;
+        theSecondIntersection = swap;
+      }
+      return [theFirstIntersection, theSecondIntersection];
+    }
+
+    function buildAreasSplittingStepAreaIntoSymbolicStepsFromProvidedSkeletonLines(firstLineStart, firstLineEnd, secondLineStart, secondLineEnd, pointBetweenStarts, pointBetweenEnds) {
+      // gets lines data - one for each side of steps
+      // firstLineStart, firstLineEnd
+      // secondLineStart, secondLineEnd
+      // gets data about extra geometry parts at upper and lower steps boundary
+      // pointBetweenStarts, pointBetweenEnds
+      //
+      // returns array of features with extra shapes giving symbolic depiction of steps
+      returned = [];
+      // add _part_X tags
+      const partCount = 4;
+      var partIndex = partCount;
+      while (partIndex--) {
+        //TODO: what if steps attachment changes geometry?
+        //the first and the last line should include also middle nodes...
+        ratioOfStartForTop = (partIndex + 1) / partCount;
+        ratioOfStartForBottom = partIndex / partCount;
+        var cornerOnTopOfTheFirstLine = pointBetweenTwoPoints(firstLineStart, firstLineEnd, ratioOfStartForTop);
+        var cornerOnBottomOfTheFirstLine = pointBetweenTwoPoints(firstLineStart, firstLineEnd, ratioOfStartForBottom);
+
+        var cornerOnTopOfTheSecondLine = pointBetweenTwoPoints(secondLineStart, secondLineEnd, ratioOfStartForTop);
+        var cornerOnBottomOfTheSecondLine = pointBetweenTwoPoints(secondLineStart, secondLineEnd, ratioOfStartForBottom);
+
+        const coords = [cornerOnTopOfTheFirstLine, cornerOnTopOfTheSecondLine, cornerOnBottomOfTheSecondLine, cornerOnBottomOfTheFirstLine, cornerOnTopOfTheFirstLine];
+        const geometry = { type: "Polygon", coordinates: [coords] };
+        const generatedFeature = { type: "Feature", properties: { lunar_assembler_step_segment: "" + partIndex }, geometry: geometry };
+        //alert(JSON.stringify(generatedFeature));
+        returned.push(generatedFeature);
+
+        //winding :( TODO, lets ignore it for now
+      }
+      return returned;
+    }
+
+
+    function pointBetweenTwoPoints(start, end, ratioOfStart) {
+      return [start[0] * ratioOfStart + end[0] * (1 - ratioOfStart), start[1] * ratioOfStart + end[1] * (1 - ratioOfStart)];
+    }
+
 
 
 /* ------------------------ */
