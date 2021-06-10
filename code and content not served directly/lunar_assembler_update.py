@@ -43,7 +43,12 @@ with open('index.html', 'w') as file:
             </ul>
           </nav>"""
     if replacable not in page_text:
-        raise
+        print(page_text)
+        print("==== ^ text ==========")
+        print("======================")
+        print("==== v replacable ====")
+        print(replacable)
+        raise "text does not contain searched element"
     page_text = page_text.replace(replacable, new_content)
     file.write(page_text)
 
