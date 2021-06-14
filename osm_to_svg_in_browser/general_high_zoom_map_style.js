@@ -17,54 +17,6 @@
 */
 function highZoomMapStyle() {
   var mapStyle = {
-    motorizedRoadValuesArray() {
-      return [
-        "motorway",
-        "motorway_link",
-        "trunk",
-        "trunk_link",
-        "primary",
-        "primary_link",
-        "secondary",
-        "secondary_link",
-        "tertiary",
-        "tertiary_link",
-        "unclassified",
-        "residential",
-        "service",
-        "track",
-        "road",
-        "busway",
-        "raceway",
-        "escape",
-      ];
-    },
-
-    pedestrianWaysValuesArray() {
-      return [
-        "footway",
-        "path",
-        "steps",
-        "pedestrian",
-        "living_street",
-      ];
-    },
-
-    railwayLinearValuesArray() {
-      return [
-        "rail",
-        "disused",
-        "tram",
-        "subway",
-        "narrow_gauge",
-        "light_rail",
-        "preserved",
-        "construction",
-        "miniature",
-        "monorail",
-      ];
-    },
-
     paintOrder(feature) {
       // higher values: more on top
 
@@ -86,7 +38,7 @@ function highZoomMapStyle() {
         }
       }
 
-      if (mapStyle.railwayLinearValuesArray().includes(feature.properties["railway"])) {
+      if (railwayLinearValuesArray().includes(feature.properties["railway"])) {
         var priority = 0.99;
         return valueRangeForOneLayer * priority + valueRangeForOneLayer * layer;
       }
@@ -146,9 +98,9 @@ function highZoomMapStyle() {
 
     unifiedStyling() {
       returned = []
-      var i = this.motorizedRoadValuesArray().length;
+      var i = motorizedRoadValuesArray().length;
       while (i--) {
-        value = this.motorizedRoadValuesArray()[i];
+        value = motorizedRoadValuesArray()[i];
         returned.push( {
           'area_color': "#555555",
           'description': 'area of a motorized road (linear representation must be also present! Using only area representation is invalid!)',
@@ -166,9 +118,9 @@ function highZoomMapStyle() {
         })
       }
 
-      var i = this.railwayLinearValuesArray().length;
+      var i = railwayLinearValuesArray().length;
       while (i--) {
-        value = this.railwayLinearValuesArray()[i];
+        value = railwayLinearValuesArray()[i];
         returned.push( {
           'line_color': "black",
           'line_width': 2,
@@ -179,9 +131,9 @@ function highZoomMapStyle() {
         })
       }
 
-      var i = this.pedestrianWaysValuesArray().length;
+      var i = pedestrianWaysValuesArray().length;
       while (i--) {
-        value = this.pedestrianWaysValuesArray()[i];
+        value = pedestrianWaysValuesArray()[i];
         returned.push( {
           'area_color': "#aaaaaa",
           'description': 'area of a pedestrian way (linear representation must be also present! Using only area representation is invalid!)',
@@ -199,7 +151,21 @@ function highZoomMapStyle() {
         })
       }
 
-      returned.push(...[
+      var barriersKeyValue = []
+      var i = linearGenerallyImpassableBarrierValuesArray().length;
+      while (i--) {
+        value = linearGenerallyImpassableBarrierValuesArray()[i];
+        barriersKeyValue.push({'key': 'barrier', 'value': value})
+      }
+
+      returned.push({
+        'line_color': "black",
+        'line_width': 1,
+        'description': 'linear, generally impassable barrier',
+        'matches': barriersKeyValue,
+      })
+
+    returned.push(...[
         {
           'area_color': "#aaaaaa",
           'description': 'pedestrian square (using it for sidewalk areas is invalid!)',
@@ -233,14 +199,14 @@ function highZoomMapStyle() {
           'line_width': 1,
           'description': 'linear representation of a cycleway',
           'matches': [
-            {'key': 'highway', 'value': 'crossing'},
+            {'key': 'highway', 'value': 'cycleway'},
           ],
         },
         {
           'area_color': "#9595b4",
           'description': 'area of a cycleway (linear representation must be also present! Using only area representation is invalid!)',
           'matches': [
-            {'key': 'area:highway', 'value': 'crossing'},
+            {'key': 'area:highway', 'value': 'cycleway'},
           ],
         },
         {
@@ -300,17 +266,9 @@ function highZoomMapStyle() {
         },
         {
           'area_color': "black",
-          'description': 'buildings (all and every building value. Yes - including building=no that has no good reason for use)',
+          'description': 'buildings',
           'matches': [
             {'key': 'building'},
-          ],
-        },
-        {
-          'area_color': "blue",
-          'description': 'water',
-          'matches': [
-            {'key': 'natural', 'value': 'water'},
-            {'key': 'waterway', 'value': 'riverbank'},
           ],
         },
         {
@@ -396,16 +354,6 @@ function highZoomMapStyle() {
           ],
         },
         {
-          'line_color': "black",
-          'line_width': 1,
-          'description': 'raised barrier',
-          'matches': [
-            {'key': 'barrier', 'value': 'fence'},
-            {'key': 'barrier', 'value': 'wall'},
-            {'key': 'barrier', 'value': 'guard_rail'},
-          ],
-        },
-        {
           'line_color': "purple",
           'line_width': 5,
           'description': 'runway',
@@ -425,115 +373,6 @@ function highZoomMapStyle() {
      return returned
     },
 
-    generateLegendEntry(key, value, rule){
-      var styling_summary = ""
-      if("area_color" in rule) {
-        styling_summary += '<div style="display: inline; color:' + rule["area_color"] + '"> ■ </div>'
-      }
-      if("line_color" in rule) {
-        styling_summary += '<div style="display: inline; color:' + rule["line_color"] + '"> ┃ </div>'
-      }
-
-      var url_value = "https://wiki.openstreetmap.org/wiki/Tag:" + encodeURIComponent(key + "=" + value);
-      var url_key = "https://wiki.openstreetmap.org/wiki/Key:" + encodeURIComponent(key);
-
-      var linked_key = '<a href="' + url_key + '">' + key + "</a>"
-      if(value == undefined) {
-        return "<li>" + styling_summary + " " + linked_key  + "=* - " + rule["description"] + "</li>\n"
-      } else {
-        var linked_value = '<a href="' + url_value + '">' + value + "</a>"
-        return "<li>" + styling_summary + " " + linked_key + "=" + linked_value + " - " + rule["description"] + "</li>\n"
-
-      }
-
-
-    },
-
-    // highZoomMapStyle().generateLegend() in console
-    generateLegend(){
-      var returned = ""
-      returned += '<p>Note: width styling is <a href="https://github.com/matkoniecz/lunar_assembler/issues/87">currently not shown</a> in the legend</p> ' 
-      returned += "<!--automatically generated by generateLegend function-->\n" 
-      returned += "<ul>\n"
-      const styleRules = mapStyle.unifiedStyling()
-      var k = -1;
-      while (k+1 < styleRules.length) {
-        k++;
-        const rule = styleRules[k];
-        var i = rule['matches'].length;
-        while (i--) {
-          const match = rule['matches'][i];
-          if(Array.isArray(match)) {
-            // multiple rules, all must be matched
-            var actualFiters = [];
-            var m = match.length;
-            while (m--) {
-              if(match[m]['role'] === 'supplementary_obvious_filter') {
-                continue;
-              }
-              actualFiters.push(match[m]);
-            }
-            if(actualFiters.length != 1){
-              throw "unsupported to have multiple actual filters!"
-            }
-            returned += mapStyle.generateLegendEntry(actualFiters[0]['key'], actualFiters[0]['value'], rule)
-          } else {
-            // single key=* or key=value match
-            returned += mapStyle.generateLegendEntry(match['key'], match['value'], rule)
-          }
-        }
-      }
-      returned += "</ul>"
-      return returned;
-    },
-
-    isMatcherMatchingFeature(match, feature){
-      if(('value' in match) === false) {
-        // matches any key
-        if(match["key"] in feature.properties) {
-          return true;
-        }
-      } else if(feature.properties[match["key"]] == match["value"]) {
-        return true;
-      }
-      return false;
-    },
-
-    getMatchFromUnifiedStyling(feature, property) {
-      const styleRules = mapStyle.unifiedStyling()
-      var k = styleRules.length;
-      while (k--) {
-        const rule = styleRules[k];
-        if((property in rule) === false) {
-          continue;
-        }
-        var i = rule['matches'].length;
-        while (i--) {
-            const match = rule['matches'][i];
-            if(Array.isArray(match)) {
-              // multiple rules, all must be matched
-              var m = match.length;
-              var success = true;
-              while (m--) {
-                if(mapStyle.isMatcherMatchingFeature(match[m], feature) == false) {
-                  success = false;
-                }
-              }
-              if(success) {
-                return rule[property]
-              }
-
-            } else {
-              // single key=* or key=value match
-              if(mapStyle.isMatcherMatchingFeature(match, feature)) {
-                return rule[property]
-              }  
-            }
-          }
-      }
-      return "none";
-    },
-
     fillColoring(feature) {
       //console.log(feature);
       if (["Point"].includes(feature.geometry.type)) {
@@ -543,8 +382,7 @@ function highZoomMapStyle() {
       }
 
       // more complex rules can be used here in addition - or instead of unified styling
-
-      return mapStyle.getMatchFromUnifiedStyling(feature, 'area_color');
+      return getMatchFromUnifiedStyling(feature, 'area_color', mapStyle.unifiedStyling());
     },
 
     strokeColoring(feature) {
@@ -556,13 +394,13 @@ function highZoomMapStyle() {
 
       // more complex rules can be used here in addition - or instead of unified styling
 
-      return mapStyle.getMatchFromUnifiedStyling(feature, 'line_color');
+      return getMatchFromUnifiedStyling(feature, 'line_color', mapStyle.unifiedStyling());
     },
 
     strokeWidth(feature) {
       // more complex rules can be used here in addition - or instead of unified styling
 
-      return mapStyle.getMatchFromUnifiedStyling(feature, 'line_width');
+      return getMatchFromUnifiedStyling(feature, 'line_width', mapStyle.unifiedStyling());
     },
 
     mergeIntoGroup(feature) {
@@ -570,11 +408,11 @@ function highZoomMapStyle() {
       // only areas (including multipolygins) can be merged for now
       // please open an issue if you need it, it increaes chance of implementation a bit
       // or open pull request with an implementation
-      if (mapStyle.motorizedRoadValuesArray().includes(feature.properties["area:highway"])) {
+      if (motorizedRoadValuesArray().includes(feature.properties["area:highway"])) {
         return "area:highway_carriageway_layer" + feature.properties["layer"];
       }
       if (
-        mapStyle.pedestrianWaysValuesArray().includes(feature.properties["area:highway"]) ||
+        pedestrianWaysValuesArray().includes(feature.properties["area:highway"]) ||
         (feature.properties["highway"] == "pedestrian" && (feature.properties["area"] === "yes" || feature.properties["type"] === "multipolygon"))
       ) {
         return "area:highway_footway" + feature.properties["layer"];
