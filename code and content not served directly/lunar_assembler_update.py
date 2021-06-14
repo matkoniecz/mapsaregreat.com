@@ -13,6 +13,10 @@ def main():
   get_file('lunar_assembler.dist.js')
   get_file('lunar_assembler.dist.css')
   get_file('lunar_assembler_in_action.gif', binary_file=True)
+  get_file('general_high_zoom_-_road_crossing.png', binary_file=True)
+  get_file('general_high_zoom_-_airport.png', binary_file=True)
+  get_file('laser_neighbourhood_-_Madalińskiego.png', binary_file=True)
+  get_file('laser_road_area_prototype_delivered_cropped.jpg', binary_file=True)
 
 def write_index_html(map_styles):
   index_html = html_prefix() + """
