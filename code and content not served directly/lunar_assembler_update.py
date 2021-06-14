@@ -20,7 +20,7 @@ def write_index_html(map_styles):
         <ul>
 """
   for map_style in map_styles:
-    index_html += '<li><a href="' + map_style['name'] + ".html" + '">' + map_style['name'].replace('_', ' ') + "</a> - " + map_style['description'] + "</li>\n"
+    index_html += '<li><a href="' + map_style['name'] + '">' + map_style['name'].replace('_', ' ') + "</a> - " + map_style['description'] + "</li>\n"
   index_html += """        </ul>
   """
   index_html += html_suffix()
