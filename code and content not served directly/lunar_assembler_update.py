@@ -78,7 +78,7 @@ def get_file(original_name, text_processing_function=None, new_name=None, binary
         file.write(response.text)
 
 def add_header(page_text):
-  replacable = """<div id="main_content_wrap" class="outer">"""
+  replaced = """<div id="main_content_wrap" class="outer">"""
   new_content = """<div id="main_content_wrap" class="outer">
       <nav role='navigation' class="main-nav">
           <ul id="main-nav-list">
@@ -112,12 +112,15 @@ def add_header(page_text):
             </li>
           </ul>
         </nav>"""
-  if replacable not in page_text:
+    return ensure_text_replacement(page_text, replaced, new_content)
+
+def ensure_text_replacement(page_text, replaced, new_content):
+  if replaced not in page_text:
       print(page_text)
       print("==== ^ text ==========")
       print("======================")
-      print("==== v replacable ====")
-      print(replacable)
+      print("==== v replaced ====")
+      print(replaced)
       raise "text does not contain searched element"
   page_text = page_text.replace(replacable, new_content)
   return page_text
