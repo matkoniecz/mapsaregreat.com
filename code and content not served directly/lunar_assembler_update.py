@@ -112,7 +112,7 @@ def add_header(page_text):
             </li>
           </ul>
         </nav>"""
-    return ensure_text_replacement(page_text, replaced, new_content)
+  return ensure_text_replacement(page_text, replaced, new_content)
 
 def ensure_text_replacement(page_text, replaced, new_content):
   if replaced not in page_text:
@@ -122,7 +122,7 @@ def ensure_text_replacement(page_text, replaced, new_content):
       print("==== v replaced ====")
       print(replaced)
       raise "text does not contain searched element"
-  page_text = page_text.replace(replacable, new_content)
+  page_text = page_text.replace(replaced, new_content)
   return page_text
 
 main()
