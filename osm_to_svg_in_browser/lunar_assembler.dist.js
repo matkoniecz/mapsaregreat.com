@@ -32,7 +32,7 @@ function findMergeGroupObject(dataGeojson, code) {
     //lunar_assembler_merge_group is applied by lunar assembler, see mergeAsRequestedByMapStyle function
     if (feature.properties["lunar_assembler_merge_group"] == code) {
       if (found != undefined) {
-        alert("more than one area of " + code + " type what is unexpected, things may break. This is a bug, please report it on https://github.com/matkoniecz/lunar_assembler/issues");
+        showError("more than one area of " + code + " type what is unexpected, things may break. This is a bug, please report it on https://github.com/matkoniecz/lunar_assembler/issues");
       }
       found = feature;
     }
@@ -51,278 +51,255 @@ function findMergeGroupObject(dataGeojson, code) {
 // for use in unified map style, this allows to avoid a pointess duplications
 function unifiedMapStyleSegmentForSymbolicStepRepresentation() {
   const stepGenerationExplanation = [
-    {'key': 'area:highway', 'value': 'steps', 'purpose': 'area of steps, for an automatic generation of a symbolic representation'},
-    {'key': 'highway', 'value': 'steps', 'purpose': 'detecting upper/lower side of steps, for an automatic generation of a symbolic representation'},
-    {'key': 'incline', 'value': 'up', 'purpose': 'detecting upper/lower side of steps, for an automatic generation of a symbolic representation'},
-    {'key': 'incline', 'value': 'down', 'purpose': 'detecting upper/lower side of steps, for an automatic generation of a symbolic representation'},
-  ]
+    { key: "area:highway", value: "steps", purpose: "area of steps, for an automatic generation of a symbolic representation" },
+    { key: "highway", value: "steps", purpose: "detecting upper/lower side of steps, for an automatic generation of a symbolic representation" },
+    { key: "incline", value: "up", purpose: "detecting upper/lower side of steps, for an automatic generation of a symbolic representation" },
+    { key: "incline", value: "down", purpose: "detecting upper/lower side of steps, for an automatic generation of a symbolic representation" },
+  ];
   return [
     {
-      'area_color': "#400080",
-      'description': 'step segment, part of a symbolic steps representation - automatically generated (the lowest one, 4th from the top)',
-      'automatically_generated_using': stepGenerationExplanation,
-      'matches': [
-        {'key': 'lunar_assembler_step_segment', 'value': '0'},
-      ],
+      area_color: "#400080",
+      description: "step segment, part of a symbolic steps representation - automatically generated (the lowest one, 4th from the top)",
+      automatically_generated_using: stepGenerationExplanation,
+      matches: [{ key: "lunar_assembler_step_segment", value: "0" }],
     },
     {
-      'area_color': "magenta",
-      'description': 'step segment, part of a symbolic steps representation - automatically generated (2nd from the bottom, 3rd from the top)',
-      'automatically_generated_using': stepGenerationExplanation,
-      'matches': [
-        {'key': 'lunar_assembler_step_segment', 'value': '1'},
-      ],
+      area_color: "magenta",
+      description: "step segment, part of a symbolic steps representation - automatically generated (2nd from the bottom, 3rd from the top)",
+      automatically_generated_using: stepGenerationExplanation,
+      matches: [{ key: "lunar_assembler_step_segment", value: "1" }],
     },
     {
-      'area_color': "#ff0000",
-      'description': 'step segment, part of symbolic steps representation - automatically generated (3rd from the bottom, 2nd from the top)',
-      'automatically_generated_using': stepGenerationExplanation,
-      'matches': [
-        {'key': 'lunar_assembler_step_segment', 'value': '2'},
-      ],
+      area_color: "#ff0000",
+      description: "step segment, part of symbolic steps representation - automatically generated (3rd from the bottom, 2nd from the top)",
+      automatically_generated_using: stepGenerationExplanation,
+      matches: [{ key: "lunar_assembler_step_segment", value: "2" }],
     },
     {
-      'area_color': "#D33F6A",
-      'description': 'step segment - automatically generated - automatically generated (4th from the bottom, the highest one)',
-      'automatically_generated_using': stepGenerationExplanation,
-      'matches': [
-        {'key': 'lunar_assembler_step_segment', 'value': '3'},
-      ],
+      area_color: "#D33F6A",
+      description: "step segment - automatically generated - automatically generated (4th from the bottom, the highest one)",
+      automatically_generated_using: stepGenerationExplanation,
+      matches: [{ key: "lunar_assembler_step_segment", value: "3" }],
     },
-  ]
+  ];
 }
 
 function programaticallyGenerateSymbolicStepParts(dataGeojson) {
-    //alert(JSON.stringify(dataGeojson))
-    var pointsInSteps = dataToListOfPositionOfStepsNodes(dataGeojson);
-    var i = dataGeojson.features.length;
-    var generatedFeatures = [];
-    while (i--) {
-      var feature = dataGeojson.features[i];
-      const link = "https://www.openstreetmap.org/" + feature.id;
-      if (feature.properties["area:highway"] != "steps") {
-        continue;
-      }
-      const rings = feature.geometry.coordinates.length;
-      if (rings != 1) {
-        alert(
-          "untested for polygons with holes. And it seems that it should be represented as two highway=steps and two area:highway anyway. See " +
-            link +
-            "\nIf OSM data is correct and output is broken, please report to https://github.com/matkoniecz/lunar_assembler/issues"
-        );
-      }
-      var newFeaturesForAdding = buildAreasSplittingStepAreaIntoSymbolicSteps(feature, pointsInSteps);
-      if (newFeaturesForAdding != null) {
-        k = newFeaturesForAdding.length;
-        while (k--) {
-          generatedFeatures.push(newFeaturesForAdding[k]);
-        }
+  var pointsInSteps = dataToListOfPositionOfStepsNodes(dataGeojson);
+  var i = dataGeojson.features.length;
+  var generatedFeatures = [];
+  while (i--) {
+    var feature = dataGeojson.features[i];
+    const link = "https://www.openstreetmap.org/" + feature.id;
+    if (feature.properties["area:highway"] != "steps") {
+      continue;
+    }
+    const rings = feature.geometry.coordinates.length;
+    if (rings != 1) {
+      showError(
+        "untested for polygons with holes. And it seems that it should be represented as two highway=steps and two area:highway anyway. See " +
+          link +
+          "\nIf OSM data is correct and output is broken, please report to https://github.com/matkoniecz/lunar_assembler/issues"
+      );
+    }
+    var newFeaturesForAdding = buildAreasSplittingStepAreaIntoSymbolicSteps(feature, pointsInSteps);
+    if (newFeaturesForAdding != null) {
+      k = newFeaturesForAdding.length;
+      while (k--) {
+        generatedFeatures.push(newFeaturesForAdding[k]);
       }
     }
-    i = generatedFeatures.length;
-    while (i--) {
-      dataGeojson.features.push(generatedFeatures[i]);
-    }
-    return dataGeojson;
   }
+  i = generatedFeatures.length;
+  while (i--) {
+    dataGeojson.features.push(generatedFeatures[i]);
+  }
+  return dataGeojson;
+}
 
-  ////////////////////////////////////////////
-    // steps processing
-    function dataToListOfPositionOfStepsNodes(geojson) {
-      // TODO: document is the first on list lower or higher
-      pointsInSteps = [];
-      var i = geojson.features.length;
-      while (i--) {
-        var feature = geojson.features[i];
-        const link = "https://www.openstreetmap.org/" + feature.id;
-        if (feature.properties["highway"] == "steps") {
-          if (feature.properties["area"] == "yes" || feature.properties["type"] === "multipolygon") {
-            alert("steps mapped as an area should use area:highway=steps tagging, " + link + " needs fixing");
-          } else if (feature.geometry.type != "LineString") {
-            alert("Unexpected geometry for steps, expected a LineString, got " + feature.geometry.type + " " + link + " needs fixing");
-          } else {
-            var k = feature.geometry.coordinates.length;
-            if (feature.properties["incline"] == "down") {
-              // reverse order (assumes incline=up to be default)
-              index = 0;
-              while (index < k) {
-                pointsInSteps.push(feature.geometry.coordinates[index]);
-                index += 1;
-              }
-            } else {
-              while (k--) {
-                pointsInSteps.push(feature.geometry.coordinates[k]);
-              }
-            }
+////////////////////////////////////////////
+// steps processing
+function dataToListOfPositionOfStepsNodes(geojson) {
+  // TODO: document is the first on list lower or higher
+  pointsInSteps = [];
+  var i = geojson.features.length;
+  while (i--) {
+    var feature = geojson.features[i];
+    const link = "https://www.openstreetmap.org/" + feature.id;
+    if (feature.properties["highway"] == "steps") {
+      if (feature.properties["area"] == "yes" || feature.properties["type"] === "multipolygon") {
+        showFatalError("steps mapped as an area should use area:highway=steps tagging, " + link + " needs fixing");
+      } else if (feature.geometry.type != "LineString") {
+        showFatalError("Unexpected geometry for steps, expected a LineString, got " + feature.geometry.type + " " + link + " needs fixing");
+      } else {
+        var k = feature.geometry.coordinates.length;
+        if (feature.properties["incline"] == "down") {
+          // reverse order (assumes incline=up to be default)
+          index = 0;
+          while (index < k) {
+            pointsInSteps.push(feature.geometry.coordinates[index]);
+            index += 1;
           }
-        }
-      }
-      return pointsInSteps;
-    }
-
-    function buildAreasSplittingStepAreaIntoSymbolicSteps(feature, pointsInSteps) {
-        // gets feature (area:highway=steps) and list of points in highway=steps
-        // returns array of features with extra shapes giving symbolic depiction of steps
-  
-        // we can detect connecting nodes. Lets assume simplest case:
-        // two nodes where highway=steps are connected, without substantially changing geometry
-        // and area:highway has four more nodes for depicting steps geometry
-        // so, for given feature we can detect skeleton with two ways forming sides of steps
-        // this can be split into parts and form the expected steps
-        //
-        // it wil fail for more complicated steps!
-        // unit testing would be useful...
-        // write just standalone code for now? not with some testing framework?
-  
-        const link = "https://www.openstreetmap.org/" + feature.id;
-        var matches = indexesOfPointsWhichAreConnectedToStepsWay(feature, pointsInSteps);
-        if (matches === null) {
-          alert("unable to build steps pattern for " + link + " - please create an issue at https://github.com/matkoniecz/lunar_assembler/issues if that is unexpected and unwanted");
-          return null;
-        }
-        var nodeCountOnPolygon = feature.geometry.coordinates[0].length;
-        expectStepsPolygonCountToBeSixNodes(nodeCountOnPolygon, link);
-  
-        //alert((matches[0].indexInObject-1) + " " + (matches[1].indexInObject+1))
-        //alert((matches[0].indexInObject+1) + " " + (matches[1].indexInObject-1))
-  
-        var pointBetweenStarts = feature.geometry.coordinates[0][matches[0].indexInObject];
-        var pointBetweenEnds = feature.geometry.coordinates[0][matches[0].indexInObject];
-  
-        var firstLineStartIndex = (matches[0].indexInObject - 1) % nodeCountOnPolygon;
-        var firstLineStart = feature.geometry.coordinates[0][firstLineStartIndex];
-        var firstLineEndIndex = (matches[1].indexInObject + 1) % nodeCountOnPolygon;
-        var firstLineEnd = feature.geometry.coordinates[0][firstLineEndIndex];
-        //alert(JSON.stringify({type: 'LineString', coordinates: [firstLineStart, firstLineEnd]}));
-  
-        var secondLineStartIndex = (matches[0].indexInObject + 1) % nodeCountOnPolygon;
-        var secondLineStart = feature.geometry.coordinates[0][secondLineStartIndex];
-        var secondLineEndIndex = (matches[1].indexInObject - 1) % nodeCountOnPolygon;
-        var secondLineEnd = feature.geometry.coordinates[0][secondLineEndIndex];
-        //alert(JSON.stringify({type: 'LineString', coordinates: [secondLineStart, secondLineEnd]}));
-  
-        return buildAreasSplittingStepAreaIntoSymbolicStepsFromProvidedSkeletonLines(firstLineStart, firstLineEnd, secondLineStart, secondLineEnd, pointBetweenStarts, pointBetweenEnds);
-      }
-      
-      
-      function indexOfMatchingPointInArray(point, array) {
-      var indexOfMatchingPointInSteps = -1;
-      var stepIndex = array.length;
-      while (stepIndex--) {
-        if (point[0] === array[stepIndex][0] && point[1] === array[stepIndex][1]) {
-          indexOfMatchingPointInSteps = stepIndex;
-          return stepIndex;
-        }
-      }
-      return -1;
-    }
-
-    function expectStepsPolygonCountToBeSixNodes(nodeCountOnPolygon, link) {
-      const expected = 6 + 1; // +1 as a border node is repeated
-      if (nodeCountOnPolygon != expected) {
-        if (nodeCountOnPolygon > expected) {
-          alert(
-            "untested for large (" +
-              nodeCountOnPolygon +
-              " nodes) area:highway=steps geometries with more than 6 nodes. See " +
-              link +
-              "\nIf OSM data is correct and output is broken, please report to https://github.com/matkoniecz/lunar_assembler/issues"
-          );
         } else {
-          alert("unexpectedly low node count ( " + nodeCountOnPolygon + "), is highway=steps attached to area:highway=steps? See " + link);
-        }
-      }
-    }
-
-    function indexesOfPointsWhichAreConnectedToStepsWay(feature, pointsInSteps) {
-      const link = "https://www.openstreetmap.org/" + feature.id;
-      if (feature.geometry.type != "Polygon") {
-        alert(
-          "unsupported for " +
-            feature.geometry.type +
-            "! Skipping, see " +
-            link +
-            "\nIf OSM data is correct and output is broken, please report to https://github.com/matkoniecz/lunar_assembler/issues"
-        );
-        return null;
-      }
-      var nodeCountOnPolygon = feature.geometry.coordinates[0].length;
-      expectStepsPolygonCountToBeSixNodes(nodeCountOnPolygon, link);
-      var nodeIndex = nodeCountOnPolygon;
-      var theFirstIntersection = undefined;
-      var theSecondIntersection = undefined;
-      while (nodeIndex-- > 1) {
-        // > 1 is necessary as the last one is repetition of the first one
-        const point = feature.geometry.coordinates[0][nodeIndex];
-
-        indexOfMatchingPointInSteps = indexOfMatchingPointInArray(point, pointsInSteps);
-        if (indexOfMatchingPointInSteps != -1) {
-          //alert(point + " found at index " + indexOfMatchingPointInSteps + "of steps array");
-          if (theFirstIntersection == undefined) {
-            theFirstIntersection = { indexInObject: nodeIndex, indexInStepsArray: indexOfMatchingPointInSteps };
-          } else if (theSecondIntersection == undefined) {
-            theSecondIntersection = { indexInObject: nodeIndex, indexInStepsArray: indexOfMatchingPointInSteps };
-          } else {
-            alert("more than 2 intersections of area:highway=steps with highway=steps, at " + link + "\nOSM data needs fixing.");
+          while (k--) {
+            pointsInSteps.push(feature.geometry.coordinates[k]);
           }
         }
       }
-      if (theFirstIntersection == undefined || theSecondIntersection == undefined) {
-        alert(
-          "expected 2 intersections of area:highway=steps with highway=steps, got less at " +
-            link +
-            "\nIt can happen when steps area is within range but steps way is outside, special step pattern will not be generated for this steps."
-        );
-        return null;
-      }
-      if (theFirstIntersection["indexInStepsArray"] > theSecondIntersection["indexInStepsArray"]) {
-        // ensure that steps are going up/down - TODO!!!!
-        var swap = theFirstIntersection;
-        theFirstIntersection = theSecondIntersection;
-        theSecondIntersection = swap;
-      }
-      return [theFirstIntersection, theSecondIntersection];
     }
+  }
+  return pointsInSteps;
+}
 
-    function buildAreasSplittingStepAreaIntoSymbolicStepsFromProvidedSkeletonLines(firstLineStart, firstLineEnd, secondLineStart, secondLineEnd, pointBetweenStarts, pointBetweenEnds) {
-      // gets lines data - one for each side of steps
-      // firstLineStart, firstLineEnd
-      // secondLineStart, secondLineEnd
-      // gets data about extra geometry parts at upper and lower steps boundary
-      // pointBetweenStarts, pointBetweenEnds
-      //
-      // returns array of features with extra shapes giving symbolic depiction of steps
-      returned = [];
-      // add _part_X tags
-      const partCount = 4;
-      var partIndex = partCount;
-      while (partIndex--) {
-        //TODO: what if steps attachment changes geometry?
-        //the first and the last line should include also middle nodes...
-        ratioOfStartForTop = (partIndex + 1) / partCount;
-        ratioOfStartForBottom = partIndex / partCount;
-        var cornerOnTopOfTheFirstLine = pointBetweenTwoPoints(firstLineStart, firstLineEnd, ratioOfStartForTop);
-        var cornerOnBottomOfTheFirstLine = pointBetweenTwoPoints(firstLineStart, firstLineEnd, ratioOfStartForBottom);
+function buildAreasSplittingStepAreaIntoSymbolicSteps(feature, pointsInSteps) {
+  // gets feature (area:highway=steps) and list of points in highway=steps
+  // returns array of features with extra shapes giving symbolic depiction of steps
 
-        var cornerOnTopOfTheSecondLine = pointBetweenTwoPoints(secondLineStart, secondLineEnd, ratioOfStartForTop);
-        var cornerOnBottomOfTheSecondLine = pointBetweenTwoPoints(secondLineStart, secondLineEnd, ratioOfStartForBottom);
+  // we can detect connecting nodes. Lets assume simplest case:
+  // two nodes where highway=steps are connected, without substantially changing geometry
+  // and area:highway has four more nodes for depicting steps geometry
+  // so, for given feature we can detect skeleton with two ways forming sides of steps
+  // this can be split into parts and form the expected steps
+  //
+  // it wil fail for more complicated steps!
+  // unit testing would be useful...
+  // write just standalone code for now? not with some testing framework?
 
-        const coords = [cornerOnTopOfTheFirstLine, cornerOnTopOfTheSecondLine, cornerOnBottomOfTheSecondLine, cornerOnBottomOfTheFirstLine, cornerOnTopOfTheFirstLine];
-        const geometry = { type: "Polygon", coordinates: [coords] };
-        const generatedFeature = { type: "Feature", properties: { lunar_assembler_step_segment: "" + partIndex }, geometry: geometry };
-        //alert(JSON.stringify(generatedFeature));
-        returned.push(generatedFeature);
+  const link = "https://www.openstreetmap.org/" + feature.id;
+  var matches = indexesOfPointsWhichAreConnectedToStepsWay(feature, pointsInSteps);
+  if (matches === null) {
+    showFatalError("unable to build steps pattern for " + link + " - please create an issue at https://github.com/matkoniecz/lunar_assembler/issues if that is unexpected and unwanted");
+    return null;
+  }
+  var nodeCountOnPolygon = feature.geometry.coordinates[0].length;
+  expectStepsPolygonCountToBeSixNodes(nodeCountOnPolygon, link);
 
-        //winding :( TODO, lets ignore it for now
+  var pointBetweenStarts = feature.geometry.coordinates[0][matches[0].indexInObject];
+  var pointBetweenEnds = feature.geometry.coordinates[0][matches[0].indexInObject];
+
+  var firstLineStartIndex = (matches[0].indexInObject - 1) % nodeCountOnPolygon;
+  var firstLineStart = feature.geometry.coordinates[0][firstLineStartIndex];
+  var firstLineEndIndex = (matches[1].indexInObject + 1) % nodeCountOnPolygon;
+  var firstLineEnd = feature.geometry.coordinates[0][firstLineEndIndex];
+
+  var secondLineStartIndex = (matches[0].indexInObject + 1) % nodeCountOnPolygon;
+  var secondLineStart = feature.geometry.coordinates[0][secondLineStartIndex];
+  var secondLineEndIndex = (matches[1].indexInObject - 1) % nodeCountOnPolygon;
+  var secondLineEnd = feature.geometry.coordinates[0][secondLineEndIndex];
+
+  return buildAreasSplittingStepAreaIntoSymbolicStepsFromProvidedSkeletonLines(firstLineStart, firstLineEnd, secondLineStart, secondLineEnd, pointBetweenStarts, pointBetweenEnds);
+}
+
+function indexOfMatchingPointInArray(point, array) {
+  var indexOfMatchingPointInSteps = -1;
+  var stepIndex = array.length;
+  while (stepIndex--) {
+    if (point[0] === array[stepIndex][0] && point[1] === array[stepIndex][1]) {
+      indexOfMatchingPointInSteps = stepIndex;
+      return stepIndex;
+    }
+  }
+  return -1;
+}
+
+function expectStepsPolygonCountToBeSixNodes(nodeCountOnPolygon, link) {
+  const expected = 6 + 1; // +1 as a border node is repeated
+  if (nodeCountOnPolygon != expected) {
+    if (nodeCountOnPolygon > expected) {
+      showError(
+        "untested for large (" +
+          nodeCountOnPolygon +
+          " nodes) area:highway=steps geometries with more than 6 nodes. See " +
+          link +
+          "\nIf OSM data is correct and output is broken, please report to https://github.com/matkoniecz/lunar_assembler/issues"
+      );
+    } else {
+      showFatalError("unexpectedly low node count ( " + nodeCountOnPolygon + "), is highway=steps attached to area:highway=steps? See " + link);
+    }
+  }
+}
+
+function indexesOfPointsWhichAreConnectedToStepsWay(feature, pointsInSteps) {
+  const link = "https://www.openstreetmap.org/" + feature.id;
+  if (feature.geometry.type != "Polygon") {
+    showFatalError(
+      "unsupported for " + feature.geometry.type + "! Skipping, see " + link + "\nIf OSM data is correct and output is broken, please report to https://github.com/matkoniecz/lunar_assembler/issues"
+    );
+    return null;
+  }
+  var nodeCountOnPolygon = feature.geometry.coordinates[0].length;
+  expectStepsPolygonCountToBeSixNodes(nodeCountOnPolygon, link);
+  var nodeIndex = nodeCountOnPolygon;
+  var theFirstIntersection = undefined;
+  var theSecondIntersection = undefined;
+  while (nodeIndex-- > 1) {
+    // > 1 is necessary as the last one is repetition of the first one
+    const point = feature.geometry.coordinates[0][nodeIndex];
+
+    indexOfMatchingPointInSteps = indexOfMatchingPointInArray(point, pointsInSteps);
+    if (indexOfMatchingPointInSteps != -1) {
+      if (theFirstIntersection == undefined) {
+        theFirstIntersection = { indexInObject: nodeIndex, indexInStepsArray: indexOfMatchingPointInSteps };
+      } else if (theSecondIntersection == undefined) {
+        theSecondIntersection = { indexInObject: nodeIndex, indexInStepsArray: indexOfMatchingPointInSteps };
+      } else {
+        showFatalError("more than 2 intersections of area:highway=steps with highway=steps, at " + link + "\nOSM data needs fixing.");
       }
-      return returned;
     }
+  }
+  if (theFirstIntersection == undefined || theSecondIntersection == undefined) {
+    showFatalError(
+      "expected 2 intersections of area:highway=steps with highway=steps, got less at " +
+        link +
+        "\nIt can happen when steps area is within range but steps way is outside, special step pattern will not be generated for this steps."
+    );
+    return null;
+  }
+  if (theFirstIntersection["indexInStepsArray"] > theSecondIntersection["indexInStepsArray"]) {
+    // ensure that steps are going up/down - TODO!!!!
+    var swap = theFirstIntersection;
+    theFirstIntersection = theSecondIntersection;
+    theSecondIntersection = swap;
+  }
+  return [theFirstIntersection, theSecondIntersection];
+}
 
+function buildAreasSplittingStepAreaIntoSymbolicStepsFromProvidedSkeletonLines(firstLineStart, firstLineEnd, secondLineStart, secondLineEnd, pointBetweenStarts, pointBetweenEnds) {
+  // gets lines data - one for each side of steps
+  // firstLineStart, firstLineEnd
+  // secondLineStart, secondLineEnd
+  // gets data about extra geometry parts at upper and lower steps boundary
+  // pointBetweenStarts, pointBetweenEnds
+  //
+  // returns array of features with extra shapes giving symbolic depiction of steps
+  returned = [];
+  // add _part_X tags
+  const partCount = 4;
+  var partIndex = partCount;
+  while (partIndex--) {
+    //TODO: what if steps attachment changes geometry?
+    //the first and the last line should include also middle nodes...
+    ratioOfStartForTop = (partIndex + 1) / partCount;
+    ratioOfStartForBottom = partIndex / partCount;
+    var cornerOnTopOfTheFirstLine = pointBetweenTwoPoints(firstLineStart, firstLineEnd, ratioOfStartForTop);
+    var cornerOnBottomOfTheFirstLine = pointBetweenTwoPoints(firstLineStart, firstLineEnd, ratioOfStartForBottom);
 
-    function pointBetweenTwoPoints(start, end, ratioOfStart) {
-      return [start[0] * ratioOfStart + end[0] * (1 - ratioOfStart), start[1] * ratioOfStart + end[1] * (1 - ratioOfStart)];
-    }
+    var cornerOnTopOfTheSecondLine = pointBetweenTwoPoints(secondLineStart, secondLineEnd, ratioOfStartForTop);
+    var cornerOnBottomOfTheSecondLine = pointBetweenTwoPoints(secondLineStart, secondLineEnd, ratioOfStartForBottom);
 
+    const coords = [cornerOnTopOfTheFirstLine, cornerOnTopOfTheSecondLine, cornerOnBottomOfTheSecondLine, cornerOnBottomOfTheFirstLine, cornerOnTopOfTheFirstLine];
+    const geometry = { type: "Polygon", coordinates: [coords] };
+    const generatedFeature = { type: "Feature", properties: { lunar_assembler_step_segment: "" + partIndex }, geometry: geometry };
+    returned.push(generatedFeature);
+
+    //winding :( TODO, lets ignore it for now
+  }
+  return returned;
+}
+
+function pointBetweenTwoPoints(start, end, ratioOfStart) {
+  return [start[0] * ratioOfStart + end[0] * (1 - ratioOfStart), start[1] * ratioOfStart + end[1] * (1 - ratioOfStart)];
+}
 
 
 /* ------------------------ */
@@ -375,8 +352,8 @@ function intersectGeometryWithHorizontalStripes(feature, stripeSizeInDegrees, di
     }
     minLatitudeForStripe += stripeSizeInDegrees + distanceBetweenStripesInDegrees;
   }
-  if(collected.length == 1) {
-    console.warn("one element! Is spread working as expected? See #68") // TODO - trigger and debug it
+  if (collected.length == 1) {
+    console.warn("one element! Is spread working as expected? See #68"); // TODO - trigger and debug it
   }
   var generated = polygonClipping.union(...collected);
 
@@ -413,8 +390,8 @@ function intersectGeometryWithPlaneHavingRectangularHoles(feature, holeVerticalI
     }
     minLatitudeForStripe += spaceVerticalInDegrees + holeVerticalInDegrees;
   }
-  if(collected.length == 1) {
-    console.warn("one element! Is spread working as expected? See #68") // TODO - trigger and debug it
+  if (collected.length == 1) {
+    console.warn("one element! Is spread working as expected? See #68"); // TODO - trigger and debug it
   }
   // split in pairs due to https://github.com/mfogel/polygon-clipping/issues/118
   var generatedHorizontal = polygonClipping.union(...collected);
@@ -438,8 +415,8 @@ function intersectGeometryWithPlaneHavingRectangularHoles(feature, holeVerticalI
     }
     minLongitudeForStripe += spaceHorizontalInDegrees + holeHorizontalInDegrees;
   }
-  if(collected.length == 1) {
-    console.warn("one element! Is spread working as expected? See #68") // TODO - trigger and debug it
+  if (collected.length == 1) {
+    console.warn("one element! Is spread working as expected? See #68"); // TODO - trigger and debug it
   }
   var generatedVertical = polygonClipping.union(...collected);
   var generated = polygonClipping.union(generatedHorizontal, generatedVertical);
@@ -522,8 +499,9 @@ function pedestrianWaysValuesArray() {
 
 function linearGenerallyImpassableBarrierValuesArray() {
   // kerb intentionally skipped
-  return ["fence", "wall", "hedge", "retaining_wall", "hedge_bank", "wire_fence", "city_wall", "guard_rail", "haha"]
+  return ["fence", "wall", "hedge", "retaining_wall", "hedge_bank", "wire_fence", "city_wall", "guard_rail", "haha"];
 }
+
 
 /* ------------------------ */
 
@@ -547,13 +525,13 @@ function linearGenerallyImpassableBarrierValuesArray() {
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-function isMatcherMatchingFeature(match, feature){
-  if(('value' in match) === false) {
+function isMatcherMatchingFeature(match, feature) {
+  if ("value" in match === false) {
     // matches any key
-    if(match["key"] in feature.properties) {
+    if (match["key"] in feature.properties) {
       return true;
     }
-  } else if(feature.properties[match["key"]] == match["value"]) {
+  } else if (feature.properties[match["key"]] == match["value"]) {
     return true;
   }
   return false;
@@ -562,220 +540,217 @@ function isMatcherMatchingFeature(match, feature){
 function getMatchFromUnifiedStyling(feature, property, styleRules) {
   var k = -1;
   while (k + 1 < styleRules.length) {
-    k += 1
+    k += 1;
     const rule = styleRules[k];
-    if((property in rule) === false) {
+    if (property in rule === false) {
       continue;
     }
-    var i = rule['matches'].length;
+    var i = rule["matches"].length;
     while (i--) {
-        const match = rule['matches'][i];
-        if(Array.isArray(match)) {
-          // multiple rules, all must be matched
-          var m = match.length;
-          var success = true;
-          while (m--) {
-            if(isMatcherMatchingFeature(match[m], feature) == false) {
-              success = false;
-            }
+      const match = rule["matches"][i];
+      if (Array.isArray(match)) {
+        // multiple rules, all must be matched
+        var m = match.length;
+        var success = true;
+        while (m--) {
+          if (isMatcherMatchingFeature(match[m], feature) == false) {
+            success = false;
           }
-          if(success) {
-            return rule[property]
-          }
-
-        } else {
-          // single key=* or key=value match
-          if(isMatcherMatchingFeature(match, feature)) {
-            return rule[property]
-          }  
+        }
+        if (success) {
+          return rule[property];
+        }
+      } else {
+        // single key=* or key=value match
+        if (isMatcherMatchingFeature(match, feature)) {
+          return rule[property];
         }
       }
+    }
   }
   return "none";
 }
 
-function stylingSummary(rule){
-  var returned = ""
-  if("area_color" in rule) {
-    returned += '<div style="display: inline; color:' + rule["area_color"] + '"> ■ </div>'
+function stylingSummary(rule) {
+  var returned = "";
+  if ("area_color" in rule) {
+    returned += '<div style="display: inline; color:' + rule["area_color"] + '"> ■ </div>';
   }
-  if("line_color" in rule) {
-    returned += '<div style="display: inline; color:' + rule["line_color"] + '"> ┃ </div>'
+  if ("line_color" in rule) {
+    returned += '<div style="display: inline; color:' + rule["line_color"] + '"> ┃ </div>';
   }
   return returned;
 }
 
 function keyWithWikiLink(key) {
   var url = "https://wiki.openstreetmap.org/wiki/Key:" + encodeURIComponent(key);
-  return '<a href="' + url + '">' + key + "</a>"
+  return '<a href="' + url + '">' + key + "</a>";
 }
 
 function valueWithWikiLink(key, value) {
   var url = "https://wiki.openstreetmap.org/wiki/Tag:" + encodeURIComponent(key + "=" + value);
-  return '<a href="' + url + '">' + value + "</a>"
+  return '<a href="' + url + '">' + value + "</a>";
 }
 
 function linkedAndDescribedTag(key, value, description) {
-  if(value == undefined) {
-    return keyWithWikiLink(key)  + "=* - " + description
+  if (value == undefined) {
+    return keyWithWikiLink(key) + "=* - " + description;
   } else {
-    return keyWithWikiLink(key) + "=" + valueWithWikiLink(key, value) + " - " + description
+    return keyWithWikiLink(key) + "=" + valueWithWikiLink(key, value) + " - " + description;
   }
 }
 
-function generateLegendEntry(key, value, rule){
-  return "<li>" + stylingSummary(rule) + " " + linkedAndDescribedTag(key, value, rule["description"]) + "</li>\n"
+function generateLegendEntry(key, value, rule) {
+  return "<li>" + stylingSummary(rule) + " " + linkedAndDescribedTag(key, value, rule["description"]) + "</li>\n";
 }
 
 function addLegendEntriesForDataStraightFromOpenStreetMap(rule) {
-  returned = ""
-  var i = rule['matches'].length;
+  returned = "";
+  var i = rule["matches"].length;
   while (i--) {
-    const match = rule['matches'][i];
-    if(Array.isArray(match)) {
+    const match = rule["matches"][i];
+    if (Array.isArray(match)) {
       // multiple rules, all must be matched
       var actualFiters = [];
       var m = match.length;
       while (m--) {
-        if(match[m]['role'] === 'supplementary_obvious_filter') {
+        if (match[m]["role"] === "supplementary_obvious_filter") {
           continue;
         }
         actualFiters.push(match[m]);
       }
-      if(actualFiters.length != 1){
-        throw "unsupported to have multiple actual filters! - on " + JSON.stringify(match)
+      if (actualFiters.length != 1) {
+        throw "unsupported to have multiple actual filters! - on " + JSON.stringify(match);
       }
-      returned += generateLegendEntry(actualFiters[0]['key'], actualFiters[0]['value'], rule)
+      returned += generateLegendEntry(actualFiters[0]["key"], actualFiters[0]["value"], rule);
     } else {
       // single key=* or key=value match
-      returned += generateLegendEntry(match['key'], match['value'], rule)
+      returned += generateLegendEntry(match["key"], match["value"], rule);
     }
   }
-  return returned
+  return returned;
 }
 
 function addLegendEntriesForProcessedElements(rule) {
   returned = "";
-  returned += "<li>" + stylingSummary(rule) + " " + rule["description"] + " - this is generated using:\n"
-  returned += "<ul>"
-  var length = rule['automatically_generated_using'].length;
+  returned += "<li>" + stylingSummary(rule) + " " + rule["description"] + " - this is generated using:\n";
+  returned += "<ul>";
+  var length = rule["automatically_generated_using"].length;
   var i = -1;
   while (i + 1 < length) {
     i += 1;
-    const match = rule['automatically_generated_using'][i];
-    if(Array.isArray(match)) {
+    const match = rule["automatically_generated_using"][i];
+    if (Array.isArray(match)) {
       // multiple rules, all must be matched
       var actualFiters = [];
       var m = match.length;
       while (m--) {
-        if(match[m]['role'] === 'supplementary_obvious_filter') {
+        if (match[m]["role"] === "supplementary_obvious_filter") {
           continue;
         }
         actualFiters.push(match[m]);
       }
-      if(actualFiters.length != 1){
-        throw "unsupported to have multiple actual filters! - on " + JSON.stringify(match)
+      if (actualFiters.length != 1) {
+        throw "unsupported to have multiple actual filters! - on " + JSON.stringify(match);
       }
-      returned += "<li>" + linkedAndDescribedTag(actualFiters[0]['key'], actualFiters[0]['value'], actualFiters[0]["purpose"]) + "</li>\n"
+      returned += "<li>" + linkedAndDescribedTag(actualFiters[0]["key"], actualFiters[0]["value"], actualFiters[0]["purpose"]) + "</li>\n";
     } else {
       // single key=* or key=value match
-      returned += "<li>" + linkedAndDescribedTag(match['key'], match['value'], match["purpose"]) + "</li>\n"
+      returned += "<li>" + linkedAndDescribedTag(match["key"], match["value"], match["purpose"]) + "</li>\n";
     }
   }
-  returned += "</ul>\n"
-  returned += "</li>\n"
-  return returned
+  returned += "</ul>\n";
+  returned += "</li>\n";
+  return returned;
 }
 
 // for high zoom:
 // generateLegend(highZoomMapStyle().unifiedStyling())
 // in console
-function  generateLegend(styleRules){
-  var returned = ""
-  returned += '<p>Note: width styling is <a href="https://github.com/matkoniecz/lunar_assembler/issues/87">currently not shown</a> in the legend</p> ' 
-  returned += "<!--automatically generated by generateLegend function-->\n" 
-  returned += "<ul>\n"
+function generateLegend(styleRules) {
+  var returned = "";
+  returned += '<p>Note: width styling is <a href="https://github.com/matkoniecz/lunar_assembler/issues/87">currently not shown</a> in the legend</p> ';
+  returned += "<!--automatically generated by generateLegend function-->\n";
+  returned += "<ul>\n";
   var k = -1;
-  while (k+1 < styleRules.length) {
+  while (k + 1 < styleRules.length) {
     k++;
     const rule = styleRules[k];
 
-    if("automatically_generated_using" in rule) {
+    if ("automatically_generated_using" in rule) {
       returned += addLegendEntriesForProcessedElements(rule);
     } else {
       returned += addLegendEntriesForDataStraightFromOpenStreetMap(rule);
     }
-
   }
-  returned += "</ul>"
+  returned += "</ul>";
   return returned;
 }
 
-function  generateTaginfoListing(styleRules){
-  var returned = []
+function generateTaginfoListing(styleRules) {
+  var returned = [];
   var k = -1;
-  while (k+1 < styleRules.length) {
+  while (k + 1 < styleRules.length) {
     k++;
     const rule = styleRules[k];
 
-    if("automatically_generated_using" in rule) {
+    if ("automatically_generated_using" in rule) {
       returned.push(...addTaginfoListingForProcessedElements(rule));
     } else {
       returned.push(...addTaginfoListingForDataStraightFromOpenStreetMap(rule));
     }
-
   }
   return returned;
 }
 
 function addTaginfoListingForDataStraightFromOpenStreetMap(rule) {
-  returned = []
-  var i = rule['matches'].length;
+  returned = [];
+  var i = rule["matches"].length;
   while (i--) {
     var match = null;
-    if(Array.isArray(rule['matches'][i])) {
-      match = rule['matches'][i];
+    if (Array.isArray(rule["matches"][i])) {
+      match = rule["matches"][i];
     } else {
-      match = [rule['matches'][i]];
+      match = [rule["matches"][i]];
     }
     // multiple rules, all must be matched
     var m = match.length;
     while (m--) {
-      if(match[m]['role'] === 'supplementary_obvious_filter') {
+      if (match[m]["role"] === "supplementary_obvious_filter") {
         continue;
       }
-      var pushed = {'key': match[m]['key'], 'value': match[m]['value'], 'description': rule['description']}
-      if(('value' in match[m]) == false){
-        delete pushed['value']
+      var pushed = { key: match[m]["key"], value: match[m]["value"], description: rule["description"] };
+      if ("value" in match[m] == false) {
+        delete pushed["value"];
       }
-      returned.push(pushed)
+      returned.push(pushed);
     }
   }
   return returned;
 }
 
 function addTaginfoListingForProcessedElements(rule) {
-  returned = []
-  var length = rule['automatically_generated_using'].length;
+  returned = [];
+  var length = rule["automatically_generated_using"].length;
   var i = -1;
   while (i + 1 < length) {
     i += 1;
-    var match = null 
-    if(Array.isArray(match)) {
-      match = rule['automatically_generated_using'][i];
+    var match = null;
+    if (Array.isArray(match)) {
+      match = rule["automatically_generated_using"][i];
     } else {
-      match = [rule['automatically_generated_using'][i]];
+      match = [rule["automatically_generated_using"][i]];
     }
     var m = match.length;
     while (m--) {
-      if(match[m]['role'] === 'supplementary_obvious_filter') {
+      if (match[m]["role"] === "supplementary_obvious_filter") {
         continue;
       }
-      var pushed = {'key': match[m]['key'], 'value': match[m]['value'], 'description': match[m]['purpose']}
-      if(('value' in match[m]) == false){
-        delete pushed['value']
+      var pushed = { key: match[m]["key"], value: match[m]["value"], description: match[m]["purpose"] };
+      if ("value" in match[m] == false) {
+        delete pushed["value"];
       }
-      returned.push(pushed)
+      returned.push(pushed);
     }
   }
   return returned;
@@ -804,6 +779,7 @@ function addTaginfoListingForProcessedElements(rule) {
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+// TODO eliminate this global variables
 const predictedTimeInSeconds = 35;
 var completed = false;
 var doneInPercents = 0;
@@ -812,6 +788,9 @@ const updateCount = predictedTimeInSeconds / timeBetweenUpdatesInSeconds;
 const incrementOnUpdateBy = 100 / updateCount;
 let progressBar;
 let handleOfProgressBarAnimation;
+
+// TODO handle config in a better way
+var logOutputIdConfig;
 
 function initializeLunarAssembler({
   mapStyles,
@@ -828,8 +807,31 @@ function initializeLunarAssembler({
   initializeSelectorMap(mapStyles, mapDivId, lat, lon, zoom, downloadTriggerId, mapOutputHolderId);
   initilizeDownloadButton(downloadTriggerId, mapOutputHolderId);
   progressBar = document.getElementById(progressBarId);
+  logOutputIdConfig = logOutputId;
 }
 
+function showFatalError(message) {
+  showError(message);
+  alert(message);
+}
+
+function showError(message) {
+  console.error(message);
+  document.getElementById(logOutputIdConfig).innerHTML += '<p class="logged error">' + message + "</p>";
+}
+
+function showWarning(message) {
+  console.warn(message);
+  document.getElementById(logOutputIdConfig).innerHTML += '<p class="logged warning">' + message + "</p>";
+}
+
+function reportBugMessage() {
+  return " this is a bug, please report to https://github.com/matkoniecz/lunar_assembler/issues";
+}
+
+function reportBugMessageButGeodataMayBeWrong() {
+  return " something went wrong. If OpenStreetMap data is correct here, then this is a bug, please report to https://github.com/matkoniecz/lunar_assembler/issues";
+}
 //////////////////////////////////////////////////////////////////////////////////////////
 // progress bar fun
 // TODO:
@@ -922,8 +924,8 @@ function initializeSelectorMap(
   if (params.get("rerun_query") == "yes") {
     // parameters (technically still GUI, right) requested running query immediately
     const bounds = JSON.parse(params.get("bounds"));
-    const centerLat = (bounds["north"] + bounds["south"])/2;
-    const centerLon = (bounds["east"] + bounds["west"])/2;
+    const centerLat = (bounds["north"] + bounds["south"]) / 2;
+    const centerLon = (bounds["east"] + bounds["west"]) / 2;
     map.panTo(new L.LatLng(centerLat, centerLon));
     handleTriggerFromGUI(bounds, downloadTriggerId, mapOutputHolderId, mapStyles[0]);
   }
@@ -941,7 +943,7 @@ async function handleTriggerFromGUI(readableBounds, downloadTriggerId, mapOutput
   if (osmJSON == -1) {
     console.log("FAILURE of download!");
     markAsFailed();
-    alert(
+    showFatalError(
       "Overpass API refused to provide data. Either selected area was too large, or you exceed usage limit of that free service. Please wait a bit and retry. Overpass API is used to get data from OpenStreetMap for a given area."
     );
     return;
@@ -1015,7 +1017,7 @@ async function downloadOpenStreetMapData(readableBounds) {
     },
     body: new URLSearchParams({ data: query }),
   }).catch((err) => {
-    alert(err);
+    showFatalError(err);
     console.log(err.response.data);
     return -1;
   });
@@ -1037,9 +1039,7 @@ function isMultipolygonAsExpected(feature) {
     return false;
   }
   if (feature.geometry.type == "Polygon") {
-    alert(
-      "UNEXPECTED " + feature.geometry.type + " in " + JSON.stringify(feature) + "\nIf OSM data is correct and output is broken, please report to https://github.com/matkoniecz/lunar_assembler/issues"
-    );
+    showError("UNEXPECTED " + feature.geometry.type + " in " + JSON.stringify(feature) + reportBugMessage());
     return false;
   }
   return true;
@@ -1047,25 +1047,21 @@ function isMultipolygonAsExpected(feature) {
 
 function isAreaAsExpected(feature) {
   if (feature == undefined) {
-    alert("UNEXPECTED undefined" + " in " + JSON.stringify(feature) + "\nIf OSM data is correct and output is broken, please report to https://github.com/matkoniecz/lunar_assembler/issues");
+    showError("UNEXPECTED undefined" + " in " + JSON.stringify(feature) + reportBugMessage());
     return false;
   }
   if (feature.geometry.type == "Point" || feature.geometry.type === "MultiPoint") {
-    alert(
-      "UNEXPECTED " + feature.geometry.type + " in " + JSON.stringify(feature) + "\nIf OSM data is correct and output is broken, please report to https://github.com/matkoniecz/lunar_assembler/issues"
-    );
+    showError("UNEXPECTED " + feature.geometry.type + " in " + JSON.stringify(feature) + +reportBugMessage());
     return false;
   } else if (feature.geometry.type == "LineString" || feature.geometry.type == "MultiLineString") {
-    alert(
-      "UNEXPECTED " + feature.geometry.type + " in " + JSON.stringify(feature) + "\nIf OSM data is correct and output is broken, please report to https://github.com/matkoniecz/lunar_assembler/issues"
-    );
+    showError("UNEXPECTED " + feature.geometry.type + " in " + JSON.stringify(feature) + +reportBugMessage());
     return false;
   } else if (feature.geometry.type == "Polygon") {
     return true;
   } else if (feature.geometry.type == "MultiPolygon") {
     return true;
   }
-  alert("UNEXPECTED GEOMETRY " + feature.geometry.type);
+  showError("UNEXPECTED GEOMETRY " + feature.geometry.type + reportBugMessage());
   return false;
 }
 // TODO: what kind of geojson is accepted here? will it crash when I pass a point here?
@@ -1074,8 +1070,8 @@ function rewind(geojson_that_is_7946_compliant_with_right_hand_winding_order) {
   // https://gis.stackexchange.com/questions/392452/why-d3-js-works-only-with-geojson-violating-right-hand-rule
   // I opened https://github.com/d3/d3-shape/issues/178
 
-  if(geojson_that_is_7946_compliant_with_right_hand_winding_order.length == 1) {
-    console.warn("one element! Is spread working as expected? See #68") // TODO - trigger and debug it
+  if (geojson_that_is_7946_compliant_with_right_hand_winding_order.length == 1) {
+    console.warn("one element! Is spread working as expected? See #68"); // TODO - trigger and debug it
   }
 
   const d3_geojson = {
@@ -1106,7 +1102,7 @@ function validateGeometries(dataGeojson) {
     var feature = dataGeojson.features[i];
     if (feature.geometry == undefined) {
       var warning = "broken feature, geometry is missing!";
-      alert(warning + JSON.stringify(feature));
+      showError(warning + JSON.stringify(feature) + reportBugMessage());
       console.warn(warning);
       console.warn(feature);
     }
@@ -1114,6 +1110,9 @@ function validateGeometries(dataGeojson) {
 }
 
 function mergeAsRequestedByMapStyle(dataGeojson, mapStyle) {
+  if (("mergeIntoGroup" in mapStyle) == false) {
+    return dataGeojson;
+  }
   var i = dataGeojson.features.length;
   var processeedFeatures = [];
   var mergingGroups = {};
@@ -1151,19 +1150,19 @@ function mergeAsRequestedByMapStyle(dataGeojson, mapStyle) {
     var produced = forMerging[0];
     var coordinatesForMerging = [];
     for (var k = 0; k < forMerging.length; k++) {
-      if(isAreaAsExpected(forMerging[k]) == false) {
-        console.error("================================")
-        console.error("expected area, got not area, something want wrong, this is a bug!")
-        console.error(forMerging[k])
-        console.error("please report it on https://github.com/matkoniecz/lunar_assembler/issues ")
-        console.error("================================")
+      if (isAreaAsExpected(forMerging[k]) == false) {
+        console.error("================================");
+        console.error("expected area, got not area, something want wrong, this is a bug!");
+        console.error(forMerging[k]);
+        console.error("please report it on https://github.com/matkoniecz/lunar_assembler/issues ");
+        console.error("================================");
       }
       coordinatesForMerging.push(forMerging[k].geometry.coordinates);
     }
     // it is union so output will be nonepty
     // https://github.com/mfogel/polygon-clipping#output
     produced.geometry.type = "MultiPolygon";
-    if(coordinatesForMerging.length == 1) {
+    if (coordinatesForMerging.length == 1) {
       // adding it fixed crashing on empty areas for laser map style and private/public areas
       // https://github.com/matkoniecz/lunar_assembler/issues/68
       // necessary as ... will go multiple levels deep to decompose single element array

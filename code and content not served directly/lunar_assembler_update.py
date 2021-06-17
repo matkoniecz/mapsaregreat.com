@@ -7,6 +7,7 @@ def main():
   map_styles = [{'name': "general_high_zoom", 'description': 'area:highway included, general style - works well on scale of junction, neigbourhood, town, maybe also for entire cities'},
                 {'name': "laser_neighbourhood", 'description': 'depiction of a neighbourhood - generates map designed to be a template for laser-cut 3D tactile maps'},
                 {'name': "laser_road_area", 'description': 'depiction of a single crossing - generates map designed to be a template for laser-cut 3D tactile maps'},
+                {'name': "simple", 'description': 'very, very simple map style showing few elements. Useful if you are trying to make own and you want something as a base'},
                 ]
   write_index_html(map_styles)
   download_map_styles(map_styles)
@@ -58,7 +59,8 @@ def html_suffix():
 def download_map_styles(map_styles):
   for map_style in map_styles:
     get_file(map_style['name'] + '.html', text_processing_function=add_header)
-    get_file(map_style['name'] + '_map_style.js')
+    if map_style['name'] not in ["simple"]:
+      get_file(map_style['name'] + '_map_style.js')
 
 def get_file(original_name, text_processing_function=None, new_name=None, binary_file=False):
   if new_name == None:
