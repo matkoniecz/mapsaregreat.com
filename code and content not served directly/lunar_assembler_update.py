@@ -83,7 +83,7 @@ def get_file(original_name, text_processing_function=None, new_name=None, binary
         text = response.text
         if text_processing_function != None:
           text = text_processing_function(text)
-        file.write(response.text)
+        file.write(text)
 
 def add_header(page_text):
   replaced = """<div id="main_content_wrap" class="outer">"""
