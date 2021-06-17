@@ -25,13 +25,38 @@ def is_properly_handled_image(image):
             return True
     return False
 
-def validate_html(filename):
-    html = open(filename).read()
-    bs = BeautifulSoup(html, "html.parser")
-    images = bs.find_all("img")
+def require_wrapping_of_images(parsed_html):
+    # completely custom requirement for this site
+    images = parsed_html.find_all("img")
     for image in images:
         if is_properly_handled_image(image) == False:
             print("wrapping of " + str(image) + " in " + filename + " is not handled properly")
+
+def require_favicon(parsed_html):
+    head = parsed_html.find_all("head")
+    if(len(head) != 1):
+        print(filename, "has <head>", len(head), "times!")
+    if(len(head) == 0):
+        return
+    links = head[0].find_all("link")
+    for link in links:
+        if link.get("rel")[0] == "icon":
+            return
+    print(filename, "has no favicon")
+    print()
+
+def validate_html(filename):
+    html = open(filename).read()
+
+    if "google" in filename:
+        if len(html) < 60:
+            if "google-site-verification" in html:
+                print("treating", filename, "with content", html, "as ownership verification file and skipping its validation")
+                return
+
+    bs = BeautifulSoup(html, "html.parser")
+    require_wrapping_of_images(bs)
+    require_favicon(bs)
 
 os.chdir("../")
 for filename in glob.glob("**/*.html", recursive=True):

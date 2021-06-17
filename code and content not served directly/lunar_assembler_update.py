@@ -34,6 +34,8 @@ def write_index_html(map_styles):
       file.write(index_html)
 
 def html_prefix():
+   # <link rel="icon" href="../favicon.svg">
+   # is added later, by add_header
   return """<!DOCTYPE html>
 <html>
 <head>
@@ -118,7 +120,9 @@ def add_header(page_text):
             </li>
           </ul>
         </nav>"""
-  return ensure_text_replacement(page_text, replaced, new_content)
+  page_text = ensure_text_replacement(page_text, replaced, new_content)
+  page_text = ensure_text_replacement(page_text, "</head>", '    <link rel="icon" href="../favicon.svg">\n</head>')
+  return page_text
 
 def ensure_text_replacement(page_text, replaced, new_content):
   if replaced not in page_text:
