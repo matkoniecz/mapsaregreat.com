@@ -54,9 +54,9 @@ def validate_html(filename):
                 print("treating", filename, "with content", html, "as ownership verification file and skipping its validation")
                 return
 
-    bs = BeautifulSoup(html, "html.parser")
-    require_wrapping_of_images(bs)
-    require_favicon(bs)
+    parsed_html = BeautifulSoup(html, "html.parser")
+    require_wrapping_of_images(parsed_html)
+    require_favicon(parsed_html)
 
 os.chdir("../")
 for filename in glob.glob("**/*.html", recursive=True):
