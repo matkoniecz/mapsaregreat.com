@@ -50,7 +50,7 @@ def html_prefix():
     <script src="lunar_assembler.dist.js"></script>
 </head>
 <body>
-    <div id="main_content_wrap" class="outer">
+    <div id="main_content_wrap" class="outer"></div>
     <section id="main_content" class="inner">"""
 
 def html_suffix():
@@ -86,7 +86,7 @@ def get_file(original_name, text_processing_function=None, new_name=None, binary
         file.write(text)
 
 def add_header(page_text):
-  replaced = """<div id="main_content_wrap" class="outer">"""
+  replaced = """<div id="main_content_wrap" class="outer"></div>"""
   new_content = """<div id="main_content_wrap" class="outer">
       <nav role='navigation' class="main-nav">
           <ul id="main-nav-list">
