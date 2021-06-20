@@ -37,7 +37,7 @@ def html_prefix():
    # <link rel="icon" href="../favicon.svg">
    # is added later, by add_header
   return """<!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="utf-8" />
     <link rel="stylesheet" href="https://mapsaregreat.com/style.css">

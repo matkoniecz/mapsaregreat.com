@@ -45,6 +45,21 @@ def require_favicon(parsed_html):
     print(filename, "has no favicon")
     print()
 
+def require_language_to_be_specifified_as_english(parsed_html):
+    # https://www.matuzo.at/blog/lang-attribute/
+    # https://adrianroselli.com/2015/01/on-use-of-lang-attribute.html
+    # also, detected by some validator and may obscure more serious issues
+    
+    html = parsed_html.find_all("html")
+    if(len(html) != 1):
+        print(filename, "has <html>", len(head), "times!")
+    if(len(html) == 0):
+        return
+    if html[0].get("lang") == "en":
+        return
+    print(filename, "language is not specified as English!", html[0].get("lang"))
+    print()
+
 def validate_html(filename):
     html = open(filename).read()
 
@@ -57,6 +72,7 @@ def validate_html(filename):
     parsed_html = BeautifulSoup(html, "html.parser")
     require_wrapping_of_images(parsed_html)
     require_favicon(parsed_html)
+    require_language_to_be_specifified_as_english(parsed_html)
 
 os.chdir("../")
 for filename in glob.glob("**/*.html", recursive=True):
