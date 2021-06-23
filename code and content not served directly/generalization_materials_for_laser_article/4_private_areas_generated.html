@@ -89,14 +89,92 @@
     },
 
     unifiedStyling() {
+      var barriersKeyValue = [];
+      var i = linearGenerallyImpassableBarrierValuesArray().length;
+      while (i--) {
+        value = linearGenerallyImpassableBarrierValuesArray()[i];
+        barriersKeyValue.push({ key: "barrier", value: value, purpose: "generally impassable barrier, for detecting where access is blocked" });
+      }
+      barriersKeyValue.push({ key: "barrier", value: "yes", purpose: "unknown barrier, assumed to be generally impassable barrier, for detecting where access is blocked" });
+
+
+      var blockDetection = JSON.parse(JSON.stringify(barriersKeyValue));
+      // TODO: now it is necessary to manually change one thing in two places - change that and return list of inaccessibility tags
+      blockDetection.push({ key: "building", purpose: "generally impassable barrier, for detecting where access is blocked" });
+      blockDetection.push({ key: "natural", value: "water", purpose: "generally impassable barrier, for detecting where access is blocked" });
+      blockDetection.push({ key: "waterway", value: "riverbank", purpose: "generally impassable barrier, for detecting where access is blocked" });
+
+
       returned = [];
-      returned.push(
+      /*
+      returned.push({
+            area_color: "#777777",
+            line_color: "#333333",
+            line_width: 2,
+            description: "buildings",
+            matches: [
+                { key: "building" },
+            ]
+        });
+    */
+    returned.push({
+        area_color: "#777777",
+        description: "areas that are inaccessible, generated automatically",
+        automatically_generated_using: blockDetection,
+        matches: [
+          { key: "generated_blocked_chunk", value: "yes" },
+          { key: "native_blocked_chunk", value: "yes" },
+        ],
+      });
+      // generated_traversable_chunk=yes is not rendered
+        returned.push({
+            line_color: "green",
+            line_width: 2,
+            description: "footway",
+            matches: [
+                { key: "highway", value: "footway" },
+            ]
+        });
+        returned.push({
+            line_width: 0,
+            description: "hiding driveways",
+            matches: [
+                { key: "service", value: "driveway" },
+            ]
+        });
+        returned.push({
+            line_color: "gray",
+            line_width: 7,
+            description: "roads",
+            matches: [
+                { key: "highway" },
+            ]
+        });
+        returned.push({
+            area_color: "blue",
+            description: "water",
+            matches: [
+                { key: "natural", value: "water" },
+                { key: "waterway", value: "riverbank" },
+            ],
+        })
+        returned.push({
+            area_color: "#ADD19E",
+            description: "tree-covered area",
+            matches: [
+                { key: "natural", value: "wood" },
+                { key: "landuse", value: "forest" },
+            ],
+        })
+        returned.push(
         ...[
+            /*
           {
             area_color: "#B45A00",
             description: "buildings",
             matches: [{ key: "building" }],
           },
+          */
           {
             area_color: "#00FFFF",
             description: "water - pattern, part expected to be engraved",
@@ -122,37 +200,6 @@
         ]
       );
 
-      var barriersKeyValue = [];
-      var i = linearGenerallyImpassableBarrierValuesArray().length;
-      while (i--) {
-        value = linearGenerallyImpassableBarrierValuesArray()[i];
-        barriersKeyValue.push({ key: "barrier", value: value, purpose: "generally impassable barrier, for detecting where access is blocked" });
-      }
-      barriersKeyValue.push({ key: "barrier", value: "yes", purpose: "unknown barrier, assumed to be generally impassable barrier, for detecting where access is blocked" });
-
-      returned.push({
-        area_color: "#b76b80",
-        description: "generated barrier areas",
-        automatically_generated_using: barriersKeyValue,
-        matches: [{ key: "generated_barrier_area", value: "yes" }],
-      });
-
-      var blockDetection = JSON.parse(JSON.stringify(barriersKeyValue));
-      // TODO: now it is necessary to manually change one thing in two places - change that and return list of inaccessibility tags
-      blockDetection.push({ key: "building", purpose: "generally impassable barrier, for detecting where access is blocked" });
-      blockDetection.push({ key: "natural", value: "water", purpose: "generally impassable barrier, for detecting where access is blocked" });
-      blockDetection.push({ key: "waterway", value: "riverbank", purpose: "generally impassable barrier, for detecting where access is blocked" });
-
-      returned.push({
-        area_color: "black",
-        description: "areas that are inaccessible, generated automatically",
-        automatically_generated_using: blockDetection,
-        matches: [
-          { key: "generated_blocked_chunk", value: "yes" },
-          { key: "native_blocked_chunk", value: "yes" },
-        ],
-      });
-      // generated_traversable_chunk=yes is not rendered
 
       returned.push({
         area_color: "yellow",
@@ -357,38 +404,38 @@
     // called before merges
     // gets full data and can freely edit it
     transformGeometryAsInitialStep(dataGeojson, readableBounds) {
-      dataGeojson = mapStyle.applyManualPatchesAtStart(dataGeojson);
+      //dataGeojson = mapStyle.applyManualPatchesAtStart(dataGeojson);
 
-      dataGeojson = programaticallyGenerateSymbolicStepParts(dataGeojson);
+      //dataGeojson = programaticallyGenerateSymbolicStepParts(dataGeojson);
       dataGeojson = mapStyle.generateAreasFromBarriers(dataGeojson);
       dataGeojson = mapStyle.generateRestrictedAcccessArea(dataGeojson, readableBounds);
-      dataGeojson = mapStyle.generateAreasFromRoadLines(dataGeojson);
+      //dataGeojson = mapStyle.generateAreasFromRoadLines(dataGeojson);
       return dataGeojson;
     },
 
     // called after areas were merged, before sorting of areas
     // gets full data and can freely edit it
     transformGeometryAtFinalStep(dataGeojson, readableBounds) {
-      dataGeojson = mapStyle.applyManualPatchesBeforeGeometryErasings(dataGeojson);
+      //dataGeojson = mapStyle.applyManualPatchesBeforeGeometryErasings(dataGeojson);
 
-      dataGeojson = mapStyle.restrictPedestrianCrossingToRoadAreas(dataGeojson);
-      dataGeojson = mapStyle.eraseCrossingAreasFromRoads(dataGeojson);
-      dataGeojson = mapStyle.fillAreaNearRoadAndFootwayWithFootway(dataGeojson);
-      dataGeojson = mapStyle.eraseFootwayWhereIntersectingRoad(dataGeojson);
-      dataGeojson = mapStyle.eraseFootwayWhereIntersectingBuilding(dataGeojson);
-      dataGeojson = mapStyle.eraseFootwayWhereIntersectingPrivateArea(dataGeojson);
-      dataGeojson = mapStyle.eraseFootwayWhereIntersectingCrossings(dataGeojson);
-      dataGeojson = mapStyle.eraseWaterWhereIntersectingBridge(dataGeojson);
+      //dataGeojson = mapStyle.restrictPedestrianCrossingToRoadAreas(dataGeojson);
+      //dataGeojson = mapStyle.eraseCrossingAreasFromRoads(dataGeojson);
+      //dataGeojson = mapStyle.fillAreaNearRoadAndFootwayWithFootway(dataGeojson);
+      //dataGeojson = mapStyle.eraseFootwayWhereIntersectingRoad(dataGeojson);
+      //dataGeojson = mapStyle.eraseFootwayWhereIntersectingBuilding(dataGeojson);
+      //dataGeojson = mapStyle.eraseFootwayWhereIntersectingPrivateArea(dataGeojson);
+      //dataGeojson = mapStyle.eraseFootwayWhereIntersectingCrossings(dataGeojson);
+      //dataGeojson = mapStyle.eraseWaterWhereIntersectingBridge(dataGeojson);
 
-      dataGeojson = mapStyle.applyManualPatchesAfterGeometryErasings(dataGeojson);
+      //dataGeojson = mapStyle.applyManualPatchesAfterGeometryErasings(dataGeojson);
 
-      var roadAreaWithCrossing = findMergeGroupObject(dataGeojson, "area:highway_crossing");
-      dataGeojson = generateZebraBarCrossings(dataGeojson, roadAreaWithCrossing);
-      dataGeojson = mapStyle.fillSliversAroundFootways(dataGeojson, readableBounds);
+      //var roadAreaWithCrossing = findMergeGroupObject(dataGeojson, "area:highway_crossing");
+      //dataGeojson = generateZebraBarCrossings(dataGeojson, roadAreaWithCrossing);
+      //dataGeojson = mapStyle.fillSliversAroundFootways(dataGeojson, readableBounds);
 
       // last one - after that there are two carriageways and two waterways areas
       // with one being interection with a pattern
-      dataGeojson = mapStyle.applyPatternsToCarriagewaysAndWater(dataGeojson);
+      //dataGeojson = mapStyle.applyPatternsToCarriagewaysAndWater(dataGeojson);
 
       return dataGeojson;
     },
