@@ -108,13 +108,21 @@
                     return returned;
                 },
 
+                    // https://stackoverflow.com/a/46894020/4130619
+                randomGreyHex() {
+                    var v = (100+Math.random()*(156)|0).toString(16);//bitwise OR. Gives value in the range 100-255 which is then converted to base 16 (hex).
+                    return "#" + v + v + v;
+                },
+                
                 fillColoring(feature) {
                     if (["Point"].includes(feature.geometry.type)) {
                         //no rendering of points, for start size seems to randomly differ
-                        // and leaves ugly circles - see building=* areas
+                        // and leaves ugly circles - see building=* nodes
                         return "none";
                     }
-                    // more complex rules can be used here in addition - or instead of unified styling
+                    if (feature.properties["building"] != null) {
+                        return mapStyle.randomGreyHex();
+                    }
                     return getMatchFromUnifiedStyling(feature, "area_color", mapStyle.unifiedStyling());
                 },
 
@@ -138,7 +146,7 @@
 
         document.getElementById("automatically_generated_legend").innerHTML = generateLegend(simpleMapStyle().unifiedStyling())
         // must be executed after imports and once passed ids exist -->
-        initializeLunarAssembler({mapStyles: [simpleMapStyle()], mapDivId: 'map', downloadTriggerId: "download_generated_map", progressBarId: "progress_bar", mapOutputHolderId: "generated_svg_within", logOutputId: "log_messages_within", lat: 54.12856, lon: 21.67968, zoom: 15});
+        initializeLunarAssembler({mapStyles: [simpleMapStyle()], mapDivId: 'map', downloadTriggerId: "download_generated_map", progressBarId: "progress_bar", mapOutputHolderId: "generated_svg_within", logOutputId: "log_messages_within", lat: 50.0510044, lon: 19.9275373, zoom: 19});
     </script>
 </body>
 </html>
