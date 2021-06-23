@@ -136,20 +136,11 @@
                     return returned;
                 },
 
-                    // https://stackoverflow.com/a/46894020/4130619
-                randomGreyHex() {
-                    var v = (100+Math.random()*(156)|0).toString(16);//bitwise OR. Gives value in the range 100-255 which is then converted to base 16 (hex).
-                    return "#" + v + v + v;
-                },
-                
                 fillColoring(feature) {
                     if (["Point"].includes(feature.geometry.type)) {
                         //no rendering of points, for start size seems to randomly differ
                         // and leaves ugly circles - see building=* nodes
                         return "none";
-                    }
-                    if (feature.properties["building"] != null) {
-                        return mapStyle.randomGreyHex();
                     }
                     return getMatchFromUnifiedStyling(feature, "area_color", mapStyle.unifiedStyling());
                 },
@@ -168,6 +159,13 @@
                     // more complex rules can be used here in addition - or instead of unified styling
                     return getMatchFromUnifiedStyling(feature, "line_width", mapStyle.unifiedStyling());
                 },
+
+                mergeIntoGroup(feature) {
+                    if(feature.properties["building"] != null) {
+                        return "building";
+                    }
+                    return null;
+                }
             };
             return mapStyle;
         }
