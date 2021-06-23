@@ -79,17 +79,42 @@
                     returned = []
                     returned.push({
                         area_color: "black",
+                        line_color: "black",
+                        line_width: 2,
                         description: "buildings",
                         matches: [
                             { key: "building" },
                         ]
                     });
                     returned.push({
-                        line_color: "purple",
-                        line_width: 3,
-                        description: "marina",
+                        line_color: "black",
+                        line_width: 4,
+                        description: "barriers",
                         matches: [
-                            { key: "leisure", value: "marina" },
+                            { key: "barrier" },
+                        ]
+                    });
+                    returned.push({
+                        line_color: "green",
+                        line_width: 2,
+                        description: "footway",
+                        matches: [
+                            { key: "highway", value: "footway" },
+                        ]
+                    });
+                    returned.push({
+                        line_width: 0,
+                        description: "hiding driveways",
+                        matches: [
+                            { key: "service", value: "driveway" },
+                        ]
+                    });
+                    returned.push({
+                        line_color: "gray",
+                        line_width: 7,
+                        description: "roads",
+                        matches: [
+                            { key: "highway" },
                         ]
                     });
                     returned.push({
