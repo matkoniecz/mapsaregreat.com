@@ -28,6 +28,10 @@ def write_index_html(map_styles):
     index_html += '<li><a href="' + map_style['name'] + '">' + map_style['name'].replace('_', ' ') + "</a> - " + map_style['description'] + "</li>\n"
   index_html += """        </ul>
   """
+  index_html += """        <h1>Made using Lunar Assembler</h1>
+        <p>See <a href="https://github.com/matkoniecz/lunar_assembler#lunar-assembler">project page at Github</a>. Feedback, contributions are welcomed!</p>
+        <p>Feel free to make pull requests and issues also about things such as typos and missing documentation.</p>
+"""
   index_html += html_suffix()
   index_html = add_header(index_html)
   with open('index.html', 'w') as file:
