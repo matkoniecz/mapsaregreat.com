@@ -92,7 +92,7 @@ def get_file(original_name, text_processing_function=None, new_name=None, binary
 def add_header(page_text):
   replaced = """<div id="main_content_wrap" class="outer"></div>"""
   new_content = """<div id="main_content_wrap" class="outer">
-      <nav role='navigation' class="main-nav">
+      <nav class="main-nav">
           <ul id="main-nav-list">
             <li>
               <a href="../index.html">
