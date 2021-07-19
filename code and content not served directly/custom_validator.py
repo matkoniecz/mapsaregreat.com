@@ -88,17 +88,38 @@ def require_utf8_charset_declaration(filename, parsed_html):
         if meta_position == None:
             print(filename, "has meta not set")
     elif title_position < meta_position:
+        # https://www.matuzo.at/blog/html-boilerplate/#content
+        # It must come before the <title> element to avoid faulty characters in the page title.
         print(filename, 'has title before meta, it means that special characters in the title may be corrupted in some cases!')
 
     meta = get_singleton_tag("meta", filename, parsed_html)
     if meta == None:
         return
 
-    charset = meta.find_all("charset")
-    for entry in charset:
+    tags = meta.find_all("charset")
+    for entry in tags:
         if entry.get("charset")[0] != "UTF-8":
-            print(filename, 'charset must be UTF-8! Use <meta charset="UTF-8">')
+            # https://www.matuzo.at/blog/html-boilerplate/#content
+            # Here’s how Safari displays my name with and without the charset meta tag.
+            # Manuel Matuzović - Manuel MatuzoviÄ‡
+            print(filename, 'charset must be UTF-8! Use meta tag with `charset="UTF-8"`')
             print()
+
+    tags = meta.find_all("charset")
+    for entry in tags:
+        if entry.get("width")[0] != "device-width, initial-scale=1":
+            # https://github.com/joshbuchea/HEAD#recommended-minimum
+            # use the physical width of the device (great for mobile!)
+            # disable dumb autozooming
+            print(filename, 'magical viewport incantation is missing! Use meta tag with `width="device-width, initial-scale=1"`')
+
+    tags = meta.find_all("name")
+    for entry in tags:
+        if entry.get("name")[0] != "viewport":
+            # https://github.com/joshbuchea/HEAD#recommended-minimum
+            # viewport settings related to mobile responsiveness
+            print(filename, 'magical name="viewport" incantation is missing! Use meta tag with `name="viewport"`')
+
 
 def require_language_to_be_specifified_as_english(filename, parsed_html):
     # https://www.matuzo.at/blog/lang-attribute/
