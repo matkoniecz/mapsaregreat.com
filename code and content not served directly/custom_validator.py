@@ -54,12 +54,10 @@ def require_wrapping_of_images(filename, parsed_html):
             print("wrapping of " + str(image) + " in " + filename + " is not handled properly")
 
 def require_favicon(filename, parsed_html):
-    head = parsed_html.find_all("head")
-    if(len(head) != 1):
-        print(filename, "has <head>", len(head), "times!")
-    if(len(head) == 0):
+    head = get_singleton_tag("head", filename, parsed_html)
+    if head == None:
         return
-    links = head[0].find_all("link")
+    links = head.find_all("link")
     for link in links:
         if link.get("rel")[0] == "icon":
             return
@@ -71,21 +69,22 @@ def require_language_to_be_specifified_as_english(filename, parsed_html):
     # https://adrianroselli.com/2015/01/on-use-of-lang-attribute.html
     # also, detected by some validator and may obscure more serious issues
     
-    html = get_html_tag(filename, parsed_html)
+    html = get_singleton_tag("html", filename, parsed_html)
     if html == None:
         return
+
     if html.get("lang") == "en":
         return
     print(filename, "language is not specified as English!", html.get("lang"))
     print()
 
-def get_html_tag(filename, parsed_html):
-    html = parsed_html.find_all("html")
-    if(len(html) != 1):
-        print(filename, "has <html>", len(head), "times!")
-    if(len(html) == 0):
-        print(filename, "has no <html>!")
+def get_singleton_tag(tag, filename, parsed_html):
+    found = parsed_html.find_all(tag)
+    if(len(found) != 1):
+        print(filename, "has <" + tag + ">", len(found), "times!")
+    if(len(found) == 0):
+        print(filename, "has no <" + tag + ">!")
         return None
-    return html[0]
+    return found[0]
 
 main()
