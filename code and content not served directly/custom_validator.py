@@ -7,6 +7,26 @@ validates my website for some things that I want to check
 including custom stuff specific to only that site
 """
 
+
+def main():
+    os.chdir("../")
+    for filename in glob.glob("**/*.html", recursive=True):
+        validate_html(filename)
+
+def validate_html(filename):
+    html = open(filename).read()
+
+    if "google" in filename:
+        if len(html) < 60:
+            if "google-site-verification" in html:
+                print("treating", filename, "with content", html, "as ownership verification file and skipping its validation")
+                return
+
+    parsed_html = BeautifulSoup(html, "html.parser")
+    require_wrapping_of_images(filename, parsed_html)
+    require_favicon(filename, parsed_html)
+    require_language_to_be_specifified_as_english(filename, parsed_html)
+
 def is_properly_handled_image(image):
     # all images should either
     # - have image_with_frame class (on img tag)
@@ -60,20 +80,4 @@ def require_language_to_be_specifified_as_english(filename, parsed_html):
     print(filename, "language is not specified as English!", html[0].get("lang"))
     print()
 
-def validate_html(filename):
-    html = open(filename).read()
-
-    if "google" in filename:
-        if len(html) < 60:
-            if "google-site-verification" in html:
-                print("treating", filename, "with content", html, "as ownership verification file and skipping its validation")
-                return
-
-    parsed_html = BeautifulSoup(html, "html.parser")
-    require_wrapping_of_images(filename, parsed_html)
-    require_favicon(filename, parsed_html)
-    require_language_to_be_specifified_as_english(filename, parsed_html)
-
-os.chdir("../")
-for filename in glob.glob("**/*.html", recursive=True):
-    validate_html(filename)
+main()
