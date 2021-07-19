@@ -43,9 +43,8 @@ def html_prefix():
   return """<!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8" />
+    <meta charset="utf-8" name="viewport" content="width=device-width, initial-scale=1.0"/>
     <link rel="stylesheet" href="https://mapsaregreat.com/style.css">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Map list - generate SVG map from OpenStreetMap data</title>
     <link 
         rel="stylesheet" 
