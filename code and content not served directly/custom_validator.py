@@ -25,14 +25,14 @@ def is_properly_handled_image(image):
             return True
     return False
 
-def require_wrapping_of_images(parsed_html):
+def require_wrapping_of_images(filename, parsed_html):
     # completely custom requirement for this site
     images = parsed_html.find_all("img")
     for image in images:
         if is_properly_handled_image(image) == False:
             print("wrapping of " + str(image) + " in " + filename + " is not handled properly")
 
-def require_favicon(parsed_html):
+def require_favicon(filename, parsed_html):
     head = parsed_html.find_all("head")
     if(len(head) != 1):
         print(filename, "has <head>", len(head), "times!")
@@ -45,7 +45,7 @@ def require_favicon(parsed_html):
     print(filename, "has no favicon")
     print()
 
-def require_language_to_be_specifified_as_english(parsed_html):
+def require_language_to_be_specifified_as_english(filename, parsed_html):
     # https://www.matuzo.at/blog/lang-attribute/
     # https://adrianroselli.com/2015/01/on-use-of-lang-attribute.html
     # also, detected by some validator and may obscure more serious issues
@@ -70,9 +70,9 @@ def validate_html(filename):
                 return
 
     parsed_html = BeautifulSoup(html, "html.parser")
-    require_wrapping_of_images(parsed_html)
-    require_favicon(parsed_html)
-    require_language_to_be_specifified_as_english(parsed_html)
+    require_wrapping_of_images(filename, parsed_html)
+    require_favicon(filename, parsed_html)
+    require_language_to_be_specifified_as_english(filename, parsed_html)
 
 os.chdir("../")
 for filename in glob.glob("**/*.html", recursive=True):
