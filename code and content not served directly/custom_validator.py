@@ -26,6 +26,7 @@ def validate_html(filename):
     parsed_html = BeautifulSoup(html, "html.parser")
     require_wrapping_of_images(filename, parsed_html)
     require_favicon(filename, parsed_html)
+    require_utf8_charset_declaration(filename, parsed_html)
     require_language_to_be_specifified_as_english(filename, parsed_html)
 
 def is_properly_handled_image(image):
@@ -63,6 +64,41 @@ def require_favicon(filename, parsed_html):
             return
     print(filename, "has no favicon")
     print()
+
+def require_utf8_charset_declaration(filename, parsed_html):
+    head = get_singleton_tag("head", filename, parsed_html)
+    title_position = None
+    meta_position = None
+    position = 0
+    for child in head.children:
+        if(child != "\n"):
+            #print(child.name)
+            if child.name == "title":
+                if title_position != None:
+                    print(filename, 'has title set multiple times!')
+                title_position = position
+            if child.name == "meta":
+                if meta_position != None:
+                    print(filename, 'has meta set mutiple times!')
+                meta_position = position
+            position += 1
+    if title_position == None or meta_position == None:
+        if title_position == None:
+            print(filename, "has title not set")
+        if meta_position == None:
+            print(filename, "has meta not set")
+    elif title_position < meta_position:
+        print(filename, 'has title before meta, it means that special characters in the title may be corrupted in some cases!')
+
+    meta = get_singleton_tag("meta", filename, parsed_html)
+    if meta == None:
+        return
+
+    charset = meta.find_all("charset")
+    for entry in charset:
+        if entry.get("charset")[0] != "UTF-8":
+            print(filename, 'charset must be UTF-8! Use <meta charset="UTF-8">')
+            print()
 
 def require_language_to_be_specifified_as_english(filename, parsed_html):
     # https://www.matuzo.at/blog/lang-attribute/
