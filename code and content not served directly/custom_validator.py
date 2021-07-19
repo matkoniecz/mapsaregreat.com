@@ -26,7 +26,7 @@ def validate_html(filename):
     parsed_html = BeautifulSoup(html, "html.parser")
     require_wrapping_of_images(filename, parsed_html)
     require_favicon(filename, parsed_html)
-    require_utf8_charset_declaration(filename, parsed_html)
+    require_utf8_charset_declaration_and_magical_incantations_in_meta_tag(filename, parsed_html)
     require_language_to_be_specifified_as_english(filename, parsed_html)
 
 def is_properly_handled_image(image):
@@ -65,7 +65,7 @@ def require_favicon(filename, parsed_html):
     print(filename, "has no favicon")
     print()
 
-def require_utf8_charset_declaration(filename, parsed_html):
+def require_utf8_charset_declaration_and_magical_incantations_in_meta_tag(filename, parsed_html):
     head = get_singleton_tag("head", filename, parsed_html)
     title_position = None
     meta_position = None
