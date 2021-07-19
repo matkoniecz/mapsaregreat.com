@@ -11,7 +11,8 @@ including custom stuff specific to only that site
 def main():
     os.chdir("../")
     for filename in glob.glob("**/*.html", recursive=True):
-        validate_html(filename)
+        if filename.find("code and content not served directly") != 0:
+            validate_html(filename)
 
 def validate_html(filename):
     html = open(filename).read()
