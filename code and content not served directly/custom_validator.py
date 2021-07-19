@@ -71,14 +71,21 @@ def require_language_to_be_specifified_as_english(filename, parsed_html):
     # https://adrianroselli.com/2015/01/on-use-of-lang-attribute.html
     # also, detected by some validator and may obscure more serious issues
     
+    html = get_html_tag(filename, parsed_html)
+    if html == None:
+        return
+    if html.get("lang") == "en":
+        return
+    print(filename, "language is not specified as English!", html.get("lang"))
+    print()
+
+def get_html_tag(filename, parsed_html):
     html = parsed_html.find_all("html")
     if(len(html) != 1):
         print(filename, "has <html>", len(head), "times!")
     if(len(html) == 0):
-        return
-    if html[0].get("lang") == "en":
-        return
-    print(filename, "language is not specified as English!", html[0].get("lang"))
-    print()
+        print(filename, "has no <html>!")
+        return None
+    return html[0]
 
 main()
