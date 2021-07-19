@@ -79,7 +79,7 @@ def require_utf8_charset_declaration(filename, parsed_html):
                 title_position = position
             if child.name == "meta":
                 if meta_position != None:
-                    print(filename, 'has meta set mutiple times!')
+                    print(filename, 'has meta set multiple times!')
                 meta_position = position
             position += 1
     if title_position == None or meta_position == None:
