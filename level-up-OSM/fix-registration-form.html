@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Level up OSM - selecting the next project</title>
+    <link rel="stylesheet" href="../style.css" />
+    <link rel="icon" href="../favicon.svg">
+  </head>
+  <body>
+    <div id="main_content_wrap" class="outer">
+      <nav class="main-nav">
+        <ul id="main-nav-list">
+          <li>
+            <a href="index.html">
+              <div>
+                Home
+              </div>
+            </a>
+          </li>
+          <li>
+            <a href="articles.html">
+              <div>
+                Articles
+              </div>
+            </a>
+          </li>
+          <li>
+            <a href="recommendations.html">
+              <div>
+                Recommendations
+              </div>
+            </a>
+          </li>
+          <li>
+            <a href="contact.html" class="active">
+              <div>
+                Contact
+              </div>
+            </a>
+          </li>
+        </ul>
+      </nav>
+      <section id="main_content" class="inner">
+              <h1>Fix registration form</h1>
+              <!-- synchronize beginning with main level-up-OSM page -->
+              <p>Current one is a real barrier (revealed by my <a href="https://github.com/streetcomplete/StreetComplete/issues/1470">UX testing of StreetComplete</a>)<p>
+              
+              <p>Registering with another account is resulting in unexpected and cumbersome flow. There are unneded elements. Overall experience is atrocious on mobile devices and subotimal on fully-sized monitors. Poor design here is one of pointless and primarily technical barriers for potential mappers.</p>
+
+              <p>Public domain checkbox. Is it really needed? ("In addition to the above, I consider my contributions to be in the Public Domain (<a href="https://wiki.osmfoundation.org/wiki/Licence_and_Legal_FAQ/Why_would_I_want_my_contributions_to_be_public_domain">what's this?</a>)")</p>
+
+              <p>See <a href="https://github.com/openstreetmap/openstreetmap-website/issues/2287">#2287</a>, <a href="https://github.com/openstreetmap/openstreetmap-website/issues/2288">#2288</a>, <a href="https://github.com/openstreetmap/openstreetmap-website/issues/894">#894</a>, <a href="https://github.com/openstreetmap/openstreetmap-website/issues/3259">#3259</a></p>
+
+              <h3>Produced work</h3>
+              <p>Run basic testing on mobile and desktop and look for obvious breakage like <a href="https://github.com/openstreetmap/openstreetmap-website/issues/3259">#3259</a>. Is content still overlapping forms? Is there an open issue for that? This would take about 4h.</p>
+              <p>Fix obvious layout issues - again, cases like <a href="https://github.com/openstreetmap/openstreetmap-website/issues/3259">#3259</a>. Time estimate unknown, especially as number of such problems is unknown.</p>
+              <p>Documentation why each element of registration form is needed - to find is there any part that can be dropped (is public domain checkbox worth confusion caused by it?).</p>
+              <p>A working propotype of a simplied form. Time estimate - I am really unsure here how much time I would need.</p>
+              <h1>Other ideas</h1>
+              <p><a href="../level-up-OSM">See them!</p>
+      </section>
+    </div>
+  </body>
+</html>
