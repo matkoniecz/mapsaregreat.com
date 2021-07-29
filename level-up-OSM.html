@@ -117,6 +117,25 @@
 
           <tr>
             <td>
+              <h2>Fix broken edit button on mobile</h2>
+              <p>On mobile edit button is missing Vespucci, StreetComplete (on Android) and GoMap!! (on mobile)</p>
+              <p>Disclaimer: conflict of interest here, I am <a href="https://github.com/streetcomplete/StreetComplete/graphs/contributors">quite involved</a> in making StreetComplete.</p>
+            </td>
+            <td>
+              <h2>Illegal use of OpenStreetMap</h2>
+              <p>Write this specific recommendations for OSMF</p>
+              <p>My <a href="https://github.com/matkoniecz/illegal-use-of-OpenStreetMap">site</a> has some actionable issues how to deal with plagiarism - typical problem is a missing or hidden attribution. For example <a href="https://github.com/matkoniecz/illegal-use-of-OpenStreetMap/issues/2">#2</a></p>
+            </td>
+            <td>
+              <h2>JOSM improvements</h2>
+
+              Likely starting from <a href="https://josm.openstreetmap.de/query?status=assigned&status=needinfo&status=new&status=reopened&component=Core+validator&reporter=~mkoniecz&max=1000&col=id&col=summary&col=status&col=component&col=type&col=priority&col=milestone&col=time&report=2&order=id">validator improvements</a> that I proposed, but maybe also something from <a href="https://josm.openstreetmap.de/query?status=assigned&status=needinfo&status=new&status=reopened&component=!Core+validator&reporter=~mkoniecz&max=1000&col=id&col=summary&col=status&col=component&col=type&col=priority&col=milestone&col=time&report=2&order=id">other issues that I opened</a>.
+          </td>
+            </tr>
+
+
+          <tr>
+            <td>
               <h2>Route info generator</h2>
               For given route show info about surface, elevation, nearby tourism attractions and export it as a static HTML website.
   
@@ -147,19 +166,22 @@
             </tr>
               <tr>
                 <td>
-                  <h2>Illegal use of OpenStreetMap</h2>
-                  <p>Write this specific recommendations for OSMF</p>
-                  <p>My <a href="https://github.com/matkoniecz/illegal-use-of-OpenStreetMap">site</a> has some actionable issues how to deal with plagiarism - typical problem is a missing or hidden attribution. For example <a href="https://github.com/matkoniecz/illegal-use-of-OpenStreetMap/issues/2">#2</a></p>
+                  <h2>3D tactile maps</h2>
+                  <p>Publish outcome of work funded by Microgrants</p>
                 <td>
                   <h2>OSM Carto</h2>
 
                   <p>Merge finally some pull requests.</p>
                 </td>
                 <td>
-                <h2>JOSM improvements</h2>
-
-                Likely starting from <a href="https://josm.openstreetmap.de/query?status=assigned&status=needinfo&status=new&status=reopened&component=Core+validator&reporter=~mkoniecz&max=1000&col=id&col=summary&col=status&col=component&col=type&col=priority&col=milestone&col=time&report=2&order=id">validator improvements</a> that I proposed, but maybe also something from <a href="https://josm.openstreetmap.de/query?status=assigned&status=needinfo&status=new&status=reopened&component=!Core+validator&reporter=~mkoniecz&max=1000&col=id&col=summary&col=status&col=component&col=type&col=priority&col=milestone&col=time&report=2&order=id">other issues that I opened</a>.
-                </td>
+                  <h2>Synchronize presets</h2>
+                  <p>Coordination between iD, Vespucci and JOSM presets would be nice.</p>
+                  <p>For start detecting what is missing from each preset and detecting unusual values where support should be dropped would be a good start</p>
+                  <p>Maybe do this by comparing <a href="https://wiki.openstreetmap.org/wiki/Taginfo/Projects">Taginfo project listing</a> for each? See <a href="https://taginfo.openstreetmap.org/projects/josm_main_mappaint_style">JOSM mappaint</a>, <a href="https://taginfo.openstreetmap.org/projects/josm_main_presets">JOSM presets</a>, <a href="https://taginfo.openstreetmap.org/projects/vespucci">Vespucci</a> and <a href=" https://taginfo.openstreetmap.org/projects/id_editor">iD</a> listings.</p>
+                  <p>Next action: do straightforward comparison, find differences, find the most obvious pointless differences where filing issues would be helpful. And submit such issues. Note that testing with editor itself is needed as this listings can be outdated!</p>
+                  <p>In a long-term perspective maybe mistake of creating a new project solely for iD presets can be undone?</p>
+                  <p>For context see <a href="https://github.com/MarcusWolschon/osmeditor4android/issues/1412">#1412 @ Vespucci</a>, <a href="https://github.com/MarcusWolschon/osmeditor4android/issues/1413">#1413 @ Vespucci</a>.
+            </td>
                 </tr>
                 <tr>
                   <td>
@@ -167,17 +189,8 @@
                     <p>For example leisure=park really should be rendered as greenish area, not with black border suggesting that something went wrong.</p>
                   </td>
                   <td>
-                    <h2>Synchronize presets</h2>
-                    <p>Coordination between iD, Vespucci and JOSM presets would be nice.</p>
-                    <p>For start detecting what is missing from each preset and detecting unusual values where support should be dropped would be a good start</p>
-                    <p>Maybe do this by comparing <a href="https://wiki.openstreetmap.org/wiki/Taginfo/Projects">Taginfo project listing</a> for each? See <a href="https://taginfo.openstreetmap.org/projects/josm_main_mappaint_style">JOSM mappaint</a>, <a href="https://taginfo.openstreetmap.org/projects/josm_main_presets">JOSM presets</a>, <a href="https://taginfo.openstreetmap.org/projects/vespucci">Vespucci</a> and <a href=" https://taginfo.openstreetmap.org/projects/id_editor">iD</a> listings.</p>
-                    <p>Next action: do straightforward comparison, find differences, find the most obvious pointless differences where filing issues would be helpful. And submit such issues. Note that testing with editor itself is needed as this listings can be outdated!</p>
-                    <p>In a long-term perspective maybe mistake of creating a new project solely for iD presets can be undone?</p>
-                    <p>For context see <a href="https://github.com/MarcusWolschon/osmeditor4android/issues/1412">#1412 @ Vespucci</a>, <a href="https://github.com/MarcusWolschon/osmeditor4android/issues/1413">#1413 @ Vespucci</a>.
                   </td>
                   <td>
-                    <h2>3D tactile maps</h2>
-                    <p>Publish outcome of work funded by Microgrants</p>
                   </td>
                 </tr>
                 <!--
@@ -196,10 +209,10 @@
             <table>
             <tr>
                 <td>
-                  <h2>Make possible to control use of tile servers</h2>
+                  <h2>Block abuse of tile servers</h2>
                   <p><a href="https://github.com/openstreetmap/operations/issues/342">#342 Adding API key support for tile.osm.org?</a></p>
                   <p>Right now OpenStreetMap community funds various asset tracking sites and Uber clones with easy to abuse tile server. This feature is needed to end with abuse and overuse of our resources and preserve it where it would benefit OSM.</p>
-                  <p><a href="https://github.com/openstreetmap/operations/issues/549">#549 Support ip blocking on backend render servers</a> - this would help with instances of extreme abuse and may be simpler to implement.</p>
+                  <p><a href="https://github.com/openstreetmap/operations/issues/549">#549 Support ip blocking on backend render servers</a> - quote twitter here.</p>
                 </td>
                 <td>
                   <h2>Login on OSM Wiki with OSM account</h2>
