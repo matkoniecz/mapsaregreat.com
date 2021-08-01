@@ -36,6 +36,9 @@ def is_properly_handled_image(image):
     # - be directly in div with img_container class
     classes_if_specified = image.get('class')
     if classes_if_specified != None:
+        if "framed" in classes_if_specified:
+            return True
+        # TODO deprecate this
         if "image_with_frame" in classes_if_specified:
             return True
 
