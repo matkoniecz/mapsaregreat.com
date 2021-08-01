@@ -55,7 +55,7 @@ def require_wrapping_of_images(filename, parsed_html):
     images = parsed_html.find_all("img")
     for image in images:
         if is_properly_handled_image(image) == False:
-            print("wrapping of " + str(image) + " in " + filename + " is not handled properly")
+            print("wrapping of " + str(image) + " in " + filename + " is not handled properly (should be within <div class=img_container> or with class=framed on itself")
 
 def require_favicon(filename, parsed_html):
     head = get_singleton_tag("head", filename, parsed_html)
