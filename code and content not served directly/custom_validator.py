@@ -72,6 +72,7 @@ def require_utf8_charset_declaration_and_magical_incantations_in_meta_tag(filena
     head = get_singleton_tag("head", filename, parsed_html)
     title_position = None
     meta_position = None
+    noscript = None
     position = 0
     for child in head.children:
         if(child != "\n"):
@@ -84,11 +85,20 @@ def require_utf8_charset_declaration_and_magical_incantations_in_meta_tag(filena
                 if meta_position != None:
                     print(filename, 'has meta set multiple times!')
                 meta_position = position
+            if child.name == "noscript":
+                noscript = child
             position += 1
     if title_position == None or meta_position == None:
         if title_position == None:
             print(filename, "has title not set")
         if meta_position == None:
+            if noscript != None:
+                for child in noscript.children:
+                    if child.name == "meta":
+                        if child.get("http-equiv") == "refresh":
+                            if child.get("content") != None:
+                                # redirect page, skipping this check
+                                return
             print(filename, "has meta not set")
     elif title_position < meta_position:
         # https://www.matuzo.at/blog/html-boilerplate/#content
