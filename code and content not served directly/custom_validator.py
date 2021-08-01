@@ -20,7 +20,7 @@ def validate_html(filename):
     if "google" in filename:
         if len(html) < 60:
             if "google-site-verification" in html:
-                print("treating", filename, "with content", html, "as ownership verification file and skipping its validation")
+                #print("treating", filename, "with content", html, "as ownership verification file and skipping its validation")
                 return
 
     parsed_html = BeautifulSoup(html, "html.parser")
