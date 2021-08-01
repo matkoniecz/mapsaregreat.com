@@ -64,6 +64,13 @@ def require_favicon(filepath, parsed_html):
     links = head.find_all("link")
     for link in links:
         if link.get("rel")[0] == "icon":
+            directory_location = os.path.dirname(filepath)
+            if(link.get("href") == "favicon.svg"):
+                if os.path.isfile(directory_location + link.get("href")) == False:
+                    print(filepath, "links nonexisting favicon file")
+            else:
+                # TODO - may be still wrong...
+                pass
             return
     print(filepath, "has no favicon")
     print()
