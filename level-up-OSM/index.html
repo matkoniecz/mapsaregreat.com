@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Level up OSM - selecting the next project</title>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="icon" href="favicon.svg">
+  </head>
+  <body>
+    <div id="main_content_wrap" class="outer">
+      <nav class="main-nav">
+        <ul id="main-nav-list">
+          <li>
+            <a href="index.html">
+              <div>
+                Home
+              </div>
+            </a>
+          </li>
+          <li>
+            <a href="articles.html">
+              <div>
+                Articles
+              </div>
+            </a>
+          </li>
+          <li>
+            <a href="recommendations.html">
+              <div>
+                Recommendations
+              </div>
+            </a>
+          </li>
+          <li>
+            <a href="contact.html" class="active">
+              <div>
+                Contact
+              </div>
+            </a>
+          </li>
+        </ul>
+      </nav>
+      <section id="main_content" class="inner">
+        <h1>Listing project ideas for improving OpenStreetMap</h1>
+        <p>Mapping projects are excluded from this list, only less direct projects are listed here.</p>
+        <p>Projects below are NOT reserved, feel free to work of them!</p>
+        <p>In general ideas are not worth much, 99.9% of input is actual work, not idea stuff.</p>
+        <p>Though pointless well done work is quite sad, so selecting a good target is worth spending some time on.</p>
+        <p>I created this list primarily for my own use, as I wanted to organise my chaotic TODO lists. Also, it will be useful when applying for grant supporting OpenStreetMap-related development. But it may be useful as inspiration for your own work, maybe GSoC proposal or something similar.</p>
+        <p>If you see mistakes, something unclear or it is unclear why working on a given project makes sense - <a href="mailto:matkoniecz@gmail.com">let me know</a>. It is intended to be human-readable in general.</p>
+        <p>In case that someone would be interested in sponsoring work on projects below - feel free to <a href="mailto:matkoniecz@gmail.com">contact me</a>. Note that in some cases I would first need to ask other involved people. For example in case of JOSM I am unsure what is the position of JOSM maintainers. It would be definitely fine for independent projects, where I am the main author and for StreetComplete. (TODO: note status for each project to make it more clear)</p>
+        <p>If you are aware about existing work on a given proposal - also let me know! With rare exceptions it is better to join existing project over starting a new one.</p>
+
+
+        <table>
+          <tr>
+            <td>
+              <h2>Fix registration form</h2>
+              <!-- synchronize text here with a detailed page -->
+
+              <p>Current one is a real barrier (revealed by my <a href="https://github.com/streetcomplete/StreetComplete/issues/1470">UX testing of StreetComplete</a>)<p>
+              
+              <p>Registering with another account is resulting in unexpected and cumbersome flow. There are unneded elements. Overall experience is atrocious on mobile devices and subotimal on fully-sized monitors. Poor design here is one of pointless and primarily technical barriers for potential mappers.</p>
+
+              <p><a href="level-up-OSM/fix-registration-form">See more</p>
+            </td>
+            <td>
+              <h2>Maintain my business</h2>
+              <p>New editor for users that want to add their shop/restaurant/office. And update info such as opening hours.</p>
+              <p>Assumes no knowledge about OpenStreetMap, plenty of hand holding, guides user.</p>
+              <p>There is this generator of dead notes, this would edit directly</p>
+              <p>Danger: maps.me quality edits, people misusing it to own object, putting ad text in name of object...</p>
+              <p>TODO: find name not implying ownership of OSM object</p>
+              <p>Investigate existing projects - maybe <a href="https://wiki.openstreetmap.org/wiki/OSMyBiz">OSMyBiz</a> should be expanded/popularized instead?</p>
+              <p><a href="https://www.onosm.org/">onosm</a> exists but is quite misleading - it generates notes that with rare exception sit ignored for years. And in effect is not helpful to either mappers nor people trying to add their business.</p> 
+              <h3>Produced work</h3>
+              <p>For start, survey existing tools. Maybe new project is not needed here?</p>
+              <p>App/Webapp/Website allowing to add shop/amenity/POI in general, guiding user to avoid problem of MAPS.ME like placing shop in the middle of street</p>
+              <p>The first big expansion: ability to add and edit opening hours</p>
+            </td>
+            <td>
+              <h2>StreetComplete improvements</h2>
+              <p>See <a href="https://github.com/streetcomplete/StreetComplete/issues?q=is%3Aissue+is%3Aopen+-label%3A%22feedback+required%22">issue tracker</a>. There is no shortage of ideas there, it keeps fluctuating around 100 open issues even as many of them get implemented.</p>
+              <p>Work toward iOS app would be a good target, see <a href="https://github.com/streetcomplete/StreetComplete/issues/1892">analysis estimating total work for about 7 months</a>. Note that it is an optimistic estimate and assume experienced iOS developer. I am not one, but there are big parts that are also an independent improvements and doing them will reduce total workload and make iOS port closer.</p>
+              <p>Definitely open to funding for StreetComplete related tasks.</p>
+            </td>
+          </tr>
+
+          <tr>
+            <td>
+              <h2>Avoid being WMF</h2>
+              <p>OpenStreetMap Foundation is in danger of becoming Wikimedia Foundation - organisation existing primarily to serve its employees, not answerable to community, with money getting spend in unclear way and exploiting community reputation to fund itself.</p>
+              <p>How this can be avoided?</p>
+              <p>two next projects are more specific ideas what can be done with that</p>
+              <h2>Produced work</h2>
+              <p>Document the problem (diary entry?)
+              <p>More specific idea what can be done about that.</p>
+            </td>
+            <td>
+              <h2>Research what went wrong with Wikimedia Foundation</h2>
+              <p>How it went so wrong? What we can learn from that?</p>
+              <h2>Produced work</h2>
+              <p>Description of the problem and what we can learn from it.</p>
+            </td>
+            <td>
+              <h2>OpenStreetMap Foundation budget infographic</h2>
+              <p>Make human-readable summary of OSMF funding sources, how money gets spend.</p>
+              <p>We have here things worth advertising - like unpaid board, no mysterious administration eating through millions.</p>
+              <p>So communicating situation clearly may result in people being more likely to donate to OpenStreetMap Foundation.</p>
+              <p>It also could help to promote culture of clearly disclosing what happens with donations (see "Avoid being WMF" part)
+                <h2>Produced work</h2>
+                <p>Wiki page listing basic info in a text form.</p>
+                <p>Some pretty and still clearly readable infographic.</p>
+                <p>Hopefully it can be distributed as encouragement to donate to OSMF.</p>
+              </td>
+          </tr>
+
+          <tr>
+            <td>
+              <h2>Fix broken edit button on mobile</h2>
+              <p>On mobile edit button is missing Vespucci, StreetComplete (on Android) and GoMap!! (on mobile)</p>
+              <p>Disclaimer: conflict of interest here, I am <a href="https://github.com/streetcomplete/StreetComplete/graphs/contributors">quite involved</a> in making StreetComplete.</p>
+            </td>
+            <td>
+              <h2>Illegal use of OpenStreetMap</h2>
+              <p>Write this specific recommendations for OSMF</p>
+              <p>My <a href="https://github.com/matkoniecz/illegal-use-of-OpenStreetMap">site</a> has some actionable issues how to deal with plagiarism - typical problem is a missing or hidden attribution. For example <a href="https://github.com/matkoniecz/illegal-use-of-OpenStreetMap/issues/2">#2</a></p>
+            </td>
+            <td>
+              <h2>JOSM improvements</h2>
+
+              Likely starting from <a href="https://josm.openstreetmap.de/query?status=assigned&status=needinfo&status=new&status=reopened&component=Core+validator&reporter=~mkoniecz&max=1000&col=id&col=summary&col=status&col=component&col=type&col=priority&col=milestone&col=time&report=2&order=id">validator improvements</a> that I proposed, but maybe also something from <a href="https://josm.openstreetmap.de/query?status=assigned&status=needinfo&status=new&status=reopened&component=!Core+validator&reporter=~mkoniecz&max=1000&col=id&col=summary&col=status&col=component&col=type&col=priority&col=milestone&col=time&report=2&order=id">other issues that I opened</a>.
+          </td>
+            </tr>
+
+
+          <tr>
+            <td>
+              <h2>Route info generator</h2>
+              For given route show info about surface, elevation, nearby tourism attractions and export it as a static HTML website.
+  
+              Note that except "export as" it is at least sort of doable in say Osmand and there is bRouter and this site with terrible color scheme TODO: find it
+  
+              https://www.plotaroute.com/ https://maps.openrouteservice.org/ may be partially covering it
+  
+              Why? For example lets say that someone wants to make a website with a list of proposed bicycle trips with info about a route.
+              <h2>Produced work</h2>
+              <p>Script allowing to generate website with a (likely Leaflet) map with marked route</p>
+              <p>And with info what kind of surface is there. (for example avoiding sand is of critical importance for cyclists, hikers typically prefer to avoid asphalt, for wheelchair trips asphalt in a nice area would be highly preferred...)</p> 
+            </td>
+            <td>
+              <h2>Areas as a fundamental geometry type</h2>
+              <p>It would end ennoying dance of some closed areas being areas and some closed ways depending on their tags.</p>
+              <p>Time estimate: Muahahahahhahaaha *sobs quietly*</p>
+              <p>Yes, it requires updating every single editor, anything consuming raw OSM data.</p>
+              <p>TODO: split it into some actionable parts (how?)</p>
+              <p>TODO: find existing discussion/documentation</p>
+            </td>
+            <td>
+              <h2>A/B Street</h2>
+              <p><a href="https://github.com/a-b-street/abstreet">A/B Street</a> is quite risky project. It is still too early to use it as a simulation for purposes of checking how traffic flow is influenced by potential changes. And it is unclear how much work is needed to reach that state, and project has a clear bus factor of 1.</p>
+              <p>Next danger is risk that goverments are not actually interested at all in real analysis and currently done simulations are purely smokescreens. And any actual simulation would be ignored.</p>
+              <p>But if it actually works and detailed OpenStreetMap data is actually used to simulate how infrastructure changes would affect traffic and such simulation would be mostly right and actually used to make decisions - it would be an amazing victory!</p>
+              <p>Also, I heard that Rust is great and I want to learn it.</p>
+            </td>
+            </tr>
+              <tr>
+                <td>
+                  <h2>3D tactile maps</h2>
+                  <p>Publish outcome of work funded by Microgrants</p>
+                <td>
+                  <h2>OSM Carto</h2>
+
+                  <p>Merge finally some pull requests.</p>
+                </td>
+                <td>
+                  <h2>Synchronize presets</h2>
+                  <p>Coordination between iD, Vespucci and JOSM presets would be nice.</p>
+                  <p>For start detecting what is missing from each preset and detecting unusual values where support should be dropped would be a good start</p>
+                  <p>Maybe do this by comparing <a href="https://wiki.openstreetmap.org/wiki/Taginfo/Projects">Taginfo project listing</a> for each? See <a href="https://taginfo.openstreetmap.org/projects/josm_main_mappaint_style">JOSM mappaint</a>, <a href="https://taginfo.openstreetmap.org/projects/josm_main_presets">JOSM presets</a>, <a href="https://taginfo.openstreetmap.org/projects/vespucci">Vespucci</a> and <a href=" https://taginfo.openstreetmap.org/projects/id_editor">iD</a> listings.</p>
+                  <p>Next action: do straightforward comparison, find differences, find the most obvious pointless differences where filing issues would be helpful. And submit such issues. Note that testing with editor itself is needed as this listings can be outdated!</p>
+                  <p>In a long-term perspective maybe mistake of creating a new project solely for iD presets can be undone?</p>
+                  <p>For context see <a href="https://github.com/MarcusWolschon/osmeditor4android/issues/1412">#1412 @ Vespucci</a>, <a href="https://github.com/MarcusWolschon/osmeditor4android/issues/1413">#1413 @ Vespucci</a>.
+            </td>
+                </tr>
+                <tr>
+                  <td>
+                    <h2>Vespucci map style improvements</h2>
+                    <p>For example leisure=park really should be rendered as greenish area, not with black border suggesting that something went wrong.</p>
+                  </td>
+                  <td>
+                  </td>
+                  <td>
+                  </td>
+                </tr>
+                <!--
+              <tr>
+                <td>
+                </td>
+                <td>
+                </td>
+                <td>
+                </td>
+                </tr>
+                -->
+              </table>
+
+              <h1> Tasks of high importance where I am unable to contribute at all but still listing it for others</h1>
+            <table>
+            <tr>
+                <td>
+                  <h2>Block abuse of tile servers</h2>
+                  <p><a href="https://github.com/openstreetmap/operations/issues/342">#342 Adding API key support for tile.osm.org?</a></p>
+                  <p>Right now OpenStreetMap community funds various asset tracking sites and Uber clones with easy to abuse tile server. This feature is needed to end with abuse and overuse of our resources and preserve it where it would benefit OSM.</p>
+                  <p><a href="https://github.com/openstreetmap/operations/issues/549">#549 Support ip blocking on backend render servers</a> - quote twitter here.</p>
+                </td>
+                <td>
+                  <h2>Login on OSM Wiki with OSM account</h2>
+                  <p><a href="https://github.com/openstreetmap/operations/issues/507">#507 Add osm.org authentication to Wiki</a></p>
+
+                </td>
+                <td>
+                  <h2>moderation tools</h2>
+                  <p>Countering spam and other attacks would be easier with <a href="https://github.com/openstreetmap/openstreetmap-website/issues?q=is%3Aissue+is%3Aopen+label%3Amoderation">better moderation tools</a>. Some moderation stuff is tricky/political/social decision, making spam removal easier. Also, it would be nice to increase bus factor for spam removal and related work.</p>
+                </td>
+                </tr>
+              <!--
+              <tr>
+                <td>
+                </td>
+                <td>
+                </td>
+                <td>
+                </td>
+                </tr>
+                -->
+              </table>
+
+              <p>TODO: for each entry add time estimate</p>
+              <p>TODO: for each entry note is there a financing barrier</p>
+
+        <!--
+          
+        -->
+        <!--
+asked on Discord
+Is there any easy to use maker of osm based maps?
+
+Is there any tool where I can easily do something like that
+- show trees in this specific shade of green (selected in color picker)
+- water in that shade of blue (selected in a color picker)
+- mark marinas with sailboat icon (selected in the drop-down or uploaded)
+
+And specify area for rendering and export
+- the generated map (SVG vector)
+- rendered data (as geojson)
+- map style (in human-readable format like JSON)
+- link to the current work (so it can be shared/saved)
+
+Maposmatic allows to generate map in one of existing map styles, not to define new map style.
+ 
+I also know about uMap - but this is for putting some stuff on map that is
+modified
+
+I know about Kosmstik and MapCSS in Overpass Turbo, but it is programming
+
+https://discord.com/channels/413070382636072960/413070502580453387/865113704244183052
+https://www.maptiler.com/cloud/customize/ - it exists!
+Mapbox studio
+Is there lock in in either of them?          
+        -->
+
+        <!--
+asked on Discord
+Is there any OpenStreetMap based search that gives decent and quick answers for
+queries like "restaurant", "kebab", "buy fridge", "tourism attraction"?
+
+Osmand, mapy.cz, Organic Maps sort of implement this but you need to wait forever for answer (3s for Osmand search for "Decathlon" in Kraków - returns also results 700km away).
+
+Google right now is stomping over OSM here, even where OSM data is as good as Google what is quite sad.
+
+Not entirely sure why it is so tragically slow, but I suspect that apps are searching not just in the nearby area but across all downloaded maps and then discard 99.99% of found results.
+
+Nominatim is not trying hard to do this, and judging by project name it may be even out of scope there.
+https://nominatim.openstreetmap.org/ui/search.html?q=bars+in+london
+
+Done in: https://www.qwant.com/maps Overpass Wizard
+
+Alternatives: open issue in Osmand (done https://github.com/osmandapp/OsmAnd/issues/12126 )/ Organic Maps ( https://github.com/organicmaps/organicmaps/issues/867 )
+Profile organic maps and osmand
+
+output: prototype - not available to general public as hosting maps is not trivial. Maybe self-feeding with Overpass? But note limits.
+-->
+      </section>
+    </div>
+  </body>
+</html>
