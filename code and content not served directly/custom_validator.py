@@ -25,9 +25,11 @@ def validate_html(filepath):
 
     parsed_html = BeautifulSoup(html, "html.parser")
     require_wrapping_of_images(filepath, parsed_html)
+    require_existence_of_images(filepath, parsed_html)
     require_favicon(filepath, parsed_html)
     require_utf8_charset_declaration_and_magical_incantations_in_meta_tag(filepath, parsed_html)
     require_language_to_be_specifified_as_english(filepath, parsed_html)
+    require_using_canonical_css(filepath, parsed_html)
 
 def is_properly_wrapped_image(image):
     # all images should either
@@ -64,16 +66,57 @@ def require_favicon(filepath, parsed_html):
     links = head.find_all("link")
     for link in links:
         if link.get("rel")[0] == "icon":
-            directory_location = os.path.dirname(filepath)
-            if(link.get("href") == "favicon.svg"):
-                if os.path.isfile(directory_location + link.get("href")) == False:
+            if is_file_existing(filepath, link.get("href")) == False:
                     print(filepath, "links nonexisting favicon file")
-            else:
-                # TODO - may be still wrong...
-                pass
             return
     print(filepath, "has no favicon")
     print()
+
+def require_existence_of_images(filepath, parsed_html):
+    images = parsed_html.find_all("img")
+    for image in images:
+        if is_file_existing(filepath, image.get("src")) == False:
+                print(filepath, "links nonexisting image in", image)
+
+def require_using_canonical_css(filepath, parsed_html):
+    head = get_singleton_tag("head", filepath, parsed_html)
+    if head == None:
+        return
+    links = head.find_all("link")
+    for link in links:
+        if link.get("rel")[0] == "stylesheet":
+            if link.get("href") == "https://mapsaregreat.com/style.css":
+                # yeah that is my custom validator, and it is canonical
+                # css for me
+                return
+            if is_file_existing(filepath, link.get("href")) == False:
+                print(filepath, "links nonexisting CSS")
+            if link.get("href") != "style.css":
+                    print(filepath, "has unusal css link", link.get("href"))
+            return
+    print(filepath, "has no stylesheets declared!")
+    print()
+
+def is_file_existing(filepath, file_source):
+    """
+    filepath - path to file containing given path.
+    Path is from the repository root, see main()
+
+    file_source - path, possibly relative
+    """
+    directory_location = os.path.dirname(filepath)
+    target = os.path.join(directory_location, file_source)
+    if(os.path.isfile(target)):
+        return True
+
+    print("==============")
+    print(filepath)
+    print(file_source)
+    print(directory_location)
+    print(target)
+    print("==============")
+
+    return False
 
 def require_utf8_charset_declaration_and_magical_incantations_in_meta_tag(filepath, parsed_html):
     head = get_singleton_tag("head", filepath, parsed_html)
