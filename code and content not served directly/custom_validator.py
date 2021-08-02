@@ -29,7 +29,7 @@ def validate_html(filepath):
     require_utf8_charset_declaration_and_magical_incantations_in_meta_tag(filepath, parsed_html)
     require_language_to_be_specifified_as_english(filepath, parsed_html)
 
-def is_properly_handled_image(image):
+def is_properly_wrapped_image(image):
     # all images should either
     # - have image_with_frame class (on img tag)
     # or
@@ -54,7 +54,7 @@ def require_wrapping_of_images(filepath, parsed_html):
     # completely custom requirement for this site
     images = parsed_html.find_all("img")
     for image in images:
-        if is_properly_handled_image(image) == False:
+        if is_properly_wrapped_image(image) == False:
             print("wrapping of " + str(image) + " in " + filepath + " is not handled properly (should be within <div class=img_container> or with class=framed on itself")
 
 def require_favicon(filepath, parsed_html):
