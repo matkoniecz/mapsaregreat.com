@@ -122,10 +122,25 @@ def is_file_existing(filepath, file_source):
 
     return False
 
+def is_meta_with_expected_charset_complain_if_set_and_invalid(filepath, parsed_meta):
+    if parsed_meta.get("charset") == None:
+        return False
+    # https://stackoverflow.com/questions/10888929/should-html-meta-charset-be-lowercase-or-uppercase
+    if parsed_meta.get("charset") == "UTF-8" or parsed_meta.get("charset") == "utf-8":
+        return True
+    else:
+        # https://www.matuzo.at/blog/html-boilerplate/#content
+        # Here’s how Safari displays my name with and without the charset meta tag.
+        # Manuel Matuzović - Manuel MatuzoviÄ‡
+        print(filepath, 'charset must be UTF-8! Use meta tag with `charset="utf-8"` - currently value is ' + parsed_meta.get("charset"))
+        print()
+        return False
+    return False
+
 def require_utf8_charset_declaration_and_magical_incantations_in_meta_tag(filepath, parsed_html):
     head = get_singleton_tag("head", filepath, parsed_html)
     title_position = None
-    meta_position = None
+    meta_with_charset_position = None
     noscript = None
     position = 0
     for child in head.children:
@@ -136,16 +151,18 @@ def require_utf8_charset_declaration_and_magical_incantations_in_meta_tag(filepa
                     print(filepath, 'has title set multiple times!')
                 title_position = position
             if child.name == "meta":
-                if meta_position != None:
-                    print(filepath, 'has meta set multiple times!')
-                meta_position = position
+                if(is_meta_with_expected_charset_complain_if_set_and_invalid(filepath, child)):
+                    if meta_with_charset_position != None:
+                        print(filepath, 'has meta set multiple times!')
+                    meta_with_charset_position = position
+
             if child.name == "noscript":
                 noscript = child
             position += 1
-    if title_position == None or meta_position == None:
+    if title_position == None or meta_with_charset_position == None:
         if title_position == None:
             print(filepath, "has title not set")
-        if meta_position == None:
+        if meta_with_charset_position == None:
             if noscript != None:
                 for child in noscript.children:
                     if child.name == "meta":
@@ -153,39 +170,44 @@ def require_utf8_charset_declaration_and_magical_incantations_in_meta_tag(filepa
                             if child.get("content") != None:
                                 # redirect page, skipping this check
                                 return
-            print(filepath, "has meta not set")
-    elif title_position < meta_position:
+            print(filepath, "has no meta with charset declaration")
+    elif title_position < meta_with_charset_position:
         # https://www.matuzo.at/blog/html-boilerplate/#content
         # It must come before the <title> element to avoid faulty characters in the page title.
         print(filepath, 'has title before meta, it means that special characters in the title may be corrupted in some cases!')
 
-    meta = get_singleton_tag("meta", filepath, parsed_html)
-    if meta == None:
-        return
+    width_unset = True
+    message = 'magical viewport incantation is missing! Use meta tag with `content="width=device-width, initial-scale=1.0"`'
+    message_posted = False
+    metas = parsed_html.find_all("meta")
+    for meta in metas:
+        if meta.get("content") != None:
+            if meta.get("content") == 'width=device-width, initial-scale=1.0':
+                width_unset = False
+            else:
+                # https://github.com/joshbuchea/HEAD#recommended-minimum
+                # use the physical width of the device (great for mobile!)
+                # disable dumb autozooming
+                print(filepath, message + " - some different content is in relevant tag")
+                message_posted = True
+    if width_unset and not message_posted:
+        print(filepath, message)
 
-    tags = meta.find_all("charset")
-    for entry in tags:
-        if entry.get("charset")[0] != "UTF-8":
-            # https://www.matuzo.at/blog/html-boilerplate/#content
-            # Here’s how Safari displays my name with and without the charset meta tag.
-            # Manuel Matuzović - Manuel MatuzoviÄ‡
-            print(filepath, 'charset must be UTF-8! Use meta tag with `charset="UTF-8"`')
-            print()
-
-    tags = meta.find_all("charset")
-    for entry in tags:
-        if entry.get("width")[0] != "device-width, initial-scale=1":
-            # https://github.com/joshbuchea/HEAD#recommended-minimum
-            # use the physical width of the device (great for mobile!)
-            # disable dumb autozooming
-            print(filepath, 'magical viewport incantation is missing! Use meta tag with `width="device-width, initial-scale=1"`')
-
-    tags = meta.find_all("name")
-    for entry in tags:
-        if entry.get("name")[0] != "viewport":
-            # https://github.com/joshbuchea/HEAD#recommended-minimum
-            # viewport settings related to mobile responsiveness
-            print(filepath, 'magical name="viewport" incantation is missing! Use meta tag with `name="viewport"`')
+    metas = parsed_html.find_all("meta")
+    name_unset = True
+    message = 'magical name="viewport" incantation is missing! Use meta tag with `name="viewport"`'
+    message_posted = False
+    for meta in metas:
+        if meta.get("name") != None:
+            if meta.get("name") == "viewport":
+                name_unset = False
+            else:
+                # https://github.com/joshbuchea/HEAD#recommended-minimum
+                # viewport settings related to mobile responsiveness
+                print(filepath, message + " - some different content is in a relevant tag")
+                message_posted = True
+    if name_unset and not message_posted:
+        print(filepath, message)
 
 
 def require_language_to_be_specifified_as_english(filepath, parsed_html):
