@@ -10,6 +10,10 @@ including custom stuff specific to only that site
 
 def main():
     os.chdir("../")
+    os.system("rm 'code and content not served directly/linkchecker_data.csv'")
+    os.system("linkchecker index.html --verbose -o csv > 'code and content not served directly/linkchecker_data.csv' 2>/dev/null")
+    # --check-extern would also check external links but it would be much slower and repetetive running may be not entirely OK...
+    # entire stderr is redirected to /dev/null due to https://github.com/linkchecker/linkchecker/issues/552
     for filepath in glob.glob("**/*.html", recursive=True):
         if filepath.find("code and content not served directly") != 0:
             validate_html(filepath)
