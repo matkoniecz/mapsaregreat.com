@@ -5,6 +5,17 @@ Reports about inaccuracies, mistakes, dead links, typos etc are welcomed - eithe
 Repository is located at [https://github.com/matkoniecz/mapsaregreat.com](https://github.com/matkoniecz/mapsaregreat.com). Code with the development version, published on the Internet during tests is at [https://github.com/matkoniecz/matkoniecz.github.io](https://github.com/matkoniecz/matkoniecz.github.io).
 
 # Notes about maintaining, deploying etc.
+## Development dependencies
+```
+cd "code and content not served directly"
+pip3 install -r requirements.txt
+```
+
+and, due to [weirdness of one dependency](https://github.com/linkchecker/linkchecker/issues/108#issuecomment-898269896)
+
+```
+pip3 install git+https://github.com/linkchecker/linkchecker.git
+```
 
 ## Validation of code
 
