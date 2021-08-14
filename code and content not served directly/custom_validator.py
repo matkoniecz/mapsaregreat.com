@@ -1,6 +1,6 @@
 import glob, os
 from bs4 import BeautifulSoup
-
+import time
 """
 validates my website for some things that I want to check
 
