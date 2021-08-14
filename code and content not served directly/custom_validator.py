@@ -12,6 +12,54 @@ def main():
     os.chdir("../")
     os.system("rm 'code and content not served directly/linkchecker_data.csv'")
     os.system("linkchecker index.html --verbose -o csv > 'code and content not served directly/linkchecker_data.csv' 2>/dev/null")
+
+    import csv
+    with open('code and content not served directly/linkchecker_data.csv') as csvfile:
+        spamreader = csv.reader(csvfile, delimiter=';')
+        for row in spamreader:
+            if len(row) == 1:
+                # comment line
+                continue
+            infostring = row[5]
+            valid = row[6]
+            skippable = False
+            for message in infostring.split("\n"):
+                if message == "Data URL ignored.":
+                    # data url can be malformed but they contain actual data, not linking somewhere so it can be safely skipped
+                    # see also https://github.com/linkchecker/linkchecker/issues/98 for problem where very large data url break processing
+                    # and potential
+                    # --ignore-url=data:image
+                    skippable = True
+                if message == "The URL is outside of the domain filter, checked only syntax.":
+                    # infostring has info indicating that it was an external link
+                    skippable = True
+            if skippable:
+                continue
+            if valid == "True" and infostring == "":
+                # appears to be fine
+                continue
+            # urlname ----- parentname ----- base ----- result ----- warningstring ----- infostring ----- valid ----- url ----- line ----- column ----- name ----- dltime ----- size ----- checktime ----- cached ----- level ----- modified
+
+            print(' ----- '.join(row))
+            print(row[0])
+            print(row[2])
+            print(row[3])
+            print(row[4])
+
+            print(row[5]) # infostring
+            print("<"+row[5]+">") # infostring
+
+            print(row[7]) # url - file: prefixed for local ones
+            print("parentname", row[1])
+            print("line", row[8]) 
+            print("column", row[9])
+            print()
+            print("---------------------------------------------------------------")
+            print()
+            print()
+            time.sleep(0.3)
+            #print(spamreader[0][0])
+
     # --check-extern would also check external links but it would be much slower and repetetive running may be not entirely OK...
     # entire stderr is redirected to /dev/null due to https://github.com/linkchecker/linkchecker/issues/552
     for filepath in glob.glob("**/*.html", recursive=True):
