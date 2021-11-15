@@ -31,6 +31,15 @@ def write_index_html(map_styles):
   index_html += """        <h1>Made using Lunar Assembler</h1>
         <p>See <a href="https://github.com/matkoniecz/lunar_assembler#lunar-assembler">project page at Github</a>. Feedback, contributions are welcomed!</p>
         <p>Feel free to make pull requests and issues also about things such as typos and missing documentation.</p>
+        <h1>Examples</h1>
+        <div class="img_container">
+            <img src="general_high_zoom_-_road_crossing.png" alt="please send an email to matkoniecz@tutanota.com if replacing this placeholder alt attribute of image by a real alt attribute would be useful for you" />
+            <p>Example of a map generated from <a href="https://www.openstreetmap.org/#map=19/50.05527/19.92791">OpenStreetMap data</a>, on <a href="https://www.openstreetmap.org/copyright">ODbL license</a>.</p>
+        </div>
+        <div class="img_container">
+            <img src="general_high_zoom_-_airport.png" alt="please send an email to matkoniecz@tutanota.com if replacing this placeholder alt attribute of image by a real alt attribute would be useful for you" />
+            <p>Example of a map generated from <a href="https://www.openstreetmap.org/#map=16/50.0773/19.7885">OpenStreetMap data</a>, on <a href="https://www.openstreetmap.org/copyright">ODbL license</a>.</p>
+        </div>
 """
   index_html += html_suffix()
   index_html = add_header(index_html)
