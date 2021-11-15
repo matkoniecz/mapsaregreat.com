@@ -30,7 +30,7 @@ def smart_overpass_capture(url, image_file, driver):
     driver.save_screenshot(image_file)
 
 firefox_options = webdriver.FirefoxOptions()
-# in production mode headless is likely to be preferrable
+# in production mode headless is likely to be preferable
 # firefox_options.set_headless()
 driver = webdriver.Firefox(firefox_options=firefox_options)
 

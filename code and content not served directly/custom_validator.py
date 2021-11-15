@@ -144,7 +144,7 @@ def require_using_canonical_css(filepath, parsed_html):
             if is_file_existing(filepath, link.get("href")) == False:
                 print(filepath, "links nonexisting CSS")
             if link.get("href") != "style.css":
-                    print(filepath, "has unusal css link", link.get("href"))
+                    print(filepath, "has unusual css link", link.get("href"))
             return
     print(filepath, "has no stylesheets declared!")
     print()
