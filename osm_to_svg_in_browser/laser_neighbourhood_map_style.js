@@ -174,6 +174,7 @@ function highZoomLaserMapStyle() {
         roadGeneration.push({ key: "highway", value: motorizedRoadValuesArray()[i], purpose: "road centerline used for generating road areas" });
         roadGeneration.push({ key: "area:highway", value: motorizedRoadValuesArray()[i], purpose: "merged with areas generated from centerlines" });
       }
+      roadGeneration = creditsForLaneWidthInMapStyle(roadGeneration);
       roadGeneration.push({ key: "highway", value: "cycleway", purpose: "road centerline used for generating road areas" });
       roadGeneration.push({ key: "area:highway", value: "cycleway", purpose: "merged with areas generated from centerlines" });
       roadGeneration.push({ key: "area:highway", value: "taxi_stop", purpose: "merged with areas generated from centerlines" });
@@ -820,13 +821,10 @@ function highZoomLaserMapStyle() {
 
     widthOfRoadGeometryInMeters(feature) {
       if (motorizedRoadValuesArray().includes(feature.properties["highway"])) {
-        if (feature.properties["lanes"] != undefined) {
-          // in case of lanes==1 it is likely that it is wide anyway due to parking lanes
-          // supporting them would allow to drop this exception
-          if (feature.properties["lanes"] != 1) {
+          var lanes = getTotalKnownLaneCount(feature);
+          if (lanes != undefined) {
             return feature.properties["lanes"] * 2.7;
           }
-        }
         if (feature.properties["highway"] == "service" && ["driveway", "parking_aisle"].includes(feature.properties["service"])) {
           return undefined;
         }
@@ -840,7 +838,7 @@ function highZoomLaserMapStyle() {
           // closed footway for example - highway=footway access=no
           return undefined;
         }
-        return 5;
+        return 2.5;
       }
       return undefined;
     },
@@ -880,29 +878,32 @@ function highZoomLaserMapStyle() {
     },
 
     isFeatureMakingFreePedestrianMovementPossible(feature) {
-      if (motorizedRoadValuesArray().includes(feature.properties["highway"]) || ["footway", "pedestrian", "path", "steps", "cycleway"].includes(feature.properties["highway"])) {
-        if (mapStyle.isAccessValueRestrictive(feature.properties["foot"])) {
+      var highway = feature.properties["highway"];
+      var foot = feature.properties["foot"];
+      var access = feature.properties["access"];
+      if (motorizedRoadValuesArray().includes(highway) || ["footway", "pedestrian", "path", "steps", "cycleway"].includes(highway)) {
+        if (mapStyle.isAccessValueRestrictive(foot)) {
           return false;
         }
-        if (feature.properties["highway"] == "motorway" && feature.properties["foot"] == null) {
+        if (highway == "motorway" && foot == null) {
           // assume no for motorways, but do not discard them completely: some can be walked on foot (yes really)
           return false;
         }
-        if (feature.properties["highway"] == "service" && feature.properties["service"] == "driveway") {
-          if (feature.properties["foot"] != null && !mapStyle.isAccessValueRestrictive(feature.properties["foot"])) {
+        if (highway == "service" && feature.properties["service"] == "driveway") {
+          if (foot != null && !mapStyle.isAccessValueRestrictive(foot)) {
             return true;
           }
-          if (feature.properties["access"] != null && !mapStyle.isAccessValueRestrictive(feature.properties["access"])) {
+          if (access != null && !mapStyle.isAccessValueRestrictive(access)) {
             return true;
           }
           return false; // assume false for driveways
         }
 
-        if (!mapStyle.isAccessValueRestrictive(feature.properties["access"]) && !mapStyle.isAccessValueRestrictive(feature.properties["foot"])) {
+        if (!mapStyle.isAccessValueRestrictive(access) && !mapStyle.isAccessValueRestrictive(foot)) {
           return true;
         }
-        if (mapStyle.isAccessValueRestrictive(feature.properties["access"])) {
-          if (feature.properties["foot"] != null && !mapStyle.isAccessValueRestrictive(feature.properties["foot"])) {
+        if (mapStyle.isAccessValueRestrictive(access)) {
+          if (foot != null && !mapStyle.isAccessValueRestrictive(foot)) {
             return true;
           } else {
             return false;
@@ -984,7 +985,11 @@ function highZoomLaserMapStyle() {
 
     generateRestrictedAcccessArea(geojson, readableBounds) {
       var entireArea = mapStyle.boundsToGeojsonGeometry(readableBounds);
-      var freelyTraversableArea = entireArea;
+
+      // clipping with empty area is done here to ensure that multipolygon
+      // is always produced, also when no forbidden areas are present
+      var areaOfUnknownState = polygonClipping.difference(entireArea, []);
+
       generated = [];
       featuresGivingAccess = [];
       var i = geojson.features.length;
@@ -998,7 +1003,7 @@ function highZoomLaserMapStyle() {
           continue;
         }
         if (mapStyle.isAreaMakingFreePedestrianMovementImpossible(feature)) {
-          var freelyTraversableArea = polygonClipping.difference(freelyTraversableArea, feature.geometry.coordinates);
+          var areaOfUnknownState = polygonClipping.difference(areaOfUnknownState, feature.geometry.coordinates);
           if (feature.properties["natural"] != "water" && feature.properties["waterway"] != "riverbank") {
             // water has its own special rendering and does not need this
             var cloned = JSON.parse(JSON.stringify(feature));
@@ -1007,13 +1012,19 @@ function highZoomLaserMapStyle() {
           }
         }
       }
-      //console.warn(JSON.stringify({ type: "MultiPolygon", coordinates: freelyTraversableArea }));
 
-      var k = freelyTraversableArea.length;
+      //console.warn("areaOfUnknownState")
+      //console.warn(JSON.stringify({ type: "MultiPolygon", coordinates: areaOfUnknownState }));
+
+      // areaOfUnknownState is now entire area except removed blocking areas
+      // now the next step is to fill areas where there is no acces
+      // for example private courtyard within buildings, walled of areas and so on
+
+      var k = areaOfUnknownState.length;
       while (k--) {
         const traversableChunk = {
           type: "Feature",
-          geometry: { type: "Polygon", coordinates: freelyTraversableArea[k] },
+          geometry: { type: "Polygon", coordinates: areaOfUnknownState[k] },
           properties: {},
         };
         var i = featuresGivingAccess.length;
@@ -1156,7 +1167,7 @@ function highZoomLaserMapStyle() {
         if (feature.properties["lunar_assembler_merge_group"] == "water") {
           var generated = intersectGeometryWithHorizontalStripes(feature, waterRowSizeInMeters / metersInDegreeHorizontal, waterSpaceBetweenRowsInMeters / metersInDegreeHorizontal);
           generated.properties["lunar_assembler_cloned_for_pattern_fill"] = "yes";
-          dataGeojson.features.push(generated); // added at the ned, and iterating from end to 0 so will not trigger infinite loop
+          dataGeojson.features.push(generated); // added at the end, and iterating from end to 0 so will not trigger infinite loop
         }
         if (feature.properties["lunar_assembler_merge_group"] == "area:highway_carriageway_layer") {
           var generated = intersectGeometryWithPlaneHavingRectangularHoles(
@@ -1167,7 +1178,7 @@ function highZoomLaserMapStyle() {
             spaceHorizontalInMeters / metersInDegreeHorizontal
           );
           generated.properties["lunar_assembler_cloned_for_pattern_fill"] = "yes";
-          dataGeojson.features.push(generated); // added at the ned, and iterating from end to 0 so will not trigger infinite loop
+          dataGeojson.features.push(generated); // added at the end, and iterating from end to 0 so will not trigger infinite loop
         }
       }
       return dataGeojson;
