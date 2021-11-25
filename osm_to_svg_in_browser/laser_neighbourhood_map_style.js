@@ -50,7 +50,7 @@ function highZoomLaserMapStyle() {
         ...[
           {
             area_color: "#B45A00",
-            description: "buildings",
+            description: "buildings (kept mostly for debugging purposes)",
             matches: [{ key: "building" }],
           },
           {
@@ -77,38 +77,10 @@ function highZoomLaserMapStyle() {
           },
         ]
       );
-
-      var barriersKeyValue = [];
-      var i = linearGenerallyImpassableBarrierValuesArray().length;
-      while (i--) {
-        value = linearGenerallyImpassableBarrierValuesArray()[i];
-        barriersKeyValue.push({ key: "barrier", value: value, purpose: "generally impassable barrier, for detecting where access is blocked" });
-      }
-      barriersKeyValue.push({ key: "barrier", value: "yes", purpose: "unknown barrier, assumed to be generally impassable barrier, for detecting where access is blocked" });
-
-      returned.push({
-        area_color: "#b76b80",
-        description: "generated barrier areas",
-        automatically_generated_using: barriersKeyValue,
-        matches: [{ key: "generated_barrier_area", value: "yes" }],
-      });
-
-      var blockDetection = JSON.parse(JSON.stringify(barriersKeyValue));
-      // TODO: now it is necessary to manually change one thing in two places - change that and return list of inaccessibility tags
-      blockDetection.push({ key: "building", purpose: "generally impassable barrier, for detecting where access is blocked" });
-      blockDetection.push({ key: "natural", value: "water", purpose: "generally impassable barrier, for detecting where access is blocked" });
-      blockDetection.push({ key: "waterway", value: "riverbank", purpose: "generally impassable barrier, for detecting where access is blocked" });
-
-      returned.push({
-        area_color: "black",
-        description: "areas that are inaccessible, generated automatically",
-        automatically_generated_using: blockDetection,
-        matches: [
-          { key: "generated_blocked_chunk", value: "yes" },
-          { key: "native_blocked_chunk", value: "yes" },
-        ],
-      });
-      // generated_traversable_chunk=yes is not rendered
+      
+      const barrierAreaColor = "#b76b80";
+      const generatedImpassableAreaColor = "black";
+      returned = addRulesForDisplayOfCalculatedImpassableArea(returned, barrierAreaColor, generatedImpassableAreaColor);
 
       returned.push({
         area_color: "yellow",
@@ -317,8 +289,8 @@ function highZoomLaserMapStyle() {
       dataGeojson = mapStyle.applyManualPatchesAtStart(dataGeojson);
 
       dataGeojson = programaticallyGenerateSymbolicStepParts(dataGeojson);
-      dataGeojson = mapStyle.generateAreasFromBarriers(dataGeojson);
-      dataGeojson = mapStyle.generateRestrictedAcccessArea(dataGeojson, readableBounds);
+      dataGeojson = generateAreasFromBarriers(dataGeojson);
+      dataGeojson = generateRestrictedAcccessArea(dataGeojson, readableBounds);
       dataGeojson = mapStyle.generateAreasFromRoadLines(dataGeojson);
       return dataGeojson;
     },
@@ -326,6 +298,7 @@ function highZoomLaserMapStyle() {
     // called after areas were merged, before sorting of areas
     // gets full data and can freely edit it
     transformGeometryAtFinalStep(dataGeojson, readableBounds) {
+      var measuredTime;
       dataGeojson = mapStyle.applyManualPatchesBeforeGeometryErasings(dataGeojson);
 
       dataGeojson = mapStyle.restrictPedestrianCrossingToRoadAreas(dataGeojson);
@@ -345,7 +318,10 @@ function highZoomLaserMapStyle() {
 
       // last one - after that there are two carriageways and two waterways areas
       // with one being interection with a pattern
+ 
+      measuredTime = performance.now()
       dataGeojson = mapStyle.applyPatternsToCarriagewaysAndWater(dataGeojson);
+      showPerformanceInfo("applyPatternsToCarriagewaysAndWater (part of transformGeometryAtFinalStep) took " + (performance.now() - measuredTime)/1000 + "s")
 
       return dataGeojson;
     },
@@ -821,10 +797,10 @@ function highZoomLaserMapStyle() {
 
     widthOfRoadGeometryInMeters(feature) {
       if (motorizedRoadValuesArray().includes(feature.properties["highway"])) {
-          var lanes = getTotalKnownLaneCount(feature);
-          if (lanes != undefined) {
-            return feature.properties["lanes"] * 2.7;
-          }
+        var lanes = getTotalKnownLaneCount(feature);
+        if (lanes != undefined) {
+          return feature.properties["lanes"] * 2.7;
+        }
         if (feature.properties["highway"] == "service" && ["driveway", "parking_aisle"].includes(feature.properties["service"])) {
           return undefined;
         }
@@ -834,7 +810,7 @@ function highZoomLaserMapStyle() {
         return 5.4;
       }
       if (["footway", "pedestrian", "path", "steps", "cycleway"].includes(feature.properties["highway"])) {
-        if (mapStyle.isAreaMakingFreePedestrianMovementImpossible(feature)) {
+        if (isAreaMakingFreePedestrianMovementImpossible(feature)) {
           // closed footway for example - highway=footway access=no
           return undefined;
         }
@@ -843,89 +819,8 @@ function highZoomLaserMapStyle() {
       return undefined;
     },
 
-    isAccessValueRestrictive(value) {
-      if (value == "no") {
-        return true;
-      }
-      if (value == "private") {
-        return true;
-      }
-      if (value == "customers") {
-        return true;
-      }
-      return false;
-    },
-
-    isAreaMakingFreePedestrianMovementImpossible(feature) {
-      if (feature.properties["generated_barrier_area"] != null) {
-        return true;
-      }
-      if (feature.properties["natural"] == "water" || feature.properties["waterway"] == "riverbank") {
-        return true;
-      }
-      if (feature.properties["building"] != null) {
-        return true;
-      }
-      if (feature.properties["area:highway"] && feature.properties["foot"] == "no") {
-        return true;
-      }
-      if (mapStyle.isAccessValueRestrictive(feature.properties["access"]) && feature.properties["amenity"] != "parking") {
-        if (feature.properties["foot"] == null || mapStyle.isAccessValueRestrictive(feature.properties["foot"])) {
-          return true;
-        }
-      }
-      return false;
-    },
-
-    isFeatureMakingFreePedestrianMovementPossible(feature) {
-      var highway = feature.properties["highway"];
-      var foot = feature.properties["foot"];
-      var access = feature.properties["access"];
-      if (motorizedRoadValuesArray().includes(highway) || ["footway", "pedestrian", "path", "steps", "cycleway"].includes(highway)) {
-        if (mapStyle.isAccessValueRestrictive(foot)) {
-          return false;
-        }
-        if (highway == "motorway" && foot == null) {
-          // assume no for motorways, but do not discard them completely: some can be walked on foot (yes really)
-          return false;
-        }
-        if (highway == "service" && feature.properties["service"] == "driveway") {
-          if (foot != null && !mapStyle.isAccessValueRestrictive(foot)) {
-            return true;
-          }
-          if (access != null && !mapStyle.isAccessValueRestrictive(access)) {
-            return true;
-          }
-          return false; // assume false for driveways
-        }
-
-        if (!mapStyle.isAccessValueRestrictive(access) && !mapStyle.isAccessValueRestrictive(foot)) {
-          return true;
-        }
-        if (mapStyle.isAccessValueRestrictive(access)) {
-          if (foot != null && !mapStyle.isAccessValueRestrictive(foot)) {
-            return true;
-          } else {
-            return false;
-          }
-        }
-        showError("Should be impossible [isFeatureMakingFreePedestrianMovementPossible for " + JSON.stringify(feature) + "]," + reportBugMessage());
-      }
-    },
-
-    boundsToGeojsonGeometry(readableBounds) {
-      var entireAreaRing = [
-        [readableBounds["east"], readableBounds["south"]],
-        [readableBounds["east"], readableBounds["north"]],
-        [readableBounds["west"], readableBounds["north"]],
-        [readableBounds["west"], readableBounds["south"]],
-        [readableBounds["east"], readableBounds["south"]],
-      ];
-      return [entireAreaRing];
-    },
-
     fillSliversAroundFootways(dataGeojson, readableBounds) {
-      var emptyArea = mapStyle.boundsToGeojsonGeometry(readableBounds);
+      var emptyArea = readableBoundsToGeojsonGeometry(readableBounds);
       var footwayArea = findMergeGroupObject(dataGeojson, "area:highway_footway");
       if (footwayArea === undefined) {
         return dataGeojson;
@@ -981,93 +876,6 @@ function highZoomLaserMapStyle() {
       }
 
       return dataGeojson;
-    },
-
-    generateRestrictedAcccessArea(geojson, readableBounds) {
-      var entireArea = mapStyle.boundsToGeojsonGeometry(readableBounds);
-
-      // clipping with empty area is done here to ensure that multipolygon
-      // is always produced, also when no forbidden areas are present
-      var areaOfUnknownState = polygonClipping.difference(entireArea, []);
-
-      generated = [];
-      featuresGivingAccess = [];
-      var i = geojson.features.length;
-      while (i--) {
-        var feature = geojson.features[i];
-        if (mapStyle.isFeatureMakingFreePedestrianMovementPossible(feature)) {
-          featuresGivingAccess.push(feature);
-        }
-        const link = "https://www.openstreetmap.org/" + feature.id;
-        if (feature.geometry.type != "Polygon" && feature.geometry.type != "MultiPolygon") {
-          continue;
-        }
-        if (mapStyle.isAreaMakingFreePedestrianMovementImpossible(feature)) {
-          var areaOfUnknownState = polygonClipping.difference(areaOfUnknownState, feature.geometry.coordinates);
-          if (feature.properties["natural"] != "water" && feature.properties["waterway"] != "riverbank") {
-            // water has its own special rendering and does not need this
-            var cloned = JSON.parse(JSON.stringify(feature));
-            cloned.properties = { native_blocked_chunk: "yes" };
-            generated.push(cloned);
-          }
-        }
-      }
-
-      //console.warn("areaOfUnknownState")
-      //console.warn(JSON.stringify({ type: "MultiPolygon", coordinates: areaOfUnknownState }));
-
-      // areaOfUnknownState is now entire area except removed blocking areas
-      // now the next step is to fill areas where there is no acces
-      // for example private courtyard within buildings, walled of areas and so on
-
-      var k = areaOfUnknownState.length;
-      while (k--) {
-        const traversableChunk = {
-          type: "Feature",
-          geometry: { type: "Polygon", coordinates: areaOfUnknownState[k] },
-          properties: {},
-        };
-        var i = featuresGivingAccess.length;
-        while (i--) {
-          const accessGivingFeature = featuresGivingAccess[i];
-
-          if (turf.lineIntersect(traversableChunk, accessGivingFeature).features.length != 0) {
-            traversableChunk.properties["generated_traversable_chunk"] = "yes";
-            break;
-          }
-        }
-        if (traversableChunk.properties["generated_traversable_chunk"] != "yes") {
-          traversableChunk.properties["generated_blocked_chunk"] = "yes";
-        }
-        geojson.features.push(traversableChunk);
-      }
-      var k = generated.length;
-      while (k--) {
-        geojson.features.push(generated[k]);
-      }
-      return geojson;
-    },
-
-    generateAreasFromBarriers(geojson) {
-      generated = [];
-      var i = geojson.features.length;
-      while (i--) {
-        var feature = geojson.features[i];
-        const link = "https://www.openstreetmap.org/" + feature.id;
-
-        if (linearGenerallyImpassableBarrierValuesArray().includes(feature.properties["barrier"]) || feature.properties["barrier"] == "yes") {
-          var produced = turf.buffer(feature, 0.1, { units: "meters" });
-          var cloned = JSON.parse(JSON.stringify(produced));
-          cloned.properties["generated_barrier_area"] = "yes";
-          generated.push(cloned);
-        }
-      }
-
-      var k = generated.length;
-      while (k--) {
-        geojson.features.push(generated[k]);
-      }
-      return geojson;
     },
 
     generateAreasFromRoadLines(geojson) {

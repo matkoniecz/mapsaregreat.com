@@ -128,28 +128,25 @@ function laserRoadAreaMapStyle() {
         });
       }
 
-      returned.push(
-        ...[
-          {
-            area_color: "green",
-            description: "pedestrian square (using it for sidewalk areas is invalid!)",
-            matches: [
-              [
-                { key: "highway", value: "pedestrian" },
-                { key: "area", value: "yes", role: "supplementary_obvious_filter" },
-              ],
-              [
-                { key: "highway", value: "pedestrian" },
-                { key: "type", value: "multipolygon", role: "supplementary_obvious_filter" },
-              ],
-            ],
-          },
-          {
-            area_color: "yellow",
-            description: "pedestrian crossing through a road (area used in addition to area representing road)",
-            matches: [{ key: "area:highway", value: "crossing" }],
-          },
-        ])
+      returned.push({
+        area_color: "green",
+        description: "pedestrian square (using it for sidewalk areas is invalid!)",
+        matches: [
+          [
+            { key: "highway", value: "pedestrian" },
+            { key: "area", value: "yes", role: "supplementary_obvious_filter" },
+          ],
+          [
+            { key: "highway", value: "pedestrian" },
+            { key: "type", value: "multipolygon", role: "supplementary_obvious_filter" },
+          ],
+        ],
+      });
+      returned.push({
+        area_color: "yellow",
+        description: "pedestrian crossing through a road (area used in addition to area representing road)",
+        matches: [{ key: "area:highway", value: "crossing" }],
+      });
       returned.push({
         area_color: "#004754", // color #27 in LightBurn, clearly visible on the map, rendered on top
         description: "bar on a pedestrian, to produce pattern distinguishing it from sidewalks by touch",
@@ -158,43 +155,38 @@ function laserRoadAreaMapStyle() {
       });
 
       returned.push({
-          area_color: "orange",
-          description: "area representation of steps (used in addition to linear highway=steps)",
-          matches: [{ key: "area:highway", value: "steps" }],
-        }
-      );
+        area_color: "orange",
+        description: "area representation of steps (used in addition to linear highway=steps)",
+        matches: [{ key: "area:highway", value: "steps" }],
+      });
       returned.push(...unifiedMapStyleSegmentForSymbolicStepRepresentation());
-      returned.push(
-        ...[
-          {
-            area_color: "black",
-            description: "buildings",
-            matches: [{ key: "building" }],
-          },
-          {
-            area_color: "#00FFFF",
-            description: "water - pattern, part expected to be engraved",
-            matches: [
-              [
-                { key: "natural", value: "water" },
-                { key: "lunar_assembler_cloned_for_pattern_fill", value: "yes", role: "supplementary_obvious_filter" },
-              ],
-              [
-                { key: "waterway", value: "riverbank" },
-                { key: "lunar_assembler_cloned_for_pattern_fill", value: "yes", role: "supplementary_obvious_filter" },
-              ],
-            ],
-          },
-          {
-            area_color: "blue",
-            description: "water - entire area, expected to be cut at outline to separate element for easier painting (or used solely for orientation)",
-            matches: [
-              { key: "natural", value: "water" },
-              { key: "waterway", value: "riverbank" },
-            ],
-          },
-        ]
-      );
+      returned.push({
+        area_color: "black",
+        description: "buildings",
+        matches: [{ key: "building" }],
+      });
+      returned.push({
+        area_color: "#00FFFF",
+        description: "water - pattern, part expected to be engraved",
+        matches: [
+          [
+            { key: "natural", value: "water" },
+            { key: "lunar_assembler_cloned_for_pattern_fill", value: "yes", role: "supplementary_obvious_filter" },
+          ],
+          [
+            { key: "waterway", value: "riverbank" },
+            { key: "lunar_assembler_cloned_for_pattern_fill", value: "yes", role: "supplementary_obvious_filter" },
+          ],
+        ],
+      });
+      returned.push({
+        area_color: "blue",
+        description: "water - entire area, expected to be cut at outline to separate element for easier painting (or used solely for orientation)",
+        matches: [
+          { key: "natural", value: "water" },
+          { key: "waterway", value: "riverbank" },
+        ],
+      });
       var i = motorizedRoadValuesArray().length;
       while (i--) {
         value = motorizedRoadValuesArray()[i];
@@ -268,6 +260,10 @@ function laserRoadAreaMapStyle() {
           },
         ]
       );
+
+      const barrierAreaColor = "#b76b80";
+      const generatedImpassableAreaColor = "black";
+      returned = addRulesForDisplayOfCalculatedImpassableArea(returned, barrierAreaColor, generatedImpassableAreaColor);
 
       var i = railwayLinearValuesArray().length;
       while (i--) {
@@ -351,12 +347,21 @@ function laserRoadAreaMapStyle() {
 
     transformGeometryAsInitialStep(dataGeojson, readableBounds) {
       dataGeojson = programaticallyGenerateSymbolicStepParts(dataGeojson);
+      dataGeojson = generateAreasFromBarriers(dataGeojson);
+      dataGeojson = generateRestrictedAcccessArea(dataGeojson, readableBounds);
       return dataGeojson;
     },
 
     // called after areas were merged, before sorting of areas
     // gets full data and can freely edit it
     transformGeometryAtFinalStep(dataGeojson, readableBounds) {
+      var measuredTime;
+      var roadArea = findMergeGroupObject(dataGeojson, "area:highway_carriageway_layer");
+      var footwayArea = findMergeGroupObject(dataGeojson, "area:highway_footway");
+      if(roadArea == undefined && footwayArea == undefined) {
+        showFatalError("Neither roads nor footways are mapped here with area:highway, and this map style requires area:highway mapping. Please use another map styly or map area:highway shapes or select a different area.")
+      }
+
       dataGeojson = mapStyle.eraseCrossingAreasFromRoads(dataGeojson);
       dataGeojson = mapStyle.eraseWaterWhereIntersectingBridge(dataGeojson);
 
@@ -365,23 +370,25 @@ function laserRoadAreaMapStyle() {
       while (i--) {
         var feature = dataGeojson.features[i];
         if (feature.properties["area:highway"] === "crossing") {
-          if(roadAreasWithCrossing == undefined) {
-            roadAreasWithCrossing = JSON.parse(JSON.stringify(feature.geometry.coordinates))
+          if (roadAreasWithCrossing == undefined) {
+            roadAreasWithCrossing = JSON.parse(JSON.stringify(feature.geometry.coordinates));
           } else {
             roadAreasWithCrossing = polygonClipping.union(feature.geometry.coordinates, roadAreasWithCrossing);
           }
         }
       }
-      console.log(roadAreasWithCrossing)
-      if(roadAreasWithCrossing == undefined){
-        showError("no mappeed crossing areas here at all!")
+      console.log(roadAreasWithCrossing);
+      if (roadAreasWithCrossing == undefined) {
+        showError("no mapped crossing areas here at all!");
       } else {
-        var geometry = mergeArrayOfAreaCoordinatesIntoMultipolygon(roadAreasWithCrossing)
-        console.log(geometry)
-        generateZebraBarCrossings(dataGeojson, {'type': 'Feature', 'geometry': geometry}) 
+        var geometry = mergeArrayOfAreaCoordinatesIntoMultipolygon(roadAreasWithCrossing);
+        console.log(geometry);
+        generateZebraBarCrossings(dataGeojson, { type: "Feature", geometry: geometry });
       }
 
+      measuredTime = performance.now()
       dataGeojson = mapStyle.applyPatternsToCarriagewaysAndWater(dataGeojson);
+      showPerformanceInfo("applyPatternsToCarriagewaysAndWater (part of transformGeometryAtFinalStep) took " + (performance.now() - measuredTime)/1000 + "s")
       return dataGeojson;
     },
 
@@ -392,14 +399,23 @@ function laserRoadAreaMapStyle() {
         return dataGeojson;
       }
       if (!isMultipolygonAsExpected(roadArea)) {
-        console.error("following geometry was expected to be multipolygon but was not:");
+        console.error("following geometry was expected to be a multipolygon but was not:");
         console.error(roadArea);
       }
       var i = dataGeojson.features.length;
       while (i--) {
         var feature = dataGeojson.features[i];
         if (feature.properties["area:highway"] === "crossing") {
-          roadArea.geometry.coordinates = polygonClipping.difference(roadArea.geometry.coordinates, feature.geometry.coordinates);
+          if (feature.geometry.type == "point") {
+            const link = "https://www.openstreetmap.org/" + feature.id;
+            showWarning("https://www.openstreetmap.org/" + feature.id + " is a node but has area:highway valid only on areas...");
+          } else {
+            if (isAreaAsExpected(feature) == false) {
+              showFatalError("following geometry was expected to be an area but was not:");
+              showFatalError(feature);
+            }
+            roadArea.geometry.coordinates = polygonClipping.difference(roadArea.geometry.coordinates, feature.geometry.coordinates);
+          }
         }
       }
       return dataGeojson;

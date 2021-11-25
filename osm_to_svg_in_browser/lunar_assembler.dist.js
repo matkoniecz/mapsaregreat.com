@@ -322,6 +322,314 @@ function pointBetweenTwoPoints(start, end, ratioOfStart) {
 
 /* ------------------------ */
 
+/*lunar_assembler_helpful_functions_for_map_styles_generate_inaccessible_areas.js*/
+
+/*
+    lunar_assembler - tool for generating SVG files from OpenStreetMap data. Available as a website.
+    Copyright (C) 2021 Mateusz Konieczny
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, under version 3 of the
+    License only.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
+
+/*
+This file contains code to generate entire inaccessible areas as geometries.
+
+This way it is possible to generalize building and barriers into one area.
+
+Useful when one does not care about internal courtyards, what exactly is in walled of gardens etc.
+
+to use this code:
+
+add to transformGeometryAsInitialStep()
+
+      dataGeojson = generateAreasFromBarriers(dataGeojson);
+      dataGeojson = generateRestrictedAcccessArea(dataGeojson, readableBounds);
+
+add to unifiedStyling()
+
+      const barrierAreaColor = "#b76b80";
+      const generatedImpassableAreaColor = "black";
+      returned = addRulesForDisplayOfCalculatedImpassableArea(returned, barrierAreaColor, generatedImpassableAreaColor);
+
+obviously, colors in configuration here can be changed!
+*/
+
+function restrictiveAccessValues() {
+  return ['no', 'private', 'customers'];
+}
+
+function isAccessValueRestrictive(value) {
+  if(restrictiveAccessValues().indexOf(value) >= 0) {
+    return true;
+  }
+  return false;
+}
+
+function listOfTagSetsBlockingPedestrianAccess() {
+  returned = [
+    {'natural': 'water'},
+    {'waterway': 'riverbank'},
+    {'building': undefined},
+    {'waterway': 'riverbank'},
+    {'area:highway': undefined, 'foot': 'no'},
+  ]
+  /*
+  pulling parking rules here may be nice but beginning to be ridiculous
+  for (const restrictive of restrictiveAccessValues()) {
+
+  }
+  */
+  return returned;
+}
+
+
+function generateRestrictedAcccessArea(geojson, readableBounds) {
+    var entireArea = readableBoundsToGeojsonGeometry(readableBounds);
+
+    // clipping with empty area is done here to ensure that multipolygon
+    // is always produced, also when no forbidden areas are present
+    var areaOfUnknownState = polygonClipping.difference(entireArea, []);
+
+    // TODO TODO TODO after moving everything
+    //generated = cloneAndCollectAreasDirectlyBlockingPedestrianMovement(geojson)
+
+    generated = [];
+    featuresGivingAccess = [];
+    var i = geojson.features.length;
+    while (i--) {
+      var feature = geojson.features[i];
+      if (isFeatureMakingFreePedestrianMovementPossible(feature)) {
+        featuresGivingAccess.push(feature);
+      }
+      const link = "https://www.openstreetmap.org/" + feature.id;
+      if (feature.geometry.type != "Polygon" && feature.geometry.type != "MultiPolygon") {
+        continue;
+      }
+      if (isAreaMakingFreePedestrianMovementImpossible(feature)) {
+        var areaOfUnknownState = polygonClipping.difference(areaOfUnknownState, feature.geometry.coordinates);
+        if (feature.properties["natural"] != "water" && feature.properties["waterway"] != "riverbank") {
+          // water has its own special rendering and does not need this
+          var cloned = JSON.parse(JSON.stringify(feature));
+          cloned.properties = { native_blocked_chunk: "yes" };
+          generated.push(cloned);
+        }
+      }
+    }
+
+    // TODO TODO TODO
+    // TODO TODO TODO
+    // apply areaOfUnknownState in iteration here
+
+    //console.warn("areaOfUnknownState")
+    //console.warn(JSON.stringify({ type: "MultiPolygon", coordinates: areaOfUnknownState }));
+
+    // areaOfUnknownState is now entire area except removed blocking areas
+    // now the next step is to fill areas where there is no acces
+    // for example private courtyard within buildings, walled of areas and so on
+
+    var k = areaOfUnknownState.length;
+    while (k--) {
+      const traversableChunk = {
+        type: "Feature",
+        geometry: { type: "Polygon", coordinates: areaOfUnknownState[k] },
+        properties: {},
+      };
+      var i = featuresGivingAccess.length;
+      while (i--) {
+        const accessGivingFeature = featuresGivingAccess[i];
+
+        if (turf.lineIntersect(traversableChunk, accessGivingFeature).features.length != 0) {
+          traversableChunk.properties["generated_traversable_chunk"] = "yes";
+          break;
+        }
+      }
+      if (traversableChunk.properties["generated_traversable_chunk"] != "yes") {
+        traversableChunk.properties["generated_blocked_chunk"] = "yes";
+      }
+      geojson.features.push(traversableChunk);
+    }
+    var k = generated.length;
+    while (k--) {
+      geojson.features.push(generated[k]);
+    }
+    return geojson;
+  }
+
+function cloneAndCollectAreasDirectlyBlockingPedestrianMovement(geojson) {
+
+}
+
+  function readableBoundsToGeojsonGeometry(readableBounds) {
+    var entireAreaRing = [
+      [readableBounds["east"], readableBounds["south"]],
+      [readableBounds["east"], readableBounds["north"]],
+      [readableBounds["west"], readableBounds["north"]],
+      [readableBounds["west"], readableBounds["south"]],
+      [readableBounds["east"], readableBounds["south"]],
+    ];
+    return [entireAreaRing];
+  }
+
+  function generateAreasFromBarriers(geojson) {
+    generated = [];
+    var i = geojson.features.length;
+    while (i--) {
+      var feature = geojson.features[i];
+      const link = "https://www.openstreetmap.org/" + feature.id;
+
+      if (linearGenerallyImpassableBarrierValuesArray().includes(feature.properties["barrier"]) || feature.properties["barrier"] == "yes") {
+        var produced = turf.buffer(feature, 0.1, { units: "meters" });
+        var cloned = JSON.parse(JSON.stringify(produced));
+        cloned.properties["generated_barrier_area"] = "yes";
+        generated.push(cloned);
+      }
+    }
+
+    var k = generated.length;
+    while (k--) {
+      geojson.features.push(generated[k]);
+    }
+    return geojson;
+  }
+
+  function isFeatureMakingFreePedestrianMovementPossible(feature) {
+    // TODO right now it is missing from legend and taginfo entries as
+    // this rules compile to something obnoxiously complex
+    // it would be nice to list it
+    // at least partially
+    var highway = feature.properties["highway"];
+    var foot = feature.properties["foot"];
+    var access = feature.properties["access"];
+    if (motorizedRoadValuesArray().includes(highway) || ["footway", "pedestrian", "path", "steps", "cycleway"].includes(highway)) {
+      if (isAccessValueRestrictive(foot)) {
+        return false;
+      }
+      if (highway == "motorway" && foot == null) {
+        // assume no for motorways, but do not discard them completely: some can be walked on foot (yes really)
+        return false;
+      }
+      if (highway == "service" && feature.properties["service"] == "driveway") {
+        if (foot != null && !isAccessValueRestrictive(foot)) {
+          return true;
+        }
+        if (access != null && !isAccessValueRestrictive(access)) {
+          return true;
+        }
+        return false; // assume false for driveways
+      }
+
+      if (!isAccessValueRestrictive(access) && !isAccessValueRestrictive(foot)) {
+        return true;
+      }
+      if (isAccessValueRestrictive(access)) {
+        if (foot != null && !isAccessValueRestrictive(foot)) {
+          return true;
+        } else {
+          return false;
+        }
+      }
+      showError("Should be impossible [isFeatureMakingFreePedestrianMovementPossible for " + JSON.stringify(feature) + "]," + reportBugMessage());
+    }
+  }
+
+  function isAreaMakingFreePedestrianMovementImpossible(feature) {
+    if (feature.properties["generated_barrier_area"] != null) {
+      return true;
+    }
+    const blockingTags = listOfTagSetsBlockingPedestrianAccess();
+    if(isMatchingAnyEntryInBlockingTagList(feature, blockingTags)) {
+      return true;
+    }
+    if (isAccessValueRestrictive(feature.properties["access"]) && feature.properties["amenity"] != "parking") {
+      if (feature.properties["foot"] == null || isAccessValueRestrictive(feature.properties["foot"])) {
+        // TODO right now it is missing from legend and taginfo entries as
+        // this rules compile to something obnoxiously complex
+        return true;
+      }
+    }
+    return false;
+  }
+
+  function isMatchingEntryInBlockingTags(feature, tagEntry) {
+    for (const [key, value] of Object.entries(tagEntry)) {
+      if(value == undefined) {
+        // just checking presence of this key
+        if(feature.properties[key] == null) {
+          return false;
+        }
+      } else {
+        if(feature.properties[key] != value) {
+          return false;
+        }  
+      }
+    } 
+  return true;
+  }
+
+  function isMatchingAnyEntryInBlockingTagList(feature, blockingTagList) {
+    for (const blockingTags of blockingTagList) {
+      if(isMatchingEntryInBlockingTags(feature, blockingTags)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  function addRulesForDisplayOfCalculatedImpassableArea(returned, barrierAreaColor, generatedImpassableAreaColor) {
+    var barriersKeyValue = [];
+    var i = linearGenerallyImpassableBarrierValuesArray().length;
+    while (i--) {
+      value = linearGenerallyImpassableBarrierValuesArray()[i];
+      barriersKeyValue.push({ key: "barrier", value: value, purpose: "generally impassable barrier, for detecting where access is blocked" });
+    }
+    barriersKeyValue.push({ key: "barrier", value: "yes", purpose: "unknown barrier, assumed to be generally impassable barrier, for detecting where access is blocked" });
+
+    returned.push({
+      area_color: barrierAreaColor,
+      description: "generated barrier areas",
+      automatically_generated_using: barriersKeyValue,
+      matches: [{ key: "generated_barrier_area", value: "yes" }],
+    });
+
+    var blockDetection = JSON.parse(JSON.stringify(barriersKeyValue));
+    
+    var message = "generally impassable barrier, for detecting where access is blocked"
+    for (const blockingTags of listOfTagSetsBlockingPedestrianAccess()) {
+        for (const [key, value] of Object.entries(blockingTags)) {
+          if(value == undefined) {
+            blockDetection.push({ "key": key, purpose: message });
+          } else {
+            blockDetection.push({ "key": key, "value": value, purpose: message });
+          }
+        }
+    }
+
+    returned.push({
+      area_color: generatedImpassableAreaColor,
+      description: "areas that are inaccessible, generated automatically",
+      automatically_generated_using: blockDetection,
+      matches: [
+        { key: "generated_blocked_chunk", value: "yes" },
+        { key: "native_blocked_chunk", value: "yes" },
+      ],
+    });
+    // generated_traversable_chunk=yes is not rendered
+    return returned;      
+  }
+
+/* ------------------------ */
+
 /*lunar_assembler_helpful_functions_for_map_styles_generate_symbolic_zebra_bars.js*/
 
 /*
@@ -343,13 +651,12 @@ function pointBetweenTwoPoints(start, end, ratioOfStart) {
 */
 
 function generateZebraBarCrossings(dataGeojson, roadAreaWithCrossing) {
-  if(roadAreaWithCrossing == undefined) {
-    showWarning("zebra crossing bars not generated as undefined was passed as crossing geometry - please report bug if crossing is mapped here")
+  if (roadAreaWithCrossing == undefined) {
+    showWarning("zebra crossing bars not generated as undefined was passed as crossing geometry - please report bug if crossing is mapped here");
   }
-  if(roadAreaWithCrossing.type != "Feature") {
-    showFatalError("roadAreaWithCrossing is of wrong type: " + roadAreaWithCrossing.type + " " + reportBugMessage())
+  if (roadAreaWithCrossing.type != "Feature") {
+    showFatalError("roadAreaWithCrossing is of wrong type: " + roadAreaWithCrossing.type + " " + reportBugMessage());
   }
-  // check is roadAreaWithCrossing defined
   crossingLines = listUnifiedCrossingLines(dataGeojson);
   var i = crossingLines.length;
   while (i--) {
@@ -357,51 +664,77 @@ function generateZebraBarCrossings(dataGeojson, roadAreaWithCrossing) {
     // startEndOfActualCrossing is necessary as sometimes footway=crossing is applied between sidewalks, including segment outside road area
     // also, this allows to catch unsupported cases (one footway=crossing across independent crossings or split footway=crossing line)
     // and invalid OpenStreetMap data (like footway=crossing shorter than actual crossing or footway=crossing outside crossings)
-    console.log()
-    console.log(feature)
-    console.log(roadAreaWithCrossing)
+    showCrossingData(feature, roadAreaWithCrossing);
     var startEndOfActualCrossing = turf.lineIntersect(roadAreaWithCrossing, feature);
     if (startEndOfActualCrossing.features.length < 2 || startEndOfActualCrossing.features.length % 2 == 1) {
-      const link = "https://www.openstreetmap.org/" + feature.id;
-      showFatalError(
-        link +
-          " and touching crossing ways is/are unexpectedly crossing with road area not exactly two times (or even even count) but " +
-          startEndOfActualCrossing.features.length +
-          " times, which is unhandled" +
-          reportBugMessageButGeodataMayBeWrong()
-      );
+      complainAboutCrossingLineMismatchingCrossingArea(startEndOfActualCrossing, roadAreaWithCrossing, feature);
     }
     if (startEndOfActualCrossing.features.length < 2) {
       // skipping, generation impossible
       continue;
     }
-    console.log("startEndOfActualCrossing.features.length")
-    console.log(startEndOfActualCrossing.features.length)
+    console.log("startEndOfActualCrossing.features.length");
+    console.log(startEndOfActualCrossing.features.length);
     var k = startEndOfActualCrossing.features.length - 1;
-    while(k>=0) {
-      console.log(k)
-      generateGroupOfZebraBars(startEndOfActualCrossing.features[k-1].geometry.coordinates, startEndOfActualCrossing.features[k].geometry.coordinates);
+    while (k >= 0) {
+      console.log(k);
+      dataGeojson = generateGroupOfZebraBars(
+        startEndOfActualCrossing.features[k - 1].geometry.coordinates,
+        startEndOfActualCrossing.features[k].geometry.coordinates,
+        roadAreaWithCrossing,
+        dataGeojson
+      );
       k -= 2;
     }
   }
-
-function generateGroupOfZebraBars(point1, point2) {
-    // always three strips, change later if needed
-    // so
-    // 1st empty space
-    // 1st strip
-    // 2nd empty space
-    // 2nd strip
-    // 3rd empty space
-    // 3rd strip
-    // 4th empty space
-    //
-    // so we need to split distance in 7
-    dataGeojson.features.push(makeBarOfZebraCrossing(roadAreaWithCrossing, point1, point2, 1 / 7, 2 / 7));
-    dataGeojson.features.push(makeBarOfZebraCrossing(roadAreaWithCrossing, point1, point2, 3 / 7, 4 / 7));
-    dataGeojson.features.push(makeBarOfZebraCrossing(roadAreaWithCrossing, point1, point2, 5 / 7, 6 / 7));
-  }
   return dataGeojson;
+}
+
+function generateGroupOfZebraBars(crossingLinePoint1, crossingLinePoint2, roadAreaWithCrossing, dataGeojson) {
+  // always three strips, change later if needed
+  // so
+  // 1st empty space
+  // 1st strip
+  // 2nd empty space
+  // 2nd strip
+  // 3rd empty space
+  // 3rd strip
+  // 4th empty space
+  //
+  // so we need to split distance in 7
+  var point1 = crossingLinePoint1;
+  var point2 = crossingLinePoint2;
+  dataGeojson.features.push(makeBarOfZebraCrossing(roadAreaWithCrossing, point1, point2, 1 / 7, 2 / 7));
+  dataGeojson.features.push(makeBarOfZebraCrossing(roadAreaWithCrossing, point1, point2, 3 / 7, 4 / 7));
+  dataGeojson.features.push(makeBarOfZebraCrossing(roadAreaWithCrossing, point1, point2, 5 / 7, 6 / 7));
+  return dataGeojson;
+}
+
+function showCrossingData(feature, roadAreaWithCrossing) {
+  console.log();
+  console.log("-0--0--0--0--0--0--0--0-");
+  console.log("crossing line:");
+  console.log(feature);
+  console.log("crossing areas:");
+  console.log(roadAreaWithCrossing);
+}
+
+function complainAboutCrossingLineMismatchingCrossingArea(startEndOfActualCrossing, roadAreaWithCrossing, feature) {
+  const link = "https://www.openstreetmap.org/" + feature.id;
+  showFatalError(
+    link +
+      " and touching crossing ways is/are unexpectedly crossing with road area not exactly two times (or even even count) but " +
+      startEndOfActualCrossing.features.length +
+      " times, which is unhandled.\n\n" +
+      "Please, check is footway=crossing at correct object. If area:highway=crossing area exists - is end of crossing line attached to it?\n" +
+      "Road area:\n" +
+      JSON.stringify(roadAreaWithCrossing) +
+      "\n\n" +
+      "crossingLine:\n" +
+      JSON.stringify(feature) +
+      "\n\n" +
+      reportBugMessageButGeodataMayBeWrong()
+  );
 }
 
 function listUnifiedCrossingLines(dataGeojson) {
@@ -534,7 +867,6 @@ function makeBarOfZebraCrossing(roadAreaWithCrossing, start, end, fractionOfCros
 }
 
 
-
 /* ------------------------ */
 
 /*lunar_assembler_helpful_functions_for_map_styles_apply_patterns_to_areas.js*/
@@ -594,6 +926,45 @@ function intersectGeometryWithHorizontalStripes(feature, stripeSizeInDegrees, di
   cloned.geometry.coordinates = generated;
   return cloned;
 }
+
+function intersectGeometryWithVerticalStripes(feature, stripeSizeInDegrees, distanceBetweenStripesInDegrees) {
+  bbox = turf.bbox(feature);
+  var minLongitude = bbox[0];
+  var minLatitude = bbox[1];
+  var maxLongitude = bbox[2];
+  var maxLatitude = bbox[3];
+  if (!isMultipolygonAsExpected(feature)) {
+    return null;
+  }
+  var collected = [];
+  // gathering horizontal stripes
+  var minLongitudeForStripe = minLongitude;
+  while (minLongitudeForStripe < maxLongitude) {
+    var maxLongitudeForStripe = minLongitudeForStripe + stripeSizeInDegrees;
+    var stripeRing = [
+      [minLongitudeForStripe, minLatitude],
+      [maxLongitudeForStripe, minLatitude],
+      [maxLongitudeForStripe, maxLatitude],
+      [minLongitudeForStripe, maxLatitude],
+      [minLongitudeForStripe, minLatitude],
+    ];
+    var stripe = [stripeRing];
+    var intersectedStripe = polygonClipping.intersection(feature.geometry.coordinates, stripe);
+    if (intersectedStripe != []) {
+      collected.push(intersectedStripe);
+    }
+    minLongitudeForStripe += stripeSizeInDegrees + distanceBetweenStripesInDegrees;
+  }
+  if (collected.length == 1) {
+    console.warn("one element! Is spread working as expected? See #68"); // TODO - trigger and debug it
+  }
+  var generated = polygonClipping.union(...collected);
+
+  var cloned = JSON.parse(JSON.stringify(feature));
+  cloned.geometry.coordinates = generated;
+  return cloned;
+}
+
 
 function intersectGeometryWithPlaneHavingRectangularHoles(feature, holeVerticalInDegrees, holeHorizontalInDegrees, spaceVerticalInDegrees, spaceHorizontalInDegrees) {
   bbox = turf.bbox(feature);
@@ -737,14 +1108,14 @@ function linearGenerallyImpassableBarrierValuesArray() {
 
 function widthsOfParkingLanes() {
   return {
-    'parallel': 3,
-    'diagonal': 5,
-    'perpendicular': 6.5,
-    'marked': 3, // may be also perpendicular or diagonal but that info is lost...
-    'no_parking': 0,
-    'no_stopping': 0,
-    'fire_lane': 0,
-    'no': 0,
+    parallel: 3,
+    diagonal: 5,
+    perpendicular: 6.5,
+    marked: 3, // may be also perpendicular or diagonal but that info is lost...
+    no_parking: 0,
+    no_stopping: 0,
+    fire_lane: 0,
+    no: 0,
     // separate - ???
   };
 }
@@ -756,7 +1127,7 @@ function isSimplePositiveInteger(str) {
   return n !== Infinity && String(n) === str && n > 0;
 }
 
-function getDrivingLaneCount(feature){
+function getDrivingLaneCount(feature) {
   if (feature.properties["lanes"] == undefined) {
     return undefined;
   }
@@ -770,16 +1141,16 @@ function getDrivingLaneCount(feature){
 function getParkingLaneWidthInLaneEquivalentForGivenSide(side, feature) {
   var matchingCodeToWidthInMeters = widthsOfParkingLanes();
   var value = undefined;
-  if(feature.properties["parking:lane:both"] != undefined) {
-    value = feature.properties["parking:lane:both"];          
+  if (feature.properties["parking:lane:both"] != undefined) {
+    value = feature.properties["parking:lane:both"];
   }
-  if(feature.properties["parking:lane:" + side] != undefined) {
-    if(value != undefined) {
+  if (feature.properties["parking:lane:" + side] != undefined) {
+    if (value != undefined) {
       showError("both parking:lane:both and parking:lane:" + side + " set for " + JSON.stringify(feature) + reportBugMessage());
     }
-    value = feature.properties["parking:lane:" + side];        
+    value = feature.properties["parking:lane:" + side];
   }
-  if(value == undefined) {
+  if (value == undefined) {
     return undefined;
   }
   if (value in matchingCodeToWidthInMeters) {
@@ -790,47 +1161,47 @@ function getParkingLaneWidthInLaneEquivalentForGivenSide(side, feature) {
   }
 }
 
-function getParkingLaneWidthInLaneEquivalent(feature){
+function getParkingLaneWidthInLaneEquivalent(feature) {
   /*
   there is parallel, diagonal and perpendicular parking
   the width varies between them
   */
-  var left = getParkingLaneWidthInLaneEquivalentForGivenSide('left', feature);
-  var right = getParkingLaneWidthInLaneEquivalentForGivenSide('right', feature);
-  if(left == undefined || right == undefined) {
-    if (left == undefined && right == undefined ) {
+  var left = getParkingLaneWidthInLaneEquivalentForGivenSide("left", feature);
+  var right = getParkingLaneWidthInLaneEquivalentForGivenSide("right", feature);
+  if (left == undefined || right == undefined) {
+    if (left == undefined && right == undefined) {
       return undefined;
     } else {
       // assume that in such case user tagged known sides
-      if(left == undefined) {
+      if (left == undefined) {
         left = 0;
       }
-      if(right == undefined) {
+      if (right == undefined) {
         right = 0;
       }
     }
   }
-  return (left + right)/3;
+  return (left + right) / 3;
 }
 
 function getTotalKnownLaneCount(feature) {
   var drivingLanes = getDrivingLaneCount(feature);
   var parkingLanes = getParkingLaneWidthInLaneEquivalent(feature);
-  if(drivingLanes == undefined && parkingLanes == undefined) {
+  if (drivingLanes == undefined && parkingLanes == undefined) {
     return undefined;
   }
-  if(drivingLanes != undefined && parkingLanes != undefined) {
+  if (drivingLanes != undefined && parkingLanes != undefined) {
     return drivingLanes + parkingLanes;
   }
-  if(drivingLanes != undefined) {
+  if (drivingLanes != undefined) {
     // assume that it means that no parking lanes are tagged
     return drivingLanes;
   }
-  if(parkingLanes != undefined) {
+  if (parkingLanes != undefined) {
     // I assume that it will happen on minor city roads
     return parkingLanes + 1;
   }
-  showFatalError('This should never happen, getTotalKnownLaneCount failed');
+  showFatalError("This should never happen, getTotalKnownLaneCount failed");
 }
 
 function creditsForLaneWidthInMapStyle(automatically_generated_using_array) {
@@ -844,6 +1215,7 @@ function creditsForLaneWidthInMapStyle(automatically_generated_using_array) {
   automatically_generated_using_array.push({ key: "oneway", value: "-1", purpose: "estimating road width" });
   return automatically_generated_using_array;
 }
+
 
 /* ------------------------ */
 
@@ -977,10 +1349,10 @@ function addLegendEntriesForProcessedElements(rule) {
   returned = "";
   returned += "<li>" + stylingSummary(rule) + " " + rule["description"] + " - this is generated using:\n";
   returned += "<ul>";
-  if(("automatically_generated_using" in rule) == false) {
+  if ("automatically_generated_using" in rule == false) {
     showFatalError("map style is broken! In " + JSON.stringify(rule) + " a field automatically_generated_using is missing!");
   }
-  if(rule["automatically_generated_using"] == undefined) {
+  if (rule["automatically_generated_using"] == undefined) {
     showFatalError("map style is broken! In " + JSON.stringify(rule) + " a field automatically_generated_using is set to undefined!");
   }
   var length = rule["automatically_generated_using"].length;
@@ -1173,6 +1545,11 @@ function showWarning(message) {
   document.getElementById(logOutputIdConfig).innerHTML += '<p class="logged warning">' + message + "</p>";
 }
 
+function showPerformanceInfo(message) {
+  console.warn(message);
+  document.getElementById(logOutputIdConfig).innerHTML += '<p class="logged performance_profiling">' + message + "</p>";
+}
+
 function reportBugMessage() {
   return " this is a bug, please report to https://github.com/matkoniecz/lunar_assembler/issues";
 }
@@ -1184,7 +1561,9 @@ function reportBugMessageButGeodataMayBeWrong() {
 // progress bar fun
 // TODO:
 // not entirely fake as it is based on expected real time
-// and not intentionally misleading like for example randomized booking.com displays
+// and not intentionally misleading like counters on booking.com 
+// https://news.ycombinator.com/item?id=21306423
+// https://www.bbc.com/news/technology-49740143
 //
 // it would be nice to have it based on area size - there is probably some relation here
 
@@ -1348,21 +1727,21 @@ async function downloadOpenStreetMapData(readableBounds) {
 
   // sadly, French overpass server is outdated and not supporting nwr...
   // this section start here
-  query += "("
+  query += "(";
   query += "node" + extra_filters + bbox + ";";
   query += "way" + extra_filters + bbox + ";";
   query += "relation" + extra_filters + bbox + ";";
-  query += ");"
-  // and is to be replaced by 
+  query += ");";
+  // and is to be replaced by
   // query += "nwr" + extra_filters + bbox + ";";
 
   query += "out body;>;out skel qt;";
   console.log("overpass query in the next line:");
   console.log(query);
 
-  var overpassServers = ["https://overpass.openstreetmap.fr/api/interpreter", "https://overpass-api.de/api/interpreter"]
+  var overpassServers = ["https://overpass.openstreetmap.fr/api/interpreter", "https://overpass-api.de/api/interpreter"];
   const selectedServer = overpassServers[Math.floor(Math.random() * overpassServers.length)];
-  console.log("selected server: " + selectedServer)
+  console.log("selected server: " + selectedServer);
   const response = await fetch(selectedServer, {
     method: "POST",
     headers: {
@@ -1440,16 +1819,33 @@ function rewind(geojson_that_is_7946_compliant_with_right_hand_winding_order) {
 }
 
 function render(readableBounds, dataGeojson, width, height, mapStyle, mapOutputHolderId) {
+  var measuredTime;
   if ("transformGeometryAsInitialStep" in mapStyle) {
+    measuredTime = performance.now()
     dataGeojson = mapStyle.transformGeometryAsInitialStep(dataGeojson, readableBounds);
+    showPerformanceInfo("transformGeometryAsInitialStep took " + (performance.now() - measuredTime)/1000 + "s")
   }
+
+  measuredTime = performance.now()
   validateGeometries(dataGeojson);
+  showPerformanceInfo("validateGeometries took " + (performance.now() - measuredTime)/1000 + "s")
+
+  measuredTime = performance.now()
   dataGeojson = mergeAsRequestedByMapStyle(dataGeojson, mapStyle);
+  showPerformanceInfo("mergeAsRequestedByMapStyle took " + (performance.now() - measuredTime)/1000 + "s")
+
   if ("transformGeometryAtFinalStep" in mapStyle) {
+    measuredTime = performance.now()
     dataGeojson = mapStyle.transformGeometryAtFinalStep(dataGeojson, readableBounds);
+    showPerformanceInfo("transformGeometryAtFinalStep took " + (performance.now() - measuredTime)/1000 + "s")
   }
+  measuredTime = performance.now()
   dataGeojson = clipGeometries(readableBounds, dataGeojson);
+  showPerformanceInfo("clipGeometries took " + (performance.now() - measuredTime)/1000 + "s")
+
+  measuredTime = performance.now()
   renderUsingD3(readableBounds, dataGeojson, width, height, mapStyle, mapOutputHolderId);
+  showPerformanceInfo("rendering took " + (performance.now() - measuredTime)/1000 + "s")
 }
 
 function validateGeometries(dataGeojson) {
@@ -1466,7 +1862,7 @@ function validateGeometries(dataGeojson) {
 }
 
 function mergeAsRequestedByMapStyle(dataGeojson, mapStyle) {
-  if (("mergeIntoGroup" in mapStyle) == false) {
+  if ("mergeIntoGroup" in mapStyle == false) {
     return dataGeojson;
   }
   var i = dataGeojson.features.length;
@@ -1515,7 +1911,7 @@ function mergeAsRequestedByMapStyle(dataGeojson, mapStyle) {
       }
       coordinatesForMerging.push(forMerging[k].geometry.coordinates);
     }
-    produced.geometry = mergeArrayOfAreaCoordinatesIntoMultipolygon(coordinatesForMerging)
+    produced.geometry = mergeArrayOfAreaCoordinatesIntoMultipolygon(coordinatesForMerging);
     produced.properties["lunar_assembler_merge_group"] = key;
     processeedFeatures.push(produced);
   }
@@ -1526,7 +1922,7 @@ function mergeAsRequestedByMapStyle(dataGeojson, mapStyle) {
 function mergeArrayOfAreaCoordinatesIntoMultipolygon(coordinatesForMerging) {
   // it is union so output will be nonepty
   // https://github.com/mfogel/polygon-clipping#output
-  producedGeometry = {"type": "MultiPolygon", "coordinates": undefined}
+  producedGeometry = { type: "MultiPolygon", coordinates: undefined };
   if (coordinatesForMerging.length == 1) {
     // adding it fixed crashing on empty areas for laser map style and private/public areas
     // https://github.com/matkoniecz/lunar_assembler/issues/68
@@ -1693,17 +2089,9 @@ function makeCompareFunctionForLayering(paintOrderFunction) {
 }
 
 function update3Map(geoGenerator, used_data, selector, mapStyle) {
-  var u = d3
-    .select(selector)
-    .selectAll("path")
-    .data(used_data.features);
+  var u = d3.select(selector).selectAll("path").data(used_data.features);
 
-  u.enter()
-    .append("path")
-    .attr("d", geoGenerator)
-    .attr("stroke", mapStyle.strokeColoring)
-    .attr("stroke-width", mapStyle.strokeWidth)
-    .attr("fill", mapStyle.fillColoring);
+  u.enter().append("path").attr("d", geoGenerator).attr("stroke", mapStyle.strokeColoring).attr("stroke-width", mapStyle.strokeWidth).attr("fill", mapStyle.fillColoring);
   //.attr("name", mapStyle.name) - note that passing name with & breaks SVG (at least more fragile ones) - TODO: fix and reenable or drop that
 }
 
