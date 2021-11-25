@@ -4,7 +4,7 @@ import os
 def main():
   os.chdir("../osm_to_svg_in_browser")
 
-  map_styles = [{'name': "general_high_zoom", 'description': 'area:highway included, general style - works well on scale of junction, neigbourhood, town, maybe also for entire cities'},
+  map_styles = [{'name': "general_high_zoom", 'description': 'area:highway included, general style - works well on scale of junction, neighbourhood, town, maybe also for entire cities'},
                 {'name': "laser_neighbourhood", 'description': 'depiction of a neighbourhood - generates map designed to be a template for laser-cut 3D tactile maps'},
                 {'name': "laser_road_area", 'description': 'depiction of a single crossing - generates map designed to be a template for laser-cut 3D tactile maps'},
                 {'name': "simple", 'description': 'very, very simple map style showing few elements. Useful if you are trying to make own and you want something as a base'},
