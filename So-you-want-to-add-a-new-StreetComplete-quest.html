@@ -1,11 +1,15 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
-<head>
-  <meta charset="utf-8" />
-  <meta name="generator" content="pandoc" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>CONTRIBUTING_A_NEW_QUEST</title>
-  <style type="text/css">
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>What is OpenStreetMap by Mateusz Konieczny</title>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="imported-code/leaflet/leaflet.css" crossorigin=""/>
+    <script src="imported-code/leaflet/leaflet.js" crossorigin=""></script>
+    <link rel="icon" href="favicon.svg">
+
+    <style type="text/css">
       code{white-space: pre-wrap;}
       span.smallcaps{font-variant: small-caps;}
       span.underline{text-decoration: underline;}
@@ -74,9 +78,44 @@ code span.va { color: #19177c; } /* Variable */
 code span.vs { color: #4070a0; } /* VerbatimString */
 code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
   </style>
+
 </head>
-<body>
-<p>This file describes in detail the process of creating a new quest.</p>
+  <body>
+    <div id="main_content_wrap" class="outer">
+      <nav class="main-nav">
+        <ul id="main-nav-list">
+          <li>
+            <a href="index.html">
+              <div>
+                Home
+              </div>
+            </a>
+          </li>
+          <li>
+            <a href="articles.html" class="active">
+              <div>
+                Articles
+              </div>
+            </a>
+          </li>
+          <li>
+            <a href="recommendations.html">
+              <div>
+                Recommendations
+              </div>
+            </a>
+          </li>
+          <li>
+            <a href="contact.html">
+              <div>
+                Contact
+              </div>
+            </a>
+          </li>
+        </ul>
+      </nav>
+      <section id="main_content" class="inner">
+        <p>This file describes in detail the process of creating a new quest.</p>
 <p>For code style and more general info - see <a href="CONTRIBUTING.md#development">CONTRIBUTING file</a>.</p>
 <p>If you want to contribute code to StreetComplete, then making a new quest is one of the easiest programming tasks. It is quite easy to implement a quest where layout design matches an existing quest. For example one more yes/no quest or where user taps one of displayed images.</p>
 <p>Contributions like that are highly welcomed and you would make mapping one more thing in OSM much easier! You can implement it also if you never used Kotlin or implemented anything for Android. Being highly experienced programmer is not necessary here.</p>
@@ -455,5 +494,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <h2 id="isdeleteelementenabled"><code>isDeleteElementEnabled</code></h2>
 <p>This will decode whether user should have access to direct deletion of elements. Note that ways and relations cannot be deleted by SC users.</p>
 <p>For nodes within ways, node will remain and tags will be removed.</p>
+</section>
+</div>
 </body>
 </html>
