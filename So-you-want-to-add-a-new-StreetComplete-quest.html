@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>CONTRIBUTING_A_NEW_QUEST</title>
+  <style type="text/css">
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <style type="text/css">
+a.sourceLine { display: inline-block; line-height: 1.25; }
+a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
+a.sourceLine:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode { white-space: pre; position: relative; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+code.sourceCode { white-space: pre-wrap; }
+a.sourceLine { text-indent: -1em; padding-left: 1em; }
+}
+pre.numberSource a.sourceLine
+  { position: relative; left: -4em; }
+pre.numberSource a.sourceLine::before
+  { content: attr(title);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; pointer-events: all; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {  }
+@media screen {
+a.sourceLine::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<p>This file describes in detail the process of creating a new quest.</p>
+<p>For code style and more general info - see <a href="CONTRIBUTING.md#development">CONTRIBUTING file</a>.</p>
+<p>If you want to contribute code to StreetComplete, then making a new quest is one of the easiest programming tasks. It is quite easy to implement a quest where layout design matches an existing quest. For example one more yes/no quest or where user taps one of displayed images.</p>
+<p>Contributions like that are highly welcomed and you would make mapping one more thing in OSM much easier! You can implement it also if you never used Kotlin or implemented anything for Android. Being highly experienced programmer is not necessary here.</p>
+<p>Reading the text below is not necessary to create a new quest. Duplicating existing quest and modifying its code may be sufficient. And people were creating new quests before this documentation existed.</p>
+<p>But this materials may help or be quicker than trying to fully explore on your own how things work.</p>
+<h1 id="required">Required</h1>
+<ul>
+<li>programming ability - it is not a good task for someone who has never programmed anything.
+<ul>
+<li>Setup of environment takes a long time</li>
+<li>Editing even the simplest quest requires edits to at least three different files</li>
+<li>Kotlin familiarity is not required, but the ability to adjust to a new syntax is needed. If you are unfamiliar with Kotlin reading about <a href="https://kotlinlang.org/docs/null-safety.html">null safety related syntax</a> is likely to be very useful.</li>
+<li>It is expected that someone trying this can search for a solution to a typical problem on encountering an error message</li>
+</ul></li>
+<li>familiarity with StreetComplete as a user - it is highly recommended to be familiar with how StreetComplete works. Making hundreds of edits is not mandatory, but having a passing familiarity with how surveying with StreetComplete works is needed.</li>
+<li>time - Android Studio setup is sadly complicated
+<ul>
+<li>Multiple hours are typical, though mostly spent on waiting for various downloads</li>
+<li>setting up Android Studio will likely be more complex than writing the code</li>
+</ul></li>
+<li><a href="https://git-scm.com/docs/user-manual">basic ability to use git</a> (but as mentioned, anything GitHub specific will be explained)
+<ul>
+<li>there is version control integration available in Android Studio
+<ul>
+<li>From the Android Studio <strong>VCS</strong> menu, click <strong>Enable Version Control Integration</strong> (<a href="https://developer.android.com/studio/intro#version_control_basics">see official docs</a>)</li>
+<li>Go to File -&gt; Settings -&gt; Version control in Android Studio to optionally configure git integration</li>
+</ul></li>
+<li>Using git from command line or terminal in Android Studio also works fine</li>
+</ul></li>
+<li>GitHub <a href="https://github.com/signup">account</a></li>
+<li>around 15GB of free space on disk
+<ul>
+<li>the initial setup will typically download half the Internet while getting emulators and dependencies</li>
+</ul></li>
+</ul>
+<h1 id="dependencies---initial-setup">Dependencies - initial setup</h1>
+<ul>
+<li>install necessary software (<a href="https://developer.android.com/studio">Android Studio</a> and <a href="https://git-scm.com/downloads">git</a>)</li>
+<li>create a GitHub <a href="https://github.com/signup">account</a> if needed</li>
+<li>visit <a href="https://github.com/streetcomplete/StreetComplete">https://github.com/streetcomplete/StreetComplete</a> and press the “fork” button on the top right
+<ul>
+<li>this creates a copy of StreetComplete repository that you control and can prepare code there</li>
+</ul></li>
+<li>clone your fork of a StreetComplete repository
+<ul>
+<li>in Android Studio it can be achieved without command line ( File -&gt; New -&gt; Project from Version Control… )</li>
+<li>see <a href="https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository">Github Documentation</a> how repository can be cloned and where its URL can be found</li>
+</ul></li>
+<li>open StreetComplete in Android Studio</li>
+<li><a href="https://developer.android.com/studio/run/emulator#install">setup an emulator in Android Studio</a> (you can also <a href="https://developer.android.com/studio/run/device">connect to a real device via USB</a>, this can replace using the emulator)</li>
+<li>run StreetComplete in the emulator (to verify that everything was setup as required)</li>
+</ul>
+<p>If you are doing it for the first time, don’t worry if there is an error to solve along the way, this is typical for setting up an Android development environment. See <a href="CONTRIBUTING.md#development">CONTRIBUTING file</a> which has some links to information about the setup.</p>
+<h1 id="invent-a-new-quest">Invent a new quest</h1>
+<h2 id="own-ideas">Own ideas</h2>
+<p>To <a href="CONTRIBUTING.md#developing-new-quests">repeat</a> from that documentation file: <a href="CONTRIBUTING.md#developing-new-quests"><strong>open an issue</strong> discussing the quest</a>, before starting other work. This way it can be confirmed that such quest can be included. This can be skipped if you are an <a href="https://github.com/streetcomplete/StreetComplete/discussions/3450">experienced</a> StreetComplete contributor.</p>
+<h2 id="existing-proposals">Existing proposals</h2>
+<p>You can also look at <a href="https://github.com/streetcomplete/StreetComplete/issues?q=is%3Aissue+is%3Aopen+label%3A%22new+quest%22+-label%3A%22blocked%22">quest proposals waiting for implementation</a>.</p>
+<h1 id="prepare-repository-for-development">Prepare repository for development</h1>
+<p>That is a good moment to create a branch and switch to it.</p>
+<p>It can be done using Android Studio GUI (Git -&gt; New branch…), or in CLI with the following command:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode bash"><code class="sourceCode bash"><a class="sourceLine" id="cb1-1" title="1"><span class="fu">git</span> checkout -b short_branch_name_describing_planned_work</a></code></pre></div>
+<p>In general, <a href="https://www.jetbrains.com/help/idea/using-git-integration.html">Intellij documentation</a> about git integration is applicable to Android Studio (which is rebranded Intellij with minor modifications).</p>
+<h1 id="learn-from-existing-code">Learn from existing code</h1>
+<h2 id="find-a-base">Find a base</h2>
+<h3 id="hints-for-looking-around-code">Hints for looking around code</h3>
+<p>Full text search (<a href="https://www.jetbrains.com/help/idea/finding-and-replacing-text-in-file.html"><kbd>ctrl</kbd>+<kbd>shift</kbd>+<kbd>f</kbd></a> or <a href="https://github.com/BurntSushi/ripgrep#ripgrep-rg">grepping</a>) remains useful and powerful.</p>
+<p>But “Find usages” (<kbd>alt</kbd>+<kbd>F7</kbd>) is also a very powerful way to find where given function/constant/property/etc is appearing, classified by usages.</p>
+<h3 id="base-on-existing">Base on existing</h3>
+<p>Base the new quest on one that exists already.</p>
+<p>Find one that has the same type of interface as the one that you are trying to implement.</p>
+<p>Are you trying to implement a quest that will have simple yes/no answer? Take <a href="app/src/main/java/de/westnordost/streetcomplete/quests/defibrillator/AddIsDefibrillatorIndoor.kt"><code>AddIsDefibrillatorIndoor</code></a> quest as a base. Or <a href="app/src/main/java/de/westnordost/streetcomplete/quests/tracktype/AddTracktype.kt"><code>AddTracktype</code></a> where the mapper will be selecting one of presented images.</p>
+<p>Is it going to be asked for POIs and should be disabled by default? <a href="app/src/main/java/de/westnordost/streetcomplete/quests/wheelchair_access/AddWheelchairAccessBusiness.kt"><code>AddWheelchairAccessBusiness</code></a> may be a good base.</p>
+<p>Quests are grouped in <a href="app/src/main/java/de/westnordost/streetcomplete/quests">one folder</a>.</p>
+<p>Implementing quest by duplicating and modifiying existing one is the recommended method.</p>
+<h3 id="locating-a-quest">Locating a quest</h3>
+<p>Search across the code for part of a question or other text specific to this quest. For example “the name of this place?”.</p>
+<p>You will find an <a href="app/src/main/res/values/strings.xml">XML file</a> with an entry looking like this:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode xml"><code class="sourceCode xml"><a class="sourceLine" id="cb2-1" title="1">    <span class="kw">&lt;string</span><span class="ot"> name=</span><span class="st">&quot;quest_placeName_title&quot;</span><span class="kw">&gt;</span>&quot;What’s the name of this place?&quot;<span class="kw">&lt;/string&gt;</span></a></code></pre></div>
+<p>The identifier <code>quest_placeName_title</code> is a string reference, used in the code to allow translations.</p>
+<p>Search for this identifier in <code>*.kt</code> files, it should appear in the quest file (in this case <a href="app/src/main/java/de/westnordost/streetcomplete/quests/place_name/AddPlaceName.kt">AddPlaceName.kt</a>).</p>
+<p>This method can often be used to locate relevant code.</p>
+<h3 id="other-people">Other people</h3>
+<p>The issue proposing a quest may also contain hint which quests are similar. If you are unsure what would be a good base - you can ask in issue discussion to confirm what you found or ask for help in finding a good base for a given issue.</p>
+<h2 id="pull-requests">Pull Requests</h2>
+<p>One of the better ways to get around a codebase that is new to you is to look at recent accepted proposals to change the code (pull requests).</p>
+<p>This is also likely useful here.</p>
+<p>Find some <a href="https://github.com/streetcomplete/StreetComplete/pulls?q=is%3Apr+is%3Aclosed">recent ones</a> adding a quest.</p>
+<p>You can look at what was changed to achieve the goal, where relevant code is located. How much coding was needed to implement something? And what kind of comments are typical, how long one needs to wait for maintainers and so on.</p>
+<p>This can be also used to locate relevant code, especially helpful if some change needs to be done in multiple files.</p>
+<h1 id="copying">Copying</h1>
+<p>Duplicate the relevant quest folder from <a href="app/src/main/java/de/westnordost/streetcomplete/quests"><code>app/src/main/java/de/westnordost/streetcomplete/quests</code></a>. Some contain multiple quests, in such case delete unnecessary files.</p>
+<p>Some quests are entirely defined in a single file, some have additional answer class, custom interface or utility classes.</p>
+<p>For example, lets imagine that new quest will ask whether <a href="https://wiki.openstreetmap.org/wiki/Tag:emergency%3Ddefibrillator">AED</a> is placed indoor or outdoor. A very similar in mechanics quest with simple yes/no question is for example <a href="app/src/main/java/de/westnordost/streetcomplete/quests/bike_parking_cover/AddBikeParkingCover.kt">quest asking “Is this bicycle parking covered (protected from rain)?”</a>.</p>
+<p>So, as the first step: lets copy <a href="app/src/main/java/de/westnordost/streetcomplete/quests/bike_parking_cover"><code>app/src/main/java/de/westnordost/streetcomplete/quests/bike_parking_cover/</code></a> folder into <code>app/src/main/java/de/westnordost/streetcomplete/quests/defibrillator/</code>.</p>
+<p>This is done in <a href="https://github.com/matkoniecz/StreetComplete_quest_creation_tutorial/commit/7d9ad571f521055a4c5a0006743762fd16e4c9d6">this commit</a> in the demonstration repository.</p>
+<h1 id="adjust-the-copy">Adjust the copy</h1>
+<p>After the quest is copied it is necessary to adjust it a bit so it is not a duplicate anymore.</p>
+<p>Change its class name and the file name to the new one.</p>
+<p>In copied code change package info (things like <code>package de.westnordost.streetcomplete.quests.defibrillator</code> at the top) to match the new folder containing the quest.</p>
+<p>When commiting changes be careful to not change already existing quest - only new code (using built-in refactoring rename will affect also <code>QuestsModule.kt</code> entry for an existing quest).</p>
+<p>See <a href="https://github.com/matkoniecz/StreetComplete_quest_creation_tutorial/commit/9c65d00c7d096c3fee61650e1465a43b7e7f5712">this step</a> in the example repository.</p>
+<h1 id="add-the-quest-to-the-list-of-active-ones">Add the quest to the list of active ones</h1>
+<p>Adjust <a href="app/src/main/java/de/westnordost/streetcomplete/quests/QuestsModule.kt">QuestsModule.kt</a> file. It contains a big list of active quests, ordered by priority. Read <a href="https://github.com/streetcomplete/StreetComplete/blob/master/app/src/main/java/de/westnordost/streetcomplete/quests/QuestsModule.kt#L172-L195">what governs their priority</a> but do not worry too much, it can be tweaked later.</p>
+<p>Add your quest to the list so that it will be loaded by the app.</p>
+<p>As this point you can run the app in emulator - everything should work and one of quests will appear twice.</p>
+<p>See <a href="https://github.com/matkoniecz/StreetComplete_quest_creation_tutorial/commit/b4f01eeb752f92fd6927fbb9a943ea19a4799eec">this step</a> in the example repository.</p>
+<h1 id="modify-the-template">Modify the template</h1>
+<p>At this point prepared template can be modified to achieve the intended effect.</p>
+<p>See for example <a href="app/src/main/java/de/westnordost/streetcomplete/quests/defibrillator/AddIsDefibrillatorIndoor.kt">simple yes/no quest asking whether AED is indoor or outdoor</a>.</p>
+<h2 id="element-selection">Element selection</h2>
+<p><code>elementFilter</code> property defines nodes, ways and relations which will be selected for a given quest. It is an element selection used by OsmFilterQuestType.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode kotlin"><code class="sourceCode kotlin"><a class="sourceLine" id="cb3-1" title="1">    <span class="kw">override</span> <span class="kw">val</span> <span class="va">elementFilter</span> = <span class="st">&quot;&quot;&quot;</span></a>
+<a class="sourceLine" id="cb3-2" title="2"><span class="st">        nodes with</span></a>
+<a class="sourceLine" id="cb3-3" title="3"><span class="st">         emergency = defibrillator</span></a>
+<a class="sourceLine" id="cb3-4" title="4"><span class="st">         and access !~ private|no</span></a>
+<a class="sourceLine" id="cb3-5" title="5"><span class="st">         and !indoor</span></a>
+<a class="sourceLine" id="cb3-6" title="6"><span class="st">    &quot;&quot;&quot;</span></a></code></pre></div>
+<p>This query will be limited to object which fulfill some requirements.</p>
+<ul>
+<li><code>nodes with</code>
+<ul>
+<li>nodes only, ways and relations are not eligible</li>
+</ul></li>
+<li><code>emergency = defibrillator</code>
+<ul>
+<li>this tag must be present</li>
+</ul></li>
+<li><code>and access !~ private|no</code>
+<ul>
+<li>and <code>access</code> tag must not have values <code>private</code> or <code>no</code></li>
+<li><code>!~ private|no</code> is transformed into <code>^optionA|optionB$</code> <a href="https://en.wikipedia.org/wiki/Regular_expression">regexp</a></li>
+<li>this filter excludes objects where mapper will likely has no access necessary for survey</li>
+</ul></li>
+<li><code>and !indoor</code>
+<ul>
+<li>and <code>indoor</code> key must not be present at all, to show only ones where this tag is still missing</li>
+</ul></li>
+</ul>
+<p>It is specified as a string, in syntax specific to StreetComplete. You can look around some quests to see how it works. If you are trying to implement a new quest and you got stuck here, <a href="https://github.com/streetcomplete/StreetComplete/issues">open a new issue</a> to request more thorough documentation here.</p>
+<p>See <a href="https://github.com/matkoniecz/StreetComplete_quest_creation_tutorial/commit/2726ff1c7b3121825e808c4566e6e534392121b3">this step</a> in the example repository.</p>
+<h3 id="prototyping">Prototyping</h3>
+<p><a href="http://overpass-turbo.eu/">Overpass Turbo</a> has own syntax but it is very useful tool for prototyping filters. It is very useful to verify own assumptions how things are tagged. Especially in more complex cases.</p>
+<h3 id="hints">Hints</h3>
+<p>The rules should generate as few false positives as possible. I.e. instead of asking for the surface of any way tagged with <code>highway=*</code>, the surface should instead only be asked for an inclusive list of roads.</p>
+<p>In some cases it will be a good idea to <a href="#enabledInCountries">limit quests to certain countries</a>.</p>
+<p>You can obtain more info about properties by placing the cursor in a property and pressing Ctrl+Q within Android Studio.</p>
+<h2 id="changesetcomment">changesetComment</h2>
+<div class="sourceCode" id="cb4"><pre class="sourceCode kotlin"><code class="sourceCode kotlin"><a class="sourceLine" id="cb4-1" title="1"><span class="kw">override</span> <span class="kw">val</span> <span class="va">changesetComment</span> = <span class="st">&quot;Add whether defibrillator is inside building&quot;</span></a></code></pre></div>
+<p>message used as a changeset comment</p>
+<p>See <a href="https://github.com/matkoniecz/StreetComplete_quest_creation_tutorial/commit/0db8827133b07ce32c3c1287604198efeabc7bf6">this step</a> in the example repository.</p>
+<h2 id="wikilink">wikiLink</h2>
+<div class="sourceCode" id="cb5"><pre class="sourceCode kotlin"><code class="sourceCode kotlin"><a class="sourceLine" id="cb5-1" title="1"><span class="kw">override</span> <span class="kw">val</span> <span class="va">wikiLink</span> = <span class="st">&quot;Key:indoor&quot;</span></a></code></pre></div>
+<p>points to the OSM Wiki page most relevant to the given quest, typically it is an added key. In this case, it is a page about <a href="https://wiki.openstreetmap.org/wiki/Key:indoor">indoor=* tagging</a>.</p>
+<p>See <a href="https://github.com/matkoniecz/StreetComplete_quest_creation_tutorial/commit/13ec6b97b52413cf09f3b71311b877b746d29576">this step</a> in the example repository.</p>
+<h2 id="icon">icon</h2>
+<div class="sourceCode" id="cb6"><pre class="sourceCode kotlin"><code class="sourceCode kotlin"><a class="sourceLine" id="cb6-1" title="1"><span class="kw">override</span> <span class="kw">val</span> <span class="va">icon</span> = R.drawable.ic_quest_defibrillator</a></code></pre></div>
+<p>icon drawable, you can initially use any icon.</p>
+<p>Do not worry, submissions with placeholder icons are also welcomed! In many cases icon itself was not made by the PR author.</p>
+<p>More info about icon handling <a href="#adding-quest-icon">will be given later</a>.</p>
+<p>See <a href="https://github.com/matkoniecz/StreetComplete_quest_creation_tutorial/commit/7cecce384a5baf365119fd3453d600a87f87fadb">this step</a> in the example repository.</p>
+<h2 id="questtypeachievements">questTypeAchievements</h2>
+<div class="sourceCode" id="cb7"><pre class="sourceCode kotlin"><code class="sourceCode kotlin"><a class="sourceLine" id="cb7-1" title="1"><span class="kw">override</span> <span class="kw">val</span> <span class="va">questTypeAchievements</span> = listOf(LIFESAVER)</a></code></pre></div>
+<p>In quest achievements, list what is relevant to the given quest, see the full list of available ones in <a href="app/src/main/java/de/westnordost/streetcomplete/data/user/achievements/AchievementsModule.kt">AchievementsModule.kt</a></p>
+<p>See <a href="https://github.com/matkoniecz/StreetComplete_quest_creation_tutorial/commit/f043440b43ad84d321c7aae4fd03095c34af8eb4">this step</a> in the example repository.</p>
+<h2 id="gettitle">getTitle</h2>
+<div class="sourceCode" id="cb8"><pre class="sourceCode kotlin"><code class="sourceCode kotlin"><a class="sourceLine" id="cb8-1" title="1"><span class="kw">override</span> <span class="kw">fun</span> <span class="fu">getTitle</span>(<span class="va">tags</span>: <span class="dt">Map</span>&lt;<span class="va">String</span>, <span class="va">String</span>&gt;) = R.string.quest_is_defibrillator_inside_title</a></code></pre></div>
+<p>It is a message displayed to user, code here passes a <a href="https://developer.android.com/guide/topics/resources/string-resource">reference</a> to the string. You can change it to the new, not yet existing one and use a built in tool to place text.</p>
+<p>Actual strings sit in <a href="app/src/main/res/values/strings.xml">app/src/main/res/values/strings.xml</a></p>
+<p>There are separate files with translated text, but do not worry about it - <a href="CONTRIBUTING.md#translating-the-app">translations are handled separately</a>.</p>
+<p>See <a href="https://github.com/matkoniecz/StreetComplete_quest_creation_tutorial/commit/5fe2b8149b25ac375a09a45ad949dc804d687825">this step</a> in the example repository.</p>
+<h2 id="form">Form</h2>
+<div class="sourceCode" id="cb9"><pre class="sourceCode kotlin"><code class="sourceCode kotlin"><a class="sourceLine" id="cb9-1" title="1"><span class="kw">override</span> <span class="kw">fun</span> <span class="fu">createForm</span>() = YesNoQuestAnswerFragment()</a></code></pre></div>
+<p>Form defines interface used by mappers.</p>
+<p>In this case, the simplest possible is used.</p>
+<p>But sometimes more complex ones are needed, see for example <a href="https://github.com/streetcomplete/StreetComplete/blob/master/app/src/main/java/de/westnordost/streetcomplete/quests/bridge_structure/AddBridgeStructure.kt">AddBridgeStructure.kt</a></p>
+<p><code>override fun createForm() = AddBridgeStructureForm()</code></p>
+<p>With form defined in <a href="app/src/main/java/de/westnordost/streetcomplete/quests/bridge_structure/AddBridgeStructureForm.kt">AddBridgeStructureForm</a></p>
+<h2 id="applyanswerto">applyAnswerTo</h2>
+<div class="sourceCode" id="cb10"><pre class="sourceCode kotlin"><code class="sourceCode kotlin"><a class="sourceLine" id="cb10-1" title="1"><span class="kw">override</span> <span class="kw">fun</span> <span class="fu">applyAnswerTo</span>(<span class="va">answer</span>: <span class="dt">Boolean</span>, <span class="va">tags</span>: <span class="dt">Tags</span>, <span class="va">timestampEdited</span>: <span class="dt">Long</span>) {</a>
+<a class="sourceLine" id="cb10-2" title="2">    tags[<span class="st">&quot;indoor&quot;</span>] = answer.toYesNo()</a>
+<a class="sourceLine" id="cb10-3" title="3">}</a></code></pre></div>
+<p>This code is responsible for modifying <code>tags</code> object (passed by reference).</p>
+<p>In this case it would set <code>indoor</code> tag to have either <code>yes</code> or <code>no</code> answer, depending on selection in the quest interface.</p>
+<p>Actions may include (examples from various quests):</p>
+<ul>
+<li><code>tags["indoor"] = answer.toYesNo()</code>
+<ul>
+<li>set <code>indoor</code> tag to have either <code>yes</code> or <code>no</code> answer, based on provided data</li>
+</ul></li>
+<li><code>tags.remove("amenity")</code>
+<ul>
+<li>remove key if it is present</li>
+</ul></li>
+<li><code>tags.updateWithCheckDate("lit", answer.toYesNo())</code>
+<ul>
+<li>if the new value differs from existing tag value: new value will be applied</li>
+<li>in case of value being the same: add survey date tag, it would be <code>check_date:lit=</code> in this case
+<ul>
+<li>so can be used even if value will stay the same - possible for resurvey quests</li>
+<li>if the new value is the same as existing tag value: adds <a href="app/src/main/java/de/westnordost/streetcomplete/data/meta/OsmTaggings.kt#L33">survey date tag</a> (<code>check_date:lit=</code> in this example)</li>
+</ul></li>
+<li>always update survey tag if present already</li>
+<li>necessary if given quest includes resurvey of old elements that are already tagged</li>
+</ul></li>
+</ul>
+<p>See <a href="https://github.com/matkoniecz/StreetComplete_quest_creation_tutorial/commit/04aa86351a9b3634a7a0e034e47936b2c4e17f9b">this step</a> in the example repository.</p>
+<h2 id="extras">Extras</h2>
+<p>Info listed so far must be supplied by every quest. But there are also several optional fields. This specific quest has</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode kotlin"><code class="sourceCode kotlin"><a class="sourceLine" id="cb11-1" title="1"><span class="kw">override</span> <span class="kw">fun</span> <span class="fu">getHighlightedElements</span>(<span class="va">element</span>: <span class="dt">Element</span>, <span class="va">getMapData</span>: () -&gt; <span class="dt">MapDataWithGeometry</span>) =</a>
+<a class="sourceLine" id="cb11-2" title="2">    getMapData().filter(<span class="st">&quot;nodes with emergency = defibrillator&quot;</span>)</a></code></pre></div>
+<p>which causes nearby <code>emergency = defibrillator</code> nodes to be shown (icons used are defined in <a href="app/src/main/java/de/westnordost/streetcomplete/map/PinIcons.kt">PinIcons.kt</a>)</p>
+<p>See <a href="app/src/main/java/de/westnordost/streetcomplete/data/osm/osmquests/OsmElementQuestType.kt">also other optional properties</a>.</p>
+<p>See <a href="https://github.com/matkoniecz/StreetComplete_quest_creation_tutorial/commit/1d648e56562d16a5dc3588ca7de8558f97d5919a">this step</a> in the example repository.</p>
+<p>Note that for this quest one extra property present in the original quest used as a template <a href="https://github.com/matkoniecz/StreetComplete_quest_creation_tutorial/commit/a9fd3efe96cbc6241b3b0f65d4a2be27f1c6afb8">was removed</a></p>
+<h1 id="adding-quest-icon">Adding quest icon</h1>
+<!-- note that this section name is linked from section discussing val icon, in case of changing section name change also that link -->
+<p>It is OK to submit a quest without own icon, using any icon as a placeholder.</p>
+<p>But it would be even better to include also icon.</p>
+<p>Note that there are some graphics which haven’t been used yet, created for proposed or expected quests; maybe you don’t even need to create an icon!</p>
+<p>A new icon can reuse the content of <a href="res/graphics/quest">other quest icons</a>, it can be based on openly licensed graphics. See <a href="res/graphics/authors.txt">the attribution file</a> for what was used so far.</p>
+<p>Keep similar style to existing ones and app in general. Once the quest icon is ready:</p>
+<ul>
+<li>save as “Plain SVG” or clean SVG file from unnecessary cruft in another way, like using <a href="https://github.com/svg/svgo">svgo</a></li>
+<li>Put SVG into <a href="res/graphics/quest"><code>res/graphics/quest</code></a> folder
+<ul>
+<li>SVG is a standard format editable in various software, unlike internal Android Studio XML that will be produced in the next steps.</li>
+</ul></li>
+<li>Open Android Studio</li>
+<li>Right click on the “app” folder in the Project tool window (top left)</li>
+<li>Select new → vector asset</li>
+<li>Select your SVG file</li>
+<li>Name with <code>ic_quest_</code> prefix (something like <code>ic_quest_traffic_calming</code>)</li>
+<li>Press “Finish” button to generate drawable</li>
+<li>Add an entry in the <a href="res/graphics/authors.txt">attribution file</a></li>
+<li>Modify <code>icon</code> property in the quest definition to use the new drawable</li>
+<li>Commit modified or created files</li>
+<li>Compile, test quest in the emulator</li>
+</ul>
+<p>The same method applies also to other vector drawables, although they will be placed in other parts of <a href="res/graphics/">res/graphics/</a></p>
+<p>Inkscape is a typical tool to create and edit SVG files, it is good, free and open-source so is available to all.</p>
+<h1 id="test">Test</h1>
+<p>Obviously, testing can also be done earlier. But the quest should at least be tested before submitting for review.</p>
+<p>Typically it is done using an emulator. Note that you can set location in emulator settings rather than scrolling within StreetComplete itself.</p>
+<ul>
+<li>Is quest listed?
+<ul>
+<li>Look at the quest list in settings - is your quest appearing there? If not - see <a href="#add-the-quest-to-the-list-of-active-ones">this step</a>.</li>
+<li>While you are there you can disable all quests except yours for easier testing.</li>
+</ul></li>
+<li>Is it shown for expected elements?
+<ul>
+<li>Note that due to emulator peculiarities you may need to move map after quests are downloaded to see their markers (<a href="https://github.com/streetcomplete/StreetComplete/issues/2780">gory details for curious</a>)</li>
+</ul></li>
+<li>Is it selected for some unwanted elements?</li>
+<li>Can you tap on a quest marker to open quest form?</li>
+<li>Can you fill the answer as expected?</li>
+<li>Can you solve the quest?</li>
+<li>Is expected tagging being applied?
+<ul>
+<li>You can look at logs for info what was applied or use undo menu from bottom-left in the app itself.</li>
+<li>You can freely answer - as long as you are not logged in, nothing will be submitted. Even after logging in you can disable uploading answers in settings.</li>
+</ul></li>
+<li>Is quest disappearing after being solved?
+<ul>
+<li>If no - then either tags are not being applied or element selection filter have some problems.</li>
+</ul></li>
+</ul>
+<p>See “logcat” (bottom left area of the screen) to see stacktrace or logging messages.</p>
+<h2 id="adding-logs">Adding logs</h2>
+<div class="sourceCode" id="cb12"><pre class="sourceCode kotlin"><code class="sourceCode kotlin"><a class="sourceLine" id="cb12-1" title="1"><span class="kw">import</span> <span class="im">android.util.Log</span></a>
+<a class="sourceLine" id="cb12-2" title="2"></a>
+<a class="sourceLine" id="cb12-3" title="3">Log.w(<span class="st">&quot;Unique string for easy grepping in logcat&quot;</span>, <span class="st">&quot;Message with whatever you need like #${someVariable.itsProperty}&quot;</span>)</a></code></pre></div>
+<h1 id="open-a-pull-request">Open a pull request</h1>
+<p><a href="https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request">Pull request</a> is a submission of proposed changes to the source code.</p>
+<p>You can put into the description of PR something like “fixes #1234” to <a href="https://docs.github.com/en/issues/tracking-your-work-with-issues/linking-a-pull-request-to-an-issue#linking-a-pull-request-to-an-issue-using-a-keyword">mark it as fixing this issue</a>. It can go into a commit message or PR description or the tile.</p>
+<p>If you are stuck on something, need some help or guidance and you are willing and able to continue after solving the problem - you can open a pull request in an incomplete state and mention the blocker.</p>
+<p>You can see <a href="https://github.com/streetcomplete/StreetComplete/pulls?q=is%3Apr+">already submitted pull requests</a> to see how this process works in practice.</p>
+<h1 id="future">Future</h1>
+<p>After opening a pull request it will be reviewed and you will be likely asked to make some changes. This is normal and also happens with pull requests submitted by experienced contributors.</p>
+<p>Changes typically include improving code style, tweaking phrasing and quest settings.</p>
+<p>You are also welcome to help with reviewing other PRs - different people have different strengths, there are active reviewers who help with code style, there are some native speakers of English, some with deep knowledge of OSM tagging schemes or deep knowledge of how StreetComplete works.</p>
+<p>In case that pull requests appears to be ready, it will be marked as approved and wait for merge.</p>
+<p>After the PR is finished it will be merged before the beta release of the next version. This way it can be additionally tested with a wider audience before release to all and translators have time to <a href="CONTRIBUTING.md#translating-the-app">translate text into other languages</a>.</p>
+<p>After full release it will reach the entire StreetComplete audience who now will be able to more easily contribute to OpenStreetMap. Thanks in advance for that!</p>
+<p>Once your code is merged into StreetComplete you will be credited at <a href="https://github.com/streetcomplete/StreetComplete/graphs/contributors">repository statistics</a>.</p>
+<h1 id="bad-documentation-is-a-bug">Bad documentation is a bug</h1>
+<p>Unclear documents, including this one, are a bug. Feel free to either submit a <a href="https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request">pull request</a> with a fix or <a href="https://github.com/streetcomplete/StreetComplete/issues/new">open an issue</a> describing your confusion.</p>
+<p>Note that not everything will be directly described. This document very intentionally doesn’t include a step-by-step guide to installing Android Studio, <a href="CONTRIBUTING.md#development">linking</a> to official docs instead.</p>
+<h1 id="more-complexity">More complexity</h1>
+<p>What was described above is an attempt to cover all aspects of quest creation, without describing all the complexity.</p>
+<p>Below is some additional info.</p>
+<h2 id="kotlin">Kotlin</h2>
+<p>Article about <a href="https://kotlinlang.org/docs/null-safety.html">null safety related syntax</a> is likely to be very useful, especially if you are confused by <code>?:</code> <a href="https://kotlinlang.org/docs/null-safety.html#elvis-operator">Elvis operator</a>.</p>
+<h2 id="designing-the-form">Designing the form</h2>
+<p>As mentioned, the user interface must leave no space for misunderstandings, it must be concise and quick and easy to use. Also sounds obvious, but you will quickly find out that a balance must be found between covering all the edge cases and designing the form to be as straightforward and clutterless as possible.</p>
+<ul>
+<li>Design the main form clutter-free so that it is straightforward for the majority of use cases.</li>
+<li>Allow to answer popular edge cases, but don’t clutter up the main form with that. A good pattern is to move such answers into the “Other answers…” menu. E.g. look at the <a href="app/src/main/java/de/westnordost/streetcomplete/quests/opening_hours/AddOpeningHoursForm.kt#L40-L48">opening hours quest</a>.</li>
+<li>Don’t rely on the “leave a note” fallback too much. It is not intended and does not work as a regular answer but is designed to cover the case that the question was invalid itself because it was based on wrong data like i.e. the place does not exist anymore.</li>
+<li>The information the user should fill in should be as atomic as possible. Users are impatient, i.e. do not let them fill out a whole address with street name etc. when just the house number is fine too.</li>
+<li>“A picture is worth a thousand words”: Often the term for certain things may not be enough to convey the meaning of certain predefined answers. Do you know what a wheelbender is? You will know if you see the photo.</li>
+</ul>
+<p>Considerations about the edge cases to consider, how the design could look like and finding good representative photos or icons that match in style is also part of the preparational work that can be done without programming knowledge.</p>
+<h2 id="new-photos">New photos</h2>
+<p>Some quests will require photos for their interface.</p>
+<p>Photos must be available on open license - so not every photo found on the Internet is usable. You can either take your own photo or find an existing freely licensed photo.</p>
+<p>Good places to find freely licensed images are <a href="https://www.geograph.org.uk/">Geograph</a> and <a href="https://commons.wikimedia.org/">Wikimedia Commons</a>.</p>
+<p>You can also take your own photos, a standard smartphone camera is good enough. And sometimes a highly specific image is needed.</p>
+<p>In StreetComplete many images have unusual composition. Often it is necessary to leave space for a label at the bottom.</p>
+<p>Images should be free of visual debris, not misleading. Though it is fine to use an image not strictly matching what is depicted, as long as it is clear. For example, <a href="https://wiki.openstreetmap.org/wiki/Tag:barrier%3Ddebris">a permanent pile of soil blocking road</a> is illustrated by a <a href="https://commons.wikimedia.org/wiki/File:Landslide_on_OR_42S_(46849629014).jpg">temporary landslide</a>. This is OK as images are illustrative.</p>
+<p>Photos go to a different folder than SVGs: they can be used directly by the build process so put them into folders</p>
+<ul>
+<li><a href="app/src/main/res/drawable-mdpi">mdpi</a> - 384 pixels for images, with three square images in each row it would be 128 x 128 pixels for each)</li>
+<li><a href="app/src/main/res/drawable-hdpi">hdpi</a> - 576 pixels for images (192 x 192 pixels in case of three quare images in each row)</li>
+<li><a href="app/src/main/res/drawable-xhdpi">xhdpi</a> 768 pixels for images (256 x 256 pixels in case of three quare images in each row)</li>
+<li><a href="app/src/main/res/drawable-xxhdpi">xxhdpi</a> 1152 pixels (384 x 384 pixels in case of three quare images in each row)</li>
+</ul>
+<p>Each of these folders should hold the same image resized to a different resolution. While testing various images it is enough to put one into any of the folders.</p>
+<p>The <a href="https://github.com/matkoniecz/rescaling_for_android">rescaling script</a> may be useful, but you can also do this manually with Gimp or similar software.</p>
+<p>After adding a photo, remember to update <a href="app/src/main/res/authors.txt">the credit file</a> (different to the one for icons).</p>
+<h2 id="resurvey">Resurvey</h2>
+<p>Some quests are asked not only when tag is missing but also when it is likely to be outdated. To achieve this <code>elementFilter</code> needs to query not only elements missing some tags.</p>
+<p>Typical code is in <a href="app/src/main/java/de/westnordost/streetcomplete/quests/motorcycle_parking_capacity/AddMotorcycleParkingCapacity.kt">quest asking about motorcycle parking capacity</a>:</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode kotlin"><code class="sourceCode kotlin"><a class="sourceLine" id="cb13-1" title="1"><span class="kw">override</span> <span class="kw">val</span> <span class="va">elementFilter</span> = <span class="st">&quot;&quot;&quot;</span></a>
+<a class="sourceLine" id="cb13-2" title="2"><span class="st">    nodes, ways with amenity = motorcycle_parking</span></a>
+<a class="sourceLine" id="cb13-3" title="3"><span class="st">      and access !~ private|no</span></a>
+<a class="sourceLine" id="cb13-4" title="4"><span class="st">      and (!capacity or capacity older today -4 years)</span></a>
+<a class="sourceLine" id="cb13-5" title="5"><span class="st">&quot;&quot;&quot;</span></a></code></pre></div>
+<p>This quest will be triggered when:</p>
+<ul>
+<li><code>nodes, ways with</code>
+<ul>
+<li>on nodes or ways (relations not eligible)</li>
+</ul></li>
+<li><code>amenity = motorcycle_parking</code>
+<ul>
+<li>where <code>amenity = motorcycle_parking</code> tag is present</li>
+</ul></li>
+<li><code>and access !~ private|no</code>
+<ul>
+<li>and <code>access</code> tag does not have value <code>private</code> nor <code>no</code></li>
+</ul></li>
+<li><code>and (!capacity or capacity older today -4 years)</code>
+<ul>
+<li>and one of following is fullfilled:
+<ul>
+<li><code>capacity</code> tag is not present at all (<code>!capacity</code>)</li>
+<li>element was not edited for a long time (base time is 4 years, but it can be influenced by user changing settings)</li>
+<li><code>check_date:capacity</code> with a date indicating that it is outdated (the same as above applies)</li>
+</ul></li>
+</ul></li>
+</ul>
+<h2 id="custom-filters">Custom filters</h2>
+<p>It is possible to use far more complex filters when querying for eligible elements.</p>
+<p>Matches like <code>surface ~ earth|dirt|ground</code> are possible and are evaluated as “<code>surface</code> is either of <code>earth</code>, <code>dirt</code>, <code>ground</code>”</p>
+<p><code>access !~ private|no</code> will be evaluated to “<code>access</code> is neither <code>private</code> nor <code>no</code>”</p>
+<p>Simple lists are <a href="https://github.com/streetcomplete/StreetComplete/blob/2e812b9a3b5288983309a7edde6e8f9db05ad3f2/app/src/test/java/de/westnordost/streetcomplete/data/elementfilter/filters/ElementFilterOverpassKtTest.kt#L79-L88">evaluated as sets</a> - and for example <code>surface ~ earth|dirt|ground</code> will not match <code>surface=earther</code> tag. Basically, <code>surface ~ earth|dirt|ground</code> is treated as <code>surface ~ ^earth|dirt|ground$</code></p>
+<p>But using regexp like <code>surface ~ ^(.*)[0-9]$</code> is <a href="https://github.com/streetcomplete/StreetComplete/blob/master/app/src/test/java/de/westnordost/streetcomplete/data/elementfilter/filters/ElementFilterOverpassKtTest.kt#L79-L88">also possible</a>.</p>
+<p>It is possible to check for <a href="https://github.com/streetcomplete/StreetComplete/blob/master/app/src/main/java/de/westnordost/streetcomplete/quests/construction/MarkCompletedHighwayConstruction.kt#L13-L17">age of elements</a> or implement a <a href="https://github.com/streetcomplete/StreetComplete/blob/master/app/src/main/java/de/westnordost/streetcomplete/quests/opening_hours/AddOpeningHours.kt#L137-L151">fully custom tag parsing</a>, still combined with filter syntax.</p>
+<p>It is possible to share and reuse <a href="https://github.com/streetcomplete/StreetComplete/blob/master/app/src/main/java/de/westnordost/streetcomplete/quests/surface/AddRoadSurface.kt#L18">information about tagging schemes</a>.</p>
+<p>(this info is gathered <a href="/app/src/main/java/de/westnordost/streetcomplete/data/meta/OsmTaggings.kt">here</a>)</p>
+<p>Even more complex ones using different class bases are possible. Such as what was needed by the <a href="https://github.com/streetcomplete/StreetComplete/blob/master/app/src/main/java/de/westnordost/streetcomplete/quests/address/AddAddressStreet.kt">address quest</a> or the <a href="https://github.com/streetcomplete/StreetComplete/blob/master/app/src/main/java/de/westnordost/streetcomplete/quests/crossing/AddCrossing.kt">crossing quest</a> but it is better to start from something simpler.</p>
+<p>It allows it to make complex geometry checks, but writing them is also far more complex.</p>
+<h2 id="enabledincountries"><code>enabledInCountries</code></h2>
+<p>Some quests should be enabled only in some countries or disabled in a specific countries.</p>
+<p><a href="app/src/main/java/de/westnordost/streetcomplete/quests/accepts_cash/AddAcceptsCash.kt"><code>override val enabledInCountries = NoCountriesExcept("SE")</code></a> - enabled only in Sweden.</p>
+<p><a href="app/src/main/java/de/westnordost/streetcomplete/quests/address/AddHousenumber.kt"><code>override val enabledInCountries = AllCountriesExcept("US", "CA")</code></a> - not enabled in USA and Canada</p>
+<h2 id="defaultdisabledmessage"><code>defaultDisabledMessage</code></h2>
+<p>Some quests should be disabled by default, for example ones that may require going inside a shop. In such case setting <code>override val defaultDisabledMessage = R.string.default_disabled_msg_go_inside</code> will have two effects:</p>
+<ul>
+<li>quest will be disabled by default</li>
+<li>on attempting to enable it user will get message asking are they sure. Exact message in this case would be <code>default_disabled_msg_go_inside</code> - but some quests use more specific ones.</li>
+</ul>
+<p>Note that quest may be both disabled by default and limited to some countries.</p>
+<h2 id="isdeleteelementenabled"><code>isDeleteElementEnabled</code></h2>
+<p>This will decode whether user should have access to direct deletion of elements. Note that ways and relations cannot be deleted by SC users.</p>
+<p>For nodes within ways, node will remain and tags will be removed.</p>
+</body>
+</html>
