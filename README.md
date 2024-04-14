@@ -6,6 +6,7 @@ Repository is located at [https://github.com/matkoniecz/mapsaregreat.com](https:
 
 # Notes about maintaining, deploying etc.
 ## Development dependencies
+
 ```
 cd "code and content not served directly"
 pip3 install -r requirements.txt
