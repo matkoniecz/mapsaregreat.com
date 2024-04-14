@@ -20,7 +20,16 @@ pip3 install git+https://github.com/linkchecker/linkchecker.git
 
 ## Validation of code
 
+### Fetching tool
+
+[Obtain vnu](https://github.com/matkoniecz/website-checklist/blob/master/validators.md#nu-html-checker) - put jar into `imported-code` folder
+
+### Running
+
 ```
+find . -name "*.html" -exec java -jar "imported-code/vnu.jar" --also-check-css --also-check-svg --verbose {} \;
+find . -name "*.css" -exec java -jar "imported-code/vnu.jar" --also-check-css --also-check-svg --verbose {} \;
+
 cd "code and content not served directly"
 python3 custom_validator.py
 ```
