@@ -1,6 +1,10 @@
-/* this CSS file is based on compiled CC0 licensed sass theme from https://github.com/pages-themes/slate v0.1.1 (commit 875d0c0) */
+/* this CSS file is based on compiled CC0 licensed sass theme from https://github.com/pages-themes/slate v0.1.1 (commit 875d0c0 0 from 2018-04-11) */
 /* this CSS file is GPLv3 licensed, see https://opensource.org/licenses/gpl-3.0.html for a license text */
-/* style preview page: https://pages-themes.github.io/slate/ */
+/* style preview page for the original style: https://pages-themes.github.io/slate/ */
+/* as of 2024-06-13 it may make sense to pull in
+https://github.com/pages-themes/slate/commit/30f2cb9b2f2c2e45eb7c1a6da4def8a7829ff1c8
+
+*/
 /*
 overall main change was increasing minimum text size
 index of changes up to 2019-07-28:
